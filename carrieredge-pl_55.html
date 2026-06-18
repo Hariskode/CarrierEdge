@@ -1043,6 +1043,42 @@ body { background:var(--layout-bg,var(--bg)); }
 .fleet-tip { background:#0d1220!important;border:1px solid #2a3a58!important;color:#dde4f8!important;font-size:11px!important;padding:6px 10px!important;border-radius:6px!important; }
 .fleet-tip::before { display:none!important; }
 .leaflet-control-attribution { display:none!important; }
+
+/* ── Print styles ─────────────────────────────────────────── */
+#ce-print-doc { display:none; }
+@media print {
+  body > * { display:none!important; }
+  #ce-print-doc {
+    display:block!important;
+    font-family:Georgia,'Times New Roman',serif;
+    font-size:11pt;
+    color:#111;
+    background:#fff;
+    padding:0;
+    margin:0;
+  }
+  #ce-print-doc * { box-sizing:border-box; }
+  #ce-print-doc .pr-page { padding:32px 40px; }
+  #ce-print-doc .pr-header { border-bottom:2px solid #111; padding-bottom:12px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:flex-start; }
+  #ce-print-doc .pr-brand { font-size:9pt; color:#666; letter-spacing:.08em; font-family:Arial,sans-serif; }
+  #ce-print-doc .pr-carrier { font-size:14pt; font-weight:bold; margin-bottom:2px; }
+  #ce-print-doc .pr-meta { font-size:9pt; color:#444; }
+  #ce-print-doc .pr-title { font-size:18pt; font-weight:bold; margin:16px 0 4px; }
+  #ce-print-doc .pr-subtitle { font-size:10pt; color:#555; margin-bottom:20px; }
+  #ce-print-doc table { width:100%; border-collapse:collapse; margin:12px 0; font-size:10pt; }
+  #ce-print-doc th { background:#f0f0f0; font-size:9pt; text-transform:uppercase; letter-spacing:.05em; padding:6px 8px; text-align:left; border:1px solid #ccc; }
+  #ce-print-doc td { padding:5px 8px; border:1px solid #ddd; vertical-align:top; }
+  #ce-print-doc .pr-total-row td { font-weight:bold; background:#f8f8f8; }
+  #ce-print-doc .pr-section { font-size:10pt; font-weight:bold; text-transform:uppercase; letter-spacing:.06em; margin:20px 0 6px; padding-bottom:4px; border-bottom:1px solid #ccc; color:#333; }
+  #ce-print-doc .pr-kpi-row { display:flex; gap:16px; margin:12px 0; }
+  #ce-print-doc .pr-kpi { flex:1; border:1px solid #ddd; border-radius:4px; padding:10px 14px; }
+  #ce-print-doc .pr-kpi-label { font-size:8pt; text-transform:uppercase; letter-spacing:.06em; color:#666; margin-bottom:3px; }
+  #ce-print-doc .pr-kpi-val { font-size:16pt; font-weight:bold; }
+  #ce-print-doc .pr-footer { margin-top:32px; padding-top:12px; border-top:1px solid #ddd; font-size:8pt; color:#888; display:flex; justify-content:space-between; }
+  #ce-print-doc .pr-right { text-align:right; }
+  #ce-print-doc .pr-bill-box { border:1px solid #ddd; padding:12px 16px; border-radius:4px; margin-bottom:20px; display:inline-block; min-width:220px; }
+  @page { margin:0.6in 0.5in; }
+}
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1384,6 +1420,7 @@ body { background:var(--layout-bg,var(--bg)); }
           <div style="display:flex;gap:8px;margin-top:14px">
             <button class="btn btn-primary" onclick="addPLEntry()">+ Add Entry</button>
             <button class="btn btn-ghost" onclick="exportCSV()">⬇ Export CSV</button>
+            <button class="btn btn-ghost" onclick="printPLReport()">🖨 Print Report</button>
             <button class="btn btn-ghost" onclick="clearPL()">🗑 Clear All</button>
           </div>
         </div>
@@ -2684,6 +2721,7 @@ body { background:var(--layout-bg,var(--bg)); }
           </div>
           <div style="display:flex;gap:8px">
             <button class="btn btn-ghost btn-sm" onclick="exportIFTACSV()">Export CSV</button>
+            <button class="btn btn-ghost btn-sm" onclick="printIFTAReport()">🖨 Print Quarterly</button>
             <button class="btn btn-primary btn-sm" onclick="openIFTATripModal()">+ Log Trip</button>
           </div>
         </div>
@@ -3598,6 +3636,221 @@ function exportCSV(){
 }
 
 // ============================================================
+// PDF / PRINT REPORTS
+// ============================================================
+function _prCarrierHeader() {
+  const s = APP.settings;
+  const name = s.name || 'Carrier';
+  const meta = [s.dot ? `DOT #${s.dot}` : '', s.mc ? `MC #${s.mc}` : '', s.state || ''].filter(Boolean).join(' · ');
+  return `<div class="pr-header">
+    <div>
+      <div class="pr-carrier">${name}</div>
+      ${meta ? `<div class="pr-meta">${meta}</div>` : ''}
+    </div>
+    <div class="pr-right">
+      <div class="pr-brand">CarrierEdge</div>
+      <div class="pr-meta">Generated ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
+    </div>
+  </div>`;
+}
+
+function printInvoice(id) {
+  loadInvoices();
+  const inv = WF_INVOICES.find(x => x.id === id);
+  if (!inv) return;
+  const s = APP.settings;
+  const due = new Date(inv.dueDate + 'T12:00:00');
+  const today = new Date();
+  const daysLeft = Math.ceil((due - today) / 86400000);
+  const statusLabel = inv.paid ? 'PAID' : daysLeft < 0 ? 'OVERDUE' : 'OPEN';
+
+  document.getElementById('ce-print-page').innerHTML = `
+    ${_prCarrierHeader()}
+    <div class="pr-title">FREIGHT INVOICE</div>
+    <div style="display:flex;gap:24px;margin-bottom:20px">
+      <div class="pr-bill-box">
+        <div style="font-size:8pt;text-transform:uppercase;letter-spacing:.06em;color:#666;margin-bottom:6px">Bill To</div>
+        <div style="font-size:12pt;font-weight:bold">${inv.broker}</div>
+      </div>
+      <div style="flex:1"></div>
+      <div>
+        <table style="width:auto">
+          <tr><th>Invoice #</th><td style="font-weight:bold">${inv.num}</td></tr>
+          <tr><th>Invoice Date</th><td>${inv.date}</td></tr>
+          <tr><th>Payment Terms</th><td>${inv.terms}</td></tr>
+          <tr><th>Due Date</th><td>${inv.dueDate}</td></tr>
+          <tr><th>Status</th><td style="font-weight:bold">${statusLabel}${inv.paid && inv.paidDate ? ' · ' + inv.paidDate : ''}</td></tr>
+        </table>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>Description</th><th style="text-align:right;width:120px">Amount</th></tr></thead>
+      <tbody>
+        <tr><td>${inv.desc || 'Freight Services'}</td><td style="text-align:right;font-weight:bold">$${inv.amount.toLocaleString()}</td></tr>
+      </tbody>
+      <tfoot>
+        <tr class="pr-total-row"><td style="text-align:right">TOTAL DUE</td><td style="text-align:right">$${inv.amount.toLocaleString()}</td></tr>
+      </tfoot>
+    </table>
+    <div style="margin-top:24px;font-size:10pt;color:#555">
+      <strong>Payment Instructions:</strong> Please remit payment within the terms indicated above.
+      Reference invoice number <strong>${inv.num}</strong> on your remittance.
+      ${s.name ? `<br>Payable to: <strong>${s.name}</strong>` : ''}
+    </div>
+    <div class="pr-footer">
+      <span>${s.name || 'Carrier'} · ${s.dot ? 'USDOT #' + s.dot : ''}</span>
+      <span>CarrierEdge · carrieredge</span>
+    </div>`;
+  window.print();
+}
+
+function printPLReport() {
+  const entries = APP.plEntries || [];
+  if (!entries.length) { showToast('No P&L entries to print.'); return; }
+
+  const rev  = entries.filter(e => e.type === 'Load Revenue');
+  const exp  = entries.filter(e => e.type !== 'Load Revenue');
+  const totalRev  = rev.reduce((a, e) => a + e.amount, 0);
+  const totalExp  = exp.reduce((a, e) => a + e.amount, 0);
+  const net  = totalRev - totalExp;
+  const totalMi   = rev.reduce((a, e) => a + (e.miles || 0), 0);
+  const rpm  = totalMi > 0 ? (totalRev / totalMi).toFixed(2) : '—';
+  const margin = totalRev > 0 ? (net / totalRev * 100).toFixed(1) : '0';
+
+  // Expense breakdown by category
+  const cats = {};
+  exp.forEach(e => { cats[e.type] = (cats[e.type] || 0) + e.amount; });
+
+  // Date range
+  const dates = entries.map(e => e.date).filter(Boolean).sort();
+  const periodLabel = dates.length ? `${dates[0]} to ${dates[dates.length - 1]}` : 'All dates';
+
+  document.getElementById('ce-print-page').innerHTML = `
+    ${_prCarrierHeader()}
+    <div class="pr-title">P&amp;L SUMMARY REPORT</div>
+    <div class="pr-subtitle">Period: ${periodLabel} · ${rev.length} loads · ${totalMi.toLocaleString()} miles</div>
+    <div class="pr-kpi-row">
+      <div class="pr-kpi"><div class="pr-kpi-label">Gross Revenue</div><div class="pr-kpi-val">$${Math.round(totalRev).toLocaleString()}</div></div>
+      <div class="pr-kpi"><div class="pr-kpi-label">Total Expenses</div><div class="pr-kpi-val">$${Math.round(totalExp).toLocaleString()}</div></div>
+      <div class="pr-kpi"><div class="pr-kpi-label">Net Profit</div><div class="pr-kpi-val">$${Math.round(net).toLocaleString()}</div></div>
+      <div class="pr-kpi"><div class="pr-kpi-label">Margin</div><div class="pr-kpi-val">${margin}%</div></div>
+      <div class="pr-kpi"><div class="pr-kpi-label">Revenue / Mile</div><div class="pr-kpi-val">$${rpm}</div></div>
+    </div>
+
+    <div class="pr-section">Load Revenue</div>
+    <table>
+      <thead><tr><th>Date</th><th>Broker</th><th>Description</th><th style="text-align:right">Miles</th><th style="text-align:right">Amount</th><th style="text-align:right">$/mi</th></tr></thead>
+      <tbody>
+        ${rev.map(e => {
+          const r = e.miles ? (e.amount / e.miles).toFixed(2) : '—';
+          return `<tr><td>${e.date}</td><td>${e.broker || '—'}</td><td>${e.desc || '—'}</td><td style="text-align:right">${(e.miles||0).toLocaleString()}</td><td style="text-align:right">$${e.amount.toLocaleString()}</td><td style="text-align:right">$${r}</td></tr>`;
+        }).join('')}
+        <tr class="pr-total-row"><td colspan="4">Total</td><td style="text-align:right">$${Math.round(totalRev).toLocaleString()}</td><td></td></tr>
+      </tbody>
+    </table>
+
+    <div class="pr-section">Expenses by Category</div>
+    <table>
+      <thead><tr><th>Category</th><th style="text-align:right">Amount</th><th style="text-align:right">% of Revenue</th></tr></thead>
+      <tbody>
+        ${Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([cat, amt]) =>
+          `<tr><td>${cat}</td><td style="text-align:right">$${Math.round(amt).toLocaleString()}</td><td style="text-align:right">${totalRev > 0 ? (amt/totalRev*100).toFixed(1) : '0'}%</td></tr>`
+        ).join('')}
+        <tr class="pr-total-row"><td>Total Expenses</td><td style="text-align:right">$${Math.round(totalExp).toLocaleString()}</td><td style="text-align:right">${totalRev > 0 ? (totalExp/totalRev*100).toFixed(1) : '0'}%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="pr-section">Tax Estimate</div>
+    <table style="width:auto">
+      <tr><td>Net Taxable Income</td><td style="text-align:right;font-weight:bold">$${Math.round(net).toLocaleString()}</td></tr>
+      <tr><td>Est. Self-Employment Tax (15.3% × 92.35%)</td><td style="text-align:right">~$${Math.round(Math.max(0,net)*0.9235*0.153).toLocaleString()}</td></tr>
+      <tr><td style="font-size:8pt;color:#888" colspan="2">Consult your tax professional. This is an estimate only.</td></tr>
+    </table>
+
+    <div class="pr-footer">
+      <span>${APP.settings.name || 'Carrier'} · ${APP.settings.dot ? 'USDOT #' + APP.settings.dot : ''}</span>
+      <span>CarrierEdge P&amp;L Report</span>
+    </div>`;
+  window.print();
+}
+
+function printIFTAReport() {
+  loadIFTAData();
+  if (!IFTA_TRIPS.length && !IFTA_FUEL.length) { showToast('No IFTA data to print.'); return; }
+  const s = APP.settings;
+
+  // Aggregate per-state miles
+  const stateMiles = {};
+  IFTA_TRIPS.forEach(t => {
+    Object.entries(t.states || {}).forEach(([st, mi]) => {
+      stateMiles[st] = (stateMiles[st] || 0) + mi;
+    });
+  });
+  const totalMiles = Object.values(stateMiles).reduce((a,v) => a+v, 0);
+  const totalGal   = IFTA_FUEL.reduce((a,f) => a + (f.gallons||0), 0);
+  const mpg        = totalGal > 0 ? (totalMiles / totalGal).toFixed(2) : '—';
+  const estTax     = Math.round(totalGal * 0.28);
+
+  // Current quarter label
+  const now = new Date();
+  const q = Math.ceil((now.getMonth()+1)/3);
+  const quarterLabel = `Q${q} ${now.getFullYear()}`;
+
+  document.getElementById('ce-print-page').innerHTML = `
+    ${_prCarrierHeader()}
+    <div class="pr-title">IFTA QUARTERLY REPORT</div>
+    <div class="pr-subtitle">${quarterLabel} · ${IFTA_TRIPS.length} trips · ${totalMiles.toLocaleString()} total miles</div>
+
+    <div class="pr-kpi-row">
+      <div class="pr-kpi"><div class="pr-kpi-label">Total Miles</div><div class="pr-kpi-val">${totalMiles.toLocaleString()}</div></div>
+      <div class="pr-kpi"><div class="pr-kpi-label">Total Gallons</div><div class="pr-kpi-val">${totalGal.toFixed(1)}</div></div>
+      <div class="pr-kpi"><div class="pr-kpi-label">Fleet MPG</div><div class="pr-kpi-val">${mpg}</div></div>
+      <div class="pr-kpi"><div class="pr-kpi-label">Est. Fuel Tax</div><div class="pr-kpi-val">~$${estTax.toLocaleString()}</div></div>
+    </div>
+
+    <div class="pr-section">Miles by State</div>
+    <table>
+      <thead><tr><th>State</th><th style="text-align:right">Miles</th><th style="text-align:right">% of Total</th></tr></thead>
+      <tbody>
+        ${Object.entries(stateMiles).sort((a,b)=>b[1]-a[1]).map(([st,mi]) =>
+          `<tr><td>${st}</td><td style="text-align:right">${mi.toLocaleString()}</td><td style="text-align:right">${totalMiles > 0 ? (mi/totalMiles*100).toFixed(1) : '0'}%</td></tr>`
+        ).join('')}
+        <tr class="pr-total-row"><td>Total</td><td style="text-align:right">${totalMiles.toLocaleString()}</td><td></td></tr>
+      </tbody>
+    </table>
+
+    <div class="pr-section">Trip Log</div>
+    <table>
+      <thead><tr><th>Date</th><th>Unit</th><th>Origin</th><th>Destination</th><th style="text-align:right">Miles</th><th>States</th></tr></thead>
+      <tbody>
+        ${IFTA_TRIPS.map(t =>
+          `<tr><td>${t.date}</td><td>${t.unit||'—'}</td><td>${t.origin||'—'}</td><td>${t.dest||'—'}</td><td style="text-align:right">${(t.totalMiles||0).toLocaleString()}</td><td style="font-size:9pt">${Object.keys(t.states||{}).join(', ')}</td></tr>`
+        ).join('')}
+      </tbody>
+    </table>
+
+    <div class="pr-section">Fuel Purchases</div>
+    <table>
+      <thead><tr><th>Date</th><th>State</th><th>Location</th><th style="text-align:right">Gallons</th><th style="text-align:right">Price/Gal</th><th style="text-align:right">Total</th></tr></thead>
+      <tbody>
+        ${IFTA_FUEL.map(f =>
+          `<tr><td>${f.date}</td><td>${f.state}</td><td>${f.location||'—'}</td><td style="text-align:right">${f.gallons}</td><td style="text-align:right">$${f.price?.toFixed(3)||'—'}</td><td style="text-align:right">$${f.total?.toFixed(2)||'—'}</td></tr>`
+        ).join('')}
+        <tr class="pr-total-row"><td colspan="3">Total</td><td style="text-align:right">${totalGal.toFixed(1)}</td><td></td><td style="text-align:right">$${IFTA_FUEL.reduce((a,f)=>a+(f.total||0),0).toFixed(2)}</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:16px;font-size:9pt;color:#666">
+      Est. fuel tax based on federal IFTA rate (~$0.28/gal average). Verify per-state rates at iftach.org before filing.
+    </div>
+    <div class="pr-footer">
+      <span>${s.name || 'Carrier'} · ${s.dot ? 'USDOT #' + s.dot : ''} · Home state: ${s.state || '—'}</span>
+      <span>CarrierEdge IFTA Report · ${quarterLabel}</span>
+    </div>`;
+  window.print();
+}
+
+// ============================================================
 // FMCSA DATA
 // ============================================================
 function openDotModal(){
@@ -4142,6 +4395,7 @@ function renderInvoices() {
       <td><span class="pill ${statusCls}">${statusLbl}</span></td>
       <td style="display:flex;gap:4px">
         <button onclick="markInvoicePaid(${inv.id})" class="btn btn-ghost btn-sm" style="padding:3px 7px;font-size:10px">${inv.paid?'Unpaid':'Mark Paid'}</button>
+        <button onclick="printInvoice(${inv.id})" class="btn btn-ghost btn-sm" style="padding:3px 7px;font-size:10px">🖨</button>
         <button onclick="deleteInvoice(${inv.id})" class="btn btn-ghost btn-sm" style="padding:3px 7px;font-size:10px;color:var(--red)">x</button>
       </td>
     </tr>`;
@@ -8144,6 +8398,9 @@ function updateLayoutContent() { if(typeof updateHeroKPIBar!=='undefined') updat
     </div>
   </div>
 </div>
+
+<!-- ── Print document container (hidden until window.print()) ── -->
+<div id="ce-print-doc"><div class="pr-page" id="ce-print-page"></div></div>
 
 <script>
 if ('serviceWorker' in navigator) {
