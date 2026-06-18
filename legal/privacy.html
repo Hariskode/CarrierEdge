@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — CarrierEdge</title>
+  <meta name="description" content="CarrierEdge Privacy Policy. Your data never leaves your device." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #080c14;
+      --bg2:    #0d1220;
+      --bg3:    #121929;
+      --text:   #dde4f8;
+      --text2:  #7a8ab0;
+      --text3:  #44506e;
+      --blue:   #4a8fff;
+      --green:  #22d47a;
+      --amber:  #f5a623;
+      --teal:   #2dd4bf;
+      --border: rgba(100,140,255,0.10);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8,12,20,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .logo span { font-size: 1.3rem; }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--blue);
+      color: #fff !important;
+      padding: 0.45rem 1.1rem;
+      border-radius: 6px;
+      font-weight: 600 !important;
+      transition: opacity 0.2s !important;
+    }
+
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* ── CONTENT ── */
+    main { flex: 1; }
+
+    .legal-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 5rem 2rem 6rem;
+    }
+
+    .legal-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 1rem;
+    }
+
+    .legal-wrap h1 {
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 0.6rem;
+    }
+
+    .effective-date {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text3);
+      margin-bottom: 3rem;
+    }
+
+    .legal-section {
+      margin-bottom: 2.8rem;
+    }
+
+    .legal-section h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.01em;
+    }
+
+    .legal-section p {
+      font-size: 0.95rem;
+      color: var(--text2);
+      line-height: 1.75;
+      margin-bottom: 0.8rem;
+    }
+
+    .legal-section p:last-child { margin-bottom: 0; }
+
+    .legal-section a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .legal-section a:hover { text-decoration: underline; }
+
+    .highlight-box {
+      background: var(--bg2);
+      border: 1px solid rgba(34,212,122,0.18);
+      border-left: 3px solid var(--green);
+      border-radius: 8px;
+      padding: 1.1rem 1.3rem;
+      margin-bottom: 2.8rem;
+    }
+
+    .highlight-box p {
+      font-size: 0.92rem;
+      color: var(--text2);
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .highlight-box strong { color: var(--text); }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 2.5rem 0;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 2rem;
+      background: var(--bg);
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.2rem;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.4rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text3);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text2); }
+
+    .footer-right {
+      font-size: 0.8rem;
+      color: var(--text3);
+      text-align: right;
+    }
+
+    .footer-right a {
+      color: var(--text3);
+      text-decoration: none;
+    }
+
+    .footer-right a:hover { color: var(--text2); }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .footer-right { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="logo" href="../index.html"><span>🚛</span> CarrierEdge</a>
+    <ul class="nav-links">
+      <li><a href="../index.html#features">Features</a></li>
+      <li><a href="../pricing.html">Pricing</a></li>
+      <li><a href="../factoring-index.html">Free Tools</a></li>
+      <li><a class="nav-cta" href="../pricing.html">Get Started →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+  <div class="legal-wrap">
+
+    <p class="legal-eyebrow">Legal</p>
+    <h1>Privacy Policy</h1>
+    <p class="effective-date">Effective date: June 2026</p>
+
+    <div class="highlight-box">
+      <p><strong>The short version:</strong> CarrierEdge is a browser-native app. Your operational data — loads, invoices, P&amp;L, fleet — is stored only in your browser and never sent to our servers. We have no way to read it, sell it, or lose it in a breach.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>1. What CarrierEdge stores and where</h2>
+      <p>All user-generated data — including P&amp;L records, fleet information, invoice history, factoring decisions, and app settings — is stored exclusively in your browser's IndexedDB. This data never leaves your device and is never transmitted to CarrierEdge or any third party by the application itself.</p>
+      <p>Because we cannot access your data, we cannot recover it if you clear your browser storage. We strongly recommend using the built-in CSV/PDF export features to keep your own backups.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>2. What CarrierEdge does collect</h2>
+      <p><strong>License key validation.</strong> When you activate or the app re-verifies your subscription, a license key check is sent to Lemon Squeezy (our payment processor) to confirm your subscription is active. No operational data is included in this request — only the key itself.</p>
+      <p><strong>Anonymous page view analytics.</strong> We use Cloudflare Web Analytics to understand general traffic patterns (page views, country, browser). Cloudflare's implementation does not use cookies and does not collect personal information or cross-site tracking data.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>3. Optional third-party API calls</h2>
+      <p>Some features make outbound requests directly from your browser to external services. These are always optional and always initiated by your own action:</p>
+      <p><strong>Anthropic (AI Advisor).</strong> If you use the AI Advisor, your prompt is sent directly from your browser to Anthropic's API using your own API key. CarrierEdge does not proxy, log, or store these requests.</p>
+      <p><strong>FMCSA SAFER.</strong> Carrier lookups go directly from your browser to the FMCSA public API. No data is stored or proxied by CarrierEdge.</p>
+      <p><strong>EIA Diesel Prices.</strong> Fuel price lookups go directly from your browser to the U.S. Energy Information Administration's public API.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>4. Subscription and billing</h2>
+      <p>Payments and subscription management are handled by Lemon Squeezy. When you subscribe, Lemon Squeezy collects your email address and payment information subject to their own privacy policy. We receive only your license key and subscription status. See <a href="https://www.lemonsqueezy.com/privacy" target="_blank" rel="noopener">Lemon Squeezy's Privacy Policy</a> for details on how they handle your billing data.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>5. Cookies and tracking</h2>
+      <p>CarrierEdge does not use advertising cookies, tracking pixels, or cross-site identifiers. The Cloudflare Web Analytics script is cookieless and GDPR-compliant by design. The app uses localStorage and IndexedDB solely to store your data and preferences locally.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>6. Data deletion</h2>
+      <p>Since your data lives in your browser, you can delete it at any time by clearing CarrierEdge's site data in your browser settings. Cancelling your subscription does not delete your local data — it only removes access to member-only features.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>7. Children's privacy</h2>
+      <p>CarrierEdge is a professional tool intended for adults operating commercial trucking businesses. We do not knowingly collect information from anyone under 18.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>8. Changes to this policy</h2>
+      <p>We may update this policy as the product evolves. Material changes will be noted in the app and on this page with an updated effective date.</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="legal-section">
+      <h2>Contact</h2>
+      <p>Questions about privacy? Email us at <a href="mailto:hello@carrieredge.io">hello@carrieredge.io</a>.</p>
+    </div>
+
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <a class="footer-logo" href="../index.html"><span>🚛</span> CarrierEdge</a>
+    <ul class="footer-links">
+      <li><a href="../index.html#features">Features</a></li>
+      <li><a href="../pricing.html">Pricing</a></li>
+      <li><a href="../factoring-index.html">Free Tools</a></li>
+      <li><a href="privacy.html">Privacy</a></li>
+      <li><a href="terms.html">Terms</a></li>
+      <li><a href="refund.html">Refund Policy</a></li>
+    </ul>
+    <div class="footer-right">
+      <a href="mailto:hello@carrieredge.io">hello@carrieredge.io</a><br />
+      &copy; 2026 CarrierEdge
+    </div>
+  </div>
+</footer>
+
+<!-- Cloudflare Web Analytics: replace token below after Pages deployment -->
+<!-- <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "REPLACE_WITH_TOKEN"}'></script> -->
+</body>
+</html>

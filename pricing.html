@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pricing — CarrierEdge</title>
+  <meta name="description" content="One plan. Everything included. $19.99/month. No contracts, cancel anytime." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #080c14;
+      --bg2:    #0d1220;
+      --bg3:    #121929;
+      --text:   #dde4f8;
+      --text2:  #7a8ab0;
+      --text3:  #44506e;
+      --blue:   #4a8fff;
+      --green:  #22d47a;
+      --amber:  #f5a623;
+      --teal:   #2dd4bf;
+      --border: rgba(100,140,255,0.10);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8,12,20,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .logo span { font-size: 1.3rem; }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--blue);
+      color: #fff !important;
+      padding: 0.45rem 1.1rem;
+      border-radius: 6px;
+      font-weight: 600 !important;
+      transition: opacity 0.2s !important;
+    }
+
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* ── MAIN ── */
+    main { flex: 1; }
+
+    .section { padding: 5rem 2rem; }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .container-wide {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 6rem 2rem 3rem;
+    }
+
+    .hero-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--teal);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text2);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* ── PRICING CARD ── */
+    .card-wrap {
+      padding: 1rem 2rem 5rem;
+    }
+
+    .pricing-card {
+      max-width: 580px;
+      margin: 0 auto;
+      background: var(--bg2);
+      border: 1px solid rgba(100,140,255,0.18);
+      border-radius: 16px;
+      padding: 2.5rem 2.5rem 2rem;
+      box-shadow: 0 0 60px rgba(74,143,255,0.06);
+    }
+
+    .plan-name {
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1.2rem;
+    }
+
+    .price-block {
+      display: flex;
+      align-items: baseline;
+      gap: 0.35rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .price-amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 3.6rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .price-period {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      color: var(--text2);
+    }
+
+    .price-note {
+      font-size: 0.82rem;
+      color: var(--text3);
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 2rem;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 1.5rem 0;
+    }
+
+    .features-label {
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      margin-bottom: 2rem;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .feature-list li::before {
+      content: '✓';
+      color: var(--green);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    .cta-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: var(--blue);
+      color: #fff;
+      text-decoration: none;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 0.9rem 1.5rem;
+      border-radius: 8px;
+      transition: opacity 0.2s, transform 0.15s;
+      letter-spacing: 0.01em;
+    }
+
+    .cta-btn:hover {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
+
+    .cta-subtext {
+      font-size: 0.8rem;
+      color: var(--text3);
+      text-align: center;
+      margin-top: 1rem;
+      line-height: 1.5;
+    }
+
+    /* ── FAQ ── */
+    .faq {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 5rem 2rem;
+    }
+
+    .faq h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 2.5rem;
+      text-align: center;
+    }
+
+    .faq-list {
+      max-width: 640px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .faq-item {}
+
+    .faq-q {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .faq-a {
+      font-size: 0.95rem;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+
+    .faq-a a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .faq-a a:hover { text-decoration: underline; }
+
+    /* ── FREE TOOLS BANNER ── */
+    .free-banner {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .free-banner p {
+      font-size: 1rem;
+      color: var(--text2);
+      margin-bottom: 1.2rem;
+    }
+
+    .free-banner a {
+      display: inline-block;
+      color: var(--teal);
+      font-weight: 700;
+      text-decoration: none;
+      border: 1px solid rgba(45,212,191,0.3);
+      padding: 0.65rem 1.4rem;
+      border-radius: 7px;
+      font-size: 0.95rem;
+      transition: background 0.2s;
+    }
+
+    .free-banner a:hover { background: rgba(45,212,191,0.07); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 2rem;
+      background: var(--bg);
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.2rem;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.4rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text3);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text2); }
+
+    .footer-right {
+      font-size: 0.8rem;
+      color: var(--text3);
+      text-align: right;
+    }
+
+    .footer-right a {
+      color: var(--text3);
+      text-decoration: none;
+    }
+
+    .footer-right a:hover { color: var(--text2); }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .pricing-card { padding: 1.8rem 1.4rem; }
+      .price-amount { font-size: 2.8rem; }
+      .footer-right { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="logo" href="index.html"><span>🚛</span> CarrierEdge</a>
+    <ul class="nav-links">
+      <li><a href="index.html#features">Features</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+      <li><a href="factoring-index.html">Free Tools</a></li>
+      <li><a class="nav-cta" href="pricing.html">Get Started →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="hero-eyebrow">Pricing</p>
+    <h1>Simple, Honest Pricing</h1>
+    <p>One plan. Everything included. Cancel anytime.</p>
+  </section>
+
+  <!-- PRICING CARD -->
+  <section class="card-wrap">
+    <div class="pricing-card">
+      <p class="plan-name">CarrierEdge Full Suite</p>
+
+      <div class="price-block">
+        <span class="price-amount">$19.99</span>
+        <span class="price-period">/ month</span>
+      </div>
+      <p class="price-note">Cancel anytime · No contracts · License key delivered instantly</p>
+
+      <div class="divider"></div>
+
+      <p class="features-label">Everything included</p>
+      <ul class="feature-list">
+        <li>P&amp;L Tracker with RPM math + CSV export</li>
+        <li>Factoring Decision Engine (personalized offers, All-In Engine, SIF)</li>
+        <li>Invoice Factoring Pipeline + DSO tracking</li>
+        <li>CE Partner Rate Offers (Triumph, OTR Capital, Porter)</li>
+        <li>Negotiation Intelligence — rate scripts</li>
+        <li>FMCSA SAFER lookups + BASICs scorecard</li>
+        <li>Fleet Tracker</li>
+        <li>Edge Workflow (invoices, chargebacks)</li>
+        <li>IFTA quarterly worksheet</li>
+        <li>AI Advisor (Claude-powered, bring your own API key)</li>
+        <li>PDF reports (invoices, P&amp;L, IFTA)</li>
+        <li>Works offline forever</li>
+        <li>4 UI themes (Terminal, Command, Field, Intelligence)</li>
+        <li>Your data never leaves your device</li>
+      </ul>
+
+      <a class="cta-btn" href="https://carrieredge.lemonsqueezy.com/checkout">
+        Subscribe — $19.99/mo →
+      </a>
+
+      <p class="cta-subtext">
+        After payment, you'll receive a license key via email.<br />
+        Enter it in <strong>Settings → Membership</strong> to unlock the full suite.
+      </p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <p class="faq-q">What happens to my data if I cancel?</p>
+        <p class="faq-a">It stays in your browser forever. CarrierEdge never stores your data on any server. Cancellation only removes access to member-only features — your P&amp;L records, fleet data, and invoices remain exactly where you left them.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Do I need an internet connection?</p>
+        <p class="faq-a">Only for the initial load and optional live data (FMCSA lookups, EIA diesel prices, AI Advisor). Everything else — your P&amp;L, fleet tracker, factoring tools — works fully offline once the app is loaded.</p>
+      </div>
+
+      <div class="faq-item">
+        <p class="faq-q">Can I try before paying?</p>
+        <p class="faq-a">Yes. Use the <a href="factoring-index.html">Free Factoring Tools</a> with no account required. The full dashboard also loads with demo data so you can explore every screen before subscribing.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FREE TOOLS BANNER -->
+  <section class="free-banner">
+    <p>Not ready to subscribe?</p>
+    <a href="factoring-index.html">Try the free factoring tools first →</a>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <a class="footer-logo" href="index.html"><span>🚛</span> CarrierEdge</a>
+    <ul class="footer-links">
+      <li><a href="index.html#features">Features</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+      <li><a href="factoring-index.html">Free Tools</a></li>
+      <li><a href="legal/privacy.html">Privacy</a></li>
+      <li><a href="legal/terms.html">Terms</a></li>
+      <li><a href="legal/refund.html">Refund Policy</a></li>
+    </ul>
+    <div class="footer-right">
+      <a href="mailto:hello@carrieredge.io">hello@carrieredge.io</a><br />
+      &copy; 2026 CarrierEdge
+    </div>
+  </div>
+</footer>
+
+<!-- Cloudflare Web Analytics: replace token below after Pages deployment -->
+<!-- <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "REPLACE_WITH_TOKEN"}'></script> -->
+</body>
+</html>

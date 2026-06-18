@@ -1,10 +1,11 @@
 // CarrierEdge Service Worker
 // Cache-first for the app shell; network-first for external resources.
 // Version bump here forces old caches to evict on next visit.
-const CACHE = 'carrieredge-v1';
+const CACHE = 'carrieredge-v2';
 
 const SHELL = [
   './index.html',
+  './app.html',
   './manifest.json',
 ];
 

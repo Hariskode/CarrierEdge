@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service — CarrierEdge</title>
+  <meta name="description" content="CarrierEdge Terms of Service." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #080c14;
+      --bg2:    #0d1220;
+      --bg3:    #121929;
+      --text:   #dde4f8;
+      --text2:  #7a8ab0;
+      --text3:  #44506e;
+      --blue:   #4a8fff;
+      --green:  #22d47a;
+      --amber:  #f5a623;
+      --teal:   #2dd4bf;
+      --border: rgba(100,140,255,0.10);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8,12,20,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .logo span { font-size: 1.3rem; }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--blue);
+      color: #fff !important;
+      padding: 0.45rem 1.1rem;
+      border-radius: 6px;
+      font-weight: 600 !important;
+      transition: opacity 0.2s !important;
+    }
+
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* ── CONTENT ── */
+    main { flex: 1; }
+
+    .legal-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 5rem 2rem 6rem;
+    }
+
+    .legal-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 1rem;
+    }
+
+    .legal-wrap h1 {
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 0.6rem;
+    }
+
+    .effective-date {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text3);
+      margin-bottom: 3rem;
+    }
+
+    .legal-section {
+      margin-bottom: 2.8rem;
+    }
+
+    .legal-section h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.01em;
+    }
+
+    .legal-section p {
+      font-size: 0.95rem;
+      color: var(--text2);
+      line-height: 1.75;
+      margin-bottom: 0.8rem;
+    }
+
+    .legal-section p:last-child { margin-bottom: 0; }
+
+    .legal-section a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .legal-section a:hover { text-decoration: underline; }
+
+    .notice-box {
+      background: var(--bg2);
+      border: 1px solid rgba(245,166,35,0.18);
+      border-left: 3px solid var(--amber);
+      border-radius: 8px;
+      padding: 1.1rem 1.3rem;
+      margin-bottom: 2.8rem;
+    }
+
+    .notice-box p {
+      font-size: 0.92rem;
+      color: var(--text2);
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .notice-box strong { color: var(--text); }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 2.5rem 0;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 2rem;
+      background: var(--bg);
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.2rem;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.4rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text3);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text2); }
+
+    .footer-right {
+      font-size: 0.8rem;
+      color: var(--text3);
+      text-align: right;
+    }
+
+    .footer-right a {
+      color: var(--text3);
+      text-decoration: none;
+    }
+
+    .footer-right a:hover { color: var(--text2); }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .footer-right { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="logo" href="../index.html"><span>🚛</span> CarrierEdge</a>
+    <ul class="nav-links">
+      <li><a href="../index.html#features">Features</a></li>
+      <li><a href="../pricing.html">Pricing</a></li>
+      <li><a href="../factoring-index.html">Free Tools</a></li>
+      <li><a class="nav-cta" href="../pricing.html">Get Started →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+  <div class="legal-wrap">
+
+    <p class="legal-eyebrow">Legal</p>
+    <h1>Terms of Service</h1>
+    <p class="effective-date">Effective date: June 2026</p>
+
+    <div class="notice-box">
+      <p><strong>Plain language summary:</strong> CarrierEdge is a paid software tool — not a financial advisor, factoring company, or legal service. The data is yours, stored in your browser. Use the tools to make better decisions, but always verify critical numbers directly with carriers and factoring companies.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>1. Acceptance of terms</h2>
+      <p>By accessing or using CarrierEdge ("the software," "the app") at carrieredge.io, you agree to these Terms of Service. If you do not agree, do not use CarrierEdge.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>2. Software license</h2>
+      <p>CarrierEdge is provided as browser-native software on an as-is basis. A subscription grants you a personal, non-transferable license to use the full suite for one active business or individual operation. License keys are not to be shared across unrelated businesses.</p>
+      <p>The software may be updated, changed, or have features added or removed. We will endeavor to notify users of significant changes.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>3. Subscription and billing</h2>
+      <p>CarrierEdge is offered at $19.99 per month, billed monthly through Lemon Squeezy. You may cancel at any time from your Lemon Squeezy customer portal. Cancellation takes effect at the end of your current billing period — you retain full access until then. See our <a href="refund.html">Refund Policy</a> for details on refunds.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>4. Your data and backups</h2>
+      <p>All operational data (P&amp;L records, fleet data, invoices, settings) is stored in your browser's local storage. CarrierEdge does not back up this data on your behalf. You are responsible for exporting and maintaining your own backups using the CSV and PDF export features provided in the app. CarrierEdge is not liable for any data loss resulting from browser storage clearing, device failure, or user action.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>5. Not a financial or legal advisor</h2>
+      <p>CarrierEdge is a software tool for trucking business management and decision support. It is not a financial advisor, factoring company, legal advisor, or regulated financial service. All outputs — including P&amp;L summaries, factoring rate comparisons, RPM calculations, and AI Advisor responses — are for informational purposes only and do not constitute financial, legal, or business advice.</p>
+      <p>Always verify rate and financial data directly with the relevant factoring company or financial institution before making business decisions.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>6. Rate data accuracy</h2>
+      <p>Factoring rate data, partner offers, and third-party data (diesel prices, FMCSA records) shown in the app are updated on a best-effort basis. CarrierEdge makes no warranty that this data is current, complete, or accurate at any given moment. Rates change frequently — always confirm directly with the factoring company before signing any agreement.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>7. CarrierEdge Verified Partner program</h2>
+      <p>CarrierEdge maintains commercial relationships with certain factoring companies listed as Verified Partners (currently including Triumph Business Capital, OTR Capital, and Porter Freight Funding). CarrierEdge may receive referral fees if you establish a factoring relationship through links in the app. Partner status and placement are disclosed within the app. These relationships do not alter the objectivity of tool outputs — rate comparisons use your inputs, not partner-weighted calculations.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>8. AI Advisor</h2>
+      <p>The AI Advisor feature uses Anthropic's Claude API via your own API key. Responses are generated by a third-party AI model and may be incomplete, incorrect, or outdated. Do not rely on AI Advisor output for legal, tax, or safety-critical decisions.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>9. Limitation of liability</h2>
+      <p>To the fullest extent permitted by law, CarrierEdge and its operators shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the software, including but not limited to data loss, business losses, or reliance on software outputs. CarrierEdge's total liability shall not exceed the subscription fees paid in the three months preceding the claim.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>10. Governing law</h2>
+      <p>These terms are governed by the laws applicable in the jurisdiction where you operate your business. Any disputes shall be resolved in the applicable courts of that jurisdiction.</p>
+    </div>
+
+    <div class="legal-section">
+      <h2>11. Changes to these terms</h2>
+      <p>We may update these terms as the product evolves. Continued use of CarrierEdge after changes are posted constitutes acceptance of the updated terms. Material changes will be noted in the app and on this page with an updated effective date.</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="legal-section">
+      <h2>Contact</h2>
+      <p>Questions about these terms? Email us at <a href="mailto:hello@carrieredge.io">hello@carrieredge.io</a>.</p>
+    </div>
+
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <a class="footer-logo" href="../index.html"><span>🚛</span> CarrierEdge</a>
+    <ul class="footer-links">
+      <li><a href="../index.html#features">Features</a></li>
+      <li><a href="../pricing.html">Pricing</a></li>
+      <li><a href="../factoring-index.html">Free Tools</a></li>
+      <li><a href="privacy.html">Privacy</a></li>
+      <li><a href="terms.html">Terms</a></li>
+      <li><a href="refund.html">Refund Policy</a></li>
+    </ul>
+    <div class="footer-right">
+      <a href="mailto:hello@carrieredge.io">hello@carrieredge.io</a><br />
+      &copy; 2026 CarrierEdge
+    </div>
+  </div>
+</footer>
+
+<!-- Cloudflare Web Analytics: replace token below after Pages deployment -->
+<!-- <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "REPLACE_WITH_TOKEN"}'></script> -->
+</body>
+</html>
