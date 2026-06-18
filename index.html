@@ -2246,14 +2246,14 @@ body { background:var(--layout-bg,var(--bg)); }
           <div class="disc" style="margin-top:14px">🔒 All API keys are stored only in your browser's localStorage. They are never sent to any server other than the respective API provider.</div>
 
           <!-- ── Backup & Restore ── -->
-          <div id="backup-card" style="margin-top:20px;padding:16px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px">
+          <div id="backup-card" style="margin-top:20px;padding:16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-              <div style="font-size:12px;font-weight:700;color:var(--text1);letter-spacing:.06em">DATA BACKUP &amp; RESTORE</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text);letter-spacing:.06em">DATA BACKUP &amp; RESTORE</div>
               <div id="backup-stale-badge" style="display:none;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(245,166,35,.15);color:#f5a623">BACKUP OVERDUE</div>
             </div>
             <div id="backup-status-line" style="font-size:11px;color:var(--text3);margin-bottom:10px">Checking backup status…</div>
             <label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2);cursor:pointer;margin-bottom:12px;user-select:none">
-              <input type="checkbox" id="backup-include-keys" checked style="accent-color:var(--accent);width:14px;height:14px">
+              <input type="checkbox" id="backup-include-keys" checked style="accent-color:var(--blue);width:14px;height:14px">
               Include API keys in backup
             </label>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -3012,11 +3012,13 @@ document.addEventListener('DOMContentLoaded', () => {
   setDate();
   loadSettings();
   loadPL();
+  loadFleet();
   renderDashboard();
   calcFactoring();
   calcFuel();
   fetchDieselPrice();
   autoLoadFMCSA();
+  refreshBackupCard();
   setInterval(fetchDieselPrice, 3600000);
 });
 
@@ -4270,7 +4272,6 @@ function showPage(id, btn) {
   setTimeout(function(){ if(typeof updateHeroKPIBar!=='undefined'){updateHeroKPIBar();}if(typeof updateLayoutContent!=='undefined'){updateLayoutContent();} }, 150);
 }
 
-document.addEventListener('DOMContentLoaded',()=>{ loadFleet(); refreshBackupCard(); });
 const CITY_XY = {'seattle, wa':[142,68],'portland, or':[138,110],'san francisco, ca':[128,195],'los angeles, ca':[155,240],'san diego, ca':[160,268],'las vegas, nv':[205,228],'phoenix, az':[218,280],'tucson, az':[220,303],'salt lake city, ut':[262,180],'denver, co':[295,210],'albuquerque, nm':[278,268],'el paso, tx':[268,315],'dallas, tx':[415,310],'houston, tx':[430,355],'san antonio, tx':[395,360],'austin, tx':[405,348],'laredo, tx':[388,385],'lubbock, tx':[360,300],'minneapolis, mn':[490,100],'des moines, ia':[478,155],'st. louis, mo':[510,198],'chicago, il':[545,152],'milwaukee, wi':[545,128],'detroit, mi':[600,130],'cleveland, oh':[628,143],'indianapolis, in':[581,168],'louisville, ky':[575,198],'nashville, tn':[565,230],'memphis, tn':[525,248],'little rock, ar':[498,268],'new orleans, la':[520,340],'jackson, ms':[522,298],'birmingham, al':[555,283],'atlanta, ga':[575,278],'charleston, sc':[635,278],'charlotte, nc':[635,238],'raleigh, nc':[660,235],'richmond, va':[678,188],'washington, dc':[695,175],'baltimore, md':[700,168],'philadelphia, pa':[718,155],'new york, ny':[740,140],'boston, ma':[778,118],'pittsburgh, pa':[638,158],'columbus, oh':[615,165],'jacksonville, fl':[612,318],'orlando, fl':[598,355],'miami, fl':[610,405],'tampa, fl':[580,362],'kansas city, mo':[455,202],'oklahoma city, ok':[415,268],'tulsa, ok':[440,268],'omaha, ne':[415,183],'wichita, ks':[415,230],'fargo, nd':[405,82],'billings, mt':[278,95],'boise, id':[220,133]};
 function resolveXY(city){const k=city.toLowerCase().trim();if(CITY_XY[k])return CITY_XY[k];for(const c of Object.keys(CITY_XY))if(c.startsWith(k.split(',')[0].trim()))return CITY_XY[c];return[480,280];}
 
