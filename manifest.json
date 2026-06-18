@@ -1,0 +1,26 @@
+{
+  "name": "CarrierEdge",
+  "short_name": "CarrierEdge",
+  "description": "The Owner-Operator Operating System — P&L, factoring, FMCSA, fleet, and AI advisor for independent truckers.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#080c14",
+  "theme_color": "#4a8fff",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "finance", "productivity"],
+  "screenshots": []
+}
