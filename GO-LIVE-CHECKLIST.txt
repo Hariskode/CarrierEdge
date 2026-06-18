@@ -1,0 +1,244 @@
+CarrierEdge — Go-Live Checklist
+=================================
+Complete these steps in order. Steps marked [YOU] require a browser/account.
+Steps marked [CODE] are edits to make in the repo after you have the info.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 1 — REGISTER THE DOMAIN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[YOU]
+
+1. Go to cloudflare.com and create a free account if you don't have one.
+
+2. In the dashboard, go to:
+   Domain Registration → Register a Domain
+
+3. Search for: carrieredge.io
+   (.io runs ~$32-35/year at Cloudflare at-cost pricing)
+   Alternative if taken or too expensive: carrieredge.app (~$14/yr)
+
+4. Purchase the domain.
+   - Cloudflare automatically manages DNS — nothing else to set up here.
+   - Auto-renew ON is recommended so you don't lose the domain.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 2 — MAKE THE GITHUB REPO PUBLIC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[YOU]
+
+Cloudflare Pages needs to read your repo.
+
+1. Go to github.com → your CarrierEdge repository
+2. Settings → General → scroll to "Danger Zone"
+3. Change repository visibility → Make public
+4. Confirm.
+
+(If you prefer to keep it private, Cloudflare Pages supports private
+repos but requires connecting via OAuth — still free, just one extra step.)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 3 — DEPLOY TO CLOUDFLARE PAGES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[YOU]
+
+1. In Cloudflare dashboard → Workers & Pages → Pages → Create a project
+
+2. Choose "Connect to Git" → authorize Cloudflare to access GitHub
+
+3. Select your CarrierEdge repository
+
+4. Build settings — use these exact values:
+   - Framework preset:   None
+   - Build command:      (leave blank)
+   - Build output dir:   /
+   - Root directory:     /
+
+5. Click "Save and Deploy"
+
+6. Wait ~1 minute. You'll get a free URL like:
+   carrieredge-abc123.pages.dev
+   Open it and confirm the marketing page loads.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 4 — CONNECT YOUR CUSTOM DOMAIN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[YOU]
+
+1. In your Cloudflare Pages project → Custom Domains → Set up a custom domain
+
+2. Enter: carrieredge.io
+   Then add a second one: www.carrieredge.io
+
+3. Since your domain is registered at Cloudflare, DNS wires up automatically.
+   SSL certificate is issued automatically (free, Let's Encrypt).
+
+4. Wait 2-5 minutes, then visit carrieredge.io in a browser.
+   You should see the CarrierEdge marketing landing page.
+
+Clean URLs that already work (from _redirects file in the repo):
+   carrieredge.io/app        → CarrierEdge full suite
+   carrieredge.io/factoring  → Free factoring tools
+   carrieredge.io/pricing    → Pricing page
+   carrieredge.io/legal      → Privacy policy
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 5 — SET UP EMAIL ROUTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[YOU]
+
+This gives you @carrieredge.io email addresses that forward to your
+personal Gmail. Free. No mailbox to manage.
+
+1. In Cloudflare dashboard → click your carrieredge.io domain
+   → Email → Email Routing → Get started
+
+2. Cloudflare will ask you to add some DNS records — click "Add records
+   automatically" and it handles it.
+
+3. Add these 4 forwarding rules (Custom addresses):
+
+   From address                  →  Forward to
+   ─────────────────────────────────────────────────────
+   hello@carrieredge.io         →  your-personal@gmail.com
+   partners@carrieredge.io      →  your-personal@gmail.com
+   support@carrieredge.io       →  your-personal@gmail.com
+   billing@carrieredge.io       →  your-personal@gmail.com
+
+4. Cloudflare will send a verification email to your Gmail.
+   Click the verify link in that email.
+
+5. Test it: send an email to hello@carrieredge.io from another account.
+   It should arrive in your Gmail within seconds.
+
+NOTE: Replies will show your personal Gmail address as the sender.
+To reply as hello@carrieredge.io, set up Gmail "Send mail as":
+  Gmail Settings → Accounts → Add another email address
+  SMTP server: smtp.gmail.com, use your Gmail credentials.
+  This is free and takes 5 minutes.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 6 — SET UP LEMON SQUEEZY (SUBSCRIPTIONS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[YOU + CODE]
+
+Lemon Squeezy handles payments, taxes, and license key delivery.
+
+[YOU] Account setup:
+1. Go to lemonsqueezy.com → Create account
+2. Complete the store setup (your business name, payout details/bank account)
+3. They handle all sales tax and VAT automatically
+
+[YOU] Create the product:
+1. Products → New Product
+2. Name: "CarrierEdge Full Suite"
+3. Type: Subscription
+4. Billing: Monthly → $19.99
+5. Under "License keys":
+   - Enable license keys: YES
+   - Activation limit: 1 (one active device per license)
+   - License key expiry: follows subscription status
+6. Success URL (where buyer lands after payment):
+   https://carrieredge.io/app.html?activated=1
+7. Save and publish the product
+
+[YOU] Get the checkout link:
+1. Products → CarrierEdge Full Suite → Share
+2. Copy the checkout URL (looks like: carrieredge.lemonsqueezy.com/checkout/buy/XXXX)
+
+[CODE] Paste the real checkout URL into pricing.html:
+  In /Users/hkpro/CarrierEdge/pricing.html, find:
+    https://carrieredge.lemonsqueezy.com/checkout
+  Replace with your real checkout URL.
+  Then: git add pricing.html && git commit -m "Add real Lemon Squeezy checkout URL"
+  Cloudflare Pages will auto-deploy within 60 seconds.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 7 — ENABLE CLOUDFLARE WEB ANALYTICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[YOU + CODE]
+
+Free, privacy-first analytics. No cookie banner needed.
+
+[YOU] Get your token:
+1. Cloudflare dashboard → your carrieredge.io domain
+   → Analytics & Logs → Web Analytics
+2. Click "Enable Web Analytics"
+3. Copy the token (a 32-character hex string)
+
+[CODE] Add the token to all pages:
+  In each of these files, find the comment:
+    <!-- <script defer src='https://static.cloudflareinsights.com/...
+  Uncomment that line and replace REPLACE_WITH_TOKEN with your token.
+
+  Files to update:
+    - index.html
+    - app.html
+    - pricing.html
+    - factoring-index.html
+    - legal/privacy.html
+    - legal/terms.html
+    - legal/refund.html
+
+  Then commit and push — Pages auto-deploys.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 8 — TEST EVERYTHING END TO END
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[YOU]
+
+Work through this checklist before calling it live:
+
+□ carrieredge.io loads the marketing landing page
+□ carrieredge.io/app opens the CarrierEdge full suite
+□ carrieredge.io/factoring opens the free factoring tool
+□ carrieredge.io/pricing shows the $19.99 pricing card
+□ carrieredge.io/legal loads the privacy policy
+□ "Get Started" button on pricing page goes to real Lemon Squeezy checkout
+□ Complete a test purchase ($0 test mode in Lemon Squeezy)
+□ License key email arrives in your inbox
+□ Enter the license key in CarrierEdge → Settings → Membership → Activate
+□ Refresh carrieredge.io — confirms redirect to /app (smart member redirect works)
+□ Send test email to hello@carrieredge.io — arrives in Gmail
+□ Send test email to partners@carrieredge.io — arrives in Gmail
+□ Cloudflare Analytics dashboard shows page views after a few minutes
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+QUICK REFERENCE — COSTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  carrieredge.io domain       ~$32-35/yr    (Cloudflare Registrar)
+  Cloudflare Pages hosting     FREE
+  Cloudflare Email Routing     FREE
+  Cloudflare Web Analytics     FREE
+  SSL certificate              FREE (auto)
+  Lemon Squeezy                FREE + 5% + $0.50 per transaction
+                               (they keep 5.5% total on each payment)
+
+  Your revenue per subscriber: ~$18.90/mo after Lemon Squeezy fees
+  At 10 subscribers:           ~$189/mo
+  At 50 subscribers:           ~$945/mo
+  At 100 subscribers:          ~$1,890/mo
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+QUICK REFERENCE — KEY CONTACTS & URLS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  hello@carrieredge.io        General inquiries / press
+  partners@carrieredge.io     Factoring partner applications
+  support@carrieredge.io      User support
+  billing@carrieredge.io      Subscription / refund requests
+
+  Cloudflare dashboard:       dash.cloudflare.com
+  Lemon Squeezy dashboard:    app.lemonsqueezy.com
+  GitHub repo:                github.com/[your-username]/CarrierEdge
+  Cloudflare Pages:           dash.cloudflare.com → Workers & Pages
