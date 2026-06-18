@@ -2280,7 +2280,7 @@ body { background:var(--layout-bg,var(--bg)); }
               <div class="fg"><label>Carrier411 API Key</label><input class="fi" id="s-carrier411-key" type="password" placeholder="Carrier411 subscription key" oninput="saveSettings()"><div style="font-size:11px;color:var(--text3);margin-top:3px">Real-time authority monitoring. Subscribe at <a href="https://www.carrier411.com" target="_blank">carrier411.com</a></div></div>
             </div>
           </div>
-          <div class="disc" style="margin-top:14px">🔒 All API keys are stored only in your browser's localStorage. They are never sent to any server other than the respective API provider.</div>
+          <div class="disc" style="margin-top:14px">🔒 All API keys are stored only in your browser's local storage (IndexedDB). They are never sent to any server other than the respective API provider.</div>
 
           <!-- ── Backup & Restore ── -->
           <div id="backup-card" style="margin-top:20px;padding:16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px">
@@ -3032,6 +3032,95 @@ body { background:var(--layout-bg,var(--bg)); }
 
 const now = new Date();
 
+// ============================================================
+// CEDB — IndexedDB key-value store with sync in-memory cache
+// All get() calls are synchronous (cache reads).
+// All set/remove/clear calls update the cache immediately and
+// persist to IndexedDB asynchronously in the background.
+// init() must be awaited before any other app code runs.
+// ============================================================
+const CEDB = {
+  _db:    null,
+  _cache: {},
+
+  init() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('carrieredge', 1);
+      req.onupgradeneeded = e => e.target.result.createObjectStore('kv');
+      req.onerror = () => reject(req.error);
+      req.onsuccess = e => {
+        this._db = e.target.result;
+        // Load entire store into cache
+        const tx  = this._db.transaction('kv', 'readonly');
+        const cur = tx.objectStore('kv').openCursor();
+        cur.onsuccess = ev => {
+          const c = ev.target.result;
+          if (c) { this._cache[c.key] = c.value; c.continue(); }
+        };
+        tx.oncomplete = () => { this._migrateFromLS().then(resolve); };
+        tx.onerror    = () => resolve();
+      };
+    });
+  },
+
+  _migrateFromLS() {
+    if (Object.keys(this._cache).length > 0) return Promise.resolve();
+    const keys = [
+      'ce_pl','ce_settings','ce_fleet','ce_invoices','ce_chargebacks',
+      'ce_inspections','ce_crm','ce_ifta_trips','ce_ifta_fuel',
+      'ce_watchlist','ce_factor_pipeline','ce_layout','ce_theme',
+      'ce_last_backup','ce_demo_seeded','ce_wf_seeded',
+    ];
+    const writes = [];
+    for (const key of keys) {
+      const raw = localStorage.getItem(key);
+      if (raw === null) continue;
+      let val;
+      try { val = JSON.parse(raw); } catch(e) { val = raw; }
+      this._cache[key] = val;
+      writes.push(this._idbSet(key, val));
+      localStorage.removeItem(key);
+    }
+    return Promise.all(writes);
+  },
+
+  get(key)          { return this._cache[key] ?? null; },
+
+  set(key, value)   {
+    this._cache[key] = value;
+    return this._idbSet(key, value);
+  },
+
+  remove(key)       {
+    delete this._cache[key];
+    return new Promise(r => {
+      if (!this._db) return r();
+      const tx = this._db.transaction('kv', 'readwrite');
+      tx.objectStore('kv').delete(key);
+      tx.oncomplete = r; tx.onerror = r;
+    });
+  },
+
+  clear()           {
+    this._cache = {};
+    return new Promise(r => {
+      if (!this._db) return r();
+      const tx = this._db.transaction('kv', 'readwrite');
+      tx.objectStore('kv').clear();
+      tx.oncomplete = r; tx.onerror = r;
+    });
+  },
+
+  _idbSet(key, value) {
+    return new Promise(r => {
+      if (!this._db) return r();
+      const tx = this._db.transaction('kv', 'readwrite');
+      tx.objectStore('kv').put(value, key);
+      tx.oncomplete = r; tx.onerror = r;
+    });
+  },
+};
+
 let APP = {
   settings: {},
   plEntries: window._DEMO_PL,
@@ -3044,7 +3133,8 @@ let APP = {
 // ============================================================
 // INIT
 // ============================================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await CEDB.init();
   seedDemoData();
   loadLayout();
   setDate();
@@ -3066,7 +3156,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================================
 function seedDemoData() {
   // Skip only if there is actual PL entry data (not just an empty array string)
-  try { if (JSON.parse(localStorage.getItem('ce_pl') || '[]').length > 0) return; } catch(e) {}
+  if ((CEDB.get('ce_pl') || []).length > 0) return;
 
   const today = new Date();
   const d = (offset, base) => {
@@ -3090,7 +3180,7 @@ function seedDemoData() {
     eiaKey:        '',
     datKey:        '',
   };
-  localStorage.setItem('ce_settings', JSON.stringify(settings));
+  CEDB.set('ce_settings', settings);
 
   // ── P&L ENTRIES — 60 days of realistic trucking data ──────
   const plEntries = [
@@ -3150,14 +3240,14 @@ function seedDemoData() {
     { id:10049, type:'Other Expense',   date:d(-59), desc:'Annual IRP Registration — Dallas County',             amount:1840,  miles:0,    broker:'' },
     { id:10050, type:'Other Expense',   date:d(-60), desc:'EZ Pass Toll — Monthly Statement',                    amount:262,   miles:0,    broker:'' },
   ];
-  localStorage.setItem('ce_pl', JSON.stringify(plEntries));
+  CEDB.set('ce_pl', plEntries);
 
   // ── FLEET ──────────────────────────────────────────────────
   const fleet = [
     { id:20001, unit:'T-01', driver:'Marcus Williams', city:'Dallas, TX',    status:'en_route',  load:'Dallas TX → Chicago IL · Dry Van',   speed:64, miles:312, color:'#22d47a', lat:32.78, lng:-96.80, updatedAt: new Date(today.getTime()-2*3600000).toISOString() },
     { id:20002, unit:'T-02', driver:'James R. Torres', city:'Memphis, TN',   status:'stopped',   load:'Memphis TN → Charlotte NC — Loaded', speed:0,  miles:188, color:'#4a8fff', lat:35.15, lng:-90.05, updatedAt: new Date(today.getTime()-1*3600000).toISOString() },
   ];
-  localStorage.setItem('ce_fleet', JSON.stringify(fleet));
+  CEDB.set('ce_fleet', fleet);
 
   // ── WORKFLOW already handled by seedWorkflowData() — mark done ──
   // Pre-populate workflow data too so it's all one seed pass
@@ -3173,14 +3263,14 @@ function seedDemoData() {
     { id:30006, num:'INV-0006', date:wd(-10), broker:'Mode Transportation',    desc:'Dallas TX → Los Angeles CA · Reefer · 1435 mi',       amount:5016, terms:'Net 30', dueDate:wd(20),  status:'Open',    paid:false },
     { id:30007, num:'INV-0007', date:wd(-5),  broker:'TQL',                   desc:'Fort Worth TX → Denver CO · Dry Van · 1020 mi',       amount:3570, terms:'Net 30', dueDate:wd(25),  status:'Open',    paid:false },
   ];
-  localStorage.setItem('ce_invoices', JSON.stringify(invoices));
+  CEDB.set('ce_invoices', invoices);
 
   const chargebacks = [
     { id:40001, date:wd(-18), broker:'Echo Global Logistics', reason:'Late Delivery — 2 hrs over delivery window', amount:250,  hasBOL:'Yes', notes:'ELD log + fuel receipts confirm on-time departure. Traffic on I-35 documented. Filed dispute with invoice.',      status:'Disputed', filed:wd(-18) },
     { id:40002, date:wd(-35), broker:'Mega Carrier Brokerage', reason:'Damaged Freight — 3 pallets of electronics', amount:1800, hasBOL:'Yes', notes:'Pre-existing damage noted on BOL at pickup with receiver signature. Photos uploaded to claim portal. Resolved in our favor.', status:'Resolved', filed:wd(-35) },
     { id:40003, date:wd(-8),  broker:'LoadLink Freight LLC',   reason:'Short Count — 2 of 48 pallets missing',      amount:420,  hasBOL:'No',  notes:'Sealed trailer — shipper load and count. Fighting on principle. Awaiting factor review.',                           status:'Open',     filed:wd(-8)  },
   ];
-  localStorage.setItem('ce_chargebacks', JSON.stringify(chargebacks));
+  CEDB.set('ce_chargebacks', chargebacks);
 
   const inspections = [
     { id:50001, date:wd(-7),  type:'Level 1 — Full Inspection',  unit:'T-01', location:'Laredo, TX — I-35 Checkpoint',            result:'Pass', violations:0, level:'1' },
@@ -3188,7 +3278,7 @@ function seedDemoData() {
     { id:50003, date:wd(-62), type:'Annual DOT Inspection',       unit:'T-01', location:"Speedco — Dallas, TX",                   result:'Pass', violations:0, level:'Annual' },
     { id:50004, date:wd(-90), type:'Level 3 — Driver Only',       unit:'T-02', location:'Memphis, TN — Port of Entry',            result:'Pass', violations:0, level:'3' },
   ];
-  localStorage.setItem('ce_inspections', JSON.stringify(inspections));
+  CEDB.set('ce_inspections', inspections);
 
   // ── CRM contacts ───────────────────────────────────────────
   const crm = [
@@ -3197,7 +3287,7 @@ function seedDemoData() {
     { id:60003, company:'Amazon Freight Partner',      contact:'Portal Only — no direct',   phone:'',               createdAt: wd(-45) },
     { id:60004, company:'Walmart Transportation LLC',  contact:'Direct haul — contact TBD', phone:'(479) 273-4000', createdAt: wd(-30) },
   ];
-  localStorage.setItem('ce_crm', JSON.stringify(crm));
+  CEDB.set('ce_crm', crm);
 
   // ── IFTA trips + fuel ─────────────────────────────────────
   const iftaTrips = [
@@ -3210,7 +3300,7 @@ function seedDemoData() {
     { id:70007, date:d(-32), unit:'T-02', origin:'Atlanta',  dest:'Dallas',     totalMiles:788, states:{GA:97,AL:118,MS:142,LA:186,TX:245} },
     { id:70008, date:d(-38), unit:'T-01', origin:'Dallas',   dest:'Denver',     totalMiles:1018,states:{TX:388,OK:95,KS:218,CO:317} },
   ];
-  localStorage.setItem('ce_ifta_trips', JSON.stringify(iftaTrips));
+  CEDB.set('ce_ifta_trips', iftaTrips);
 
   const iftaFuel = [
     { id:80001, date:d(-5),  state:'TX', location:"Pilot J #422 — Dallas",           gallons:120, price:3.729, total:Math.round(120*3.729*100)/100 },
@@ -3229,7 +3319,7 @@ function seedDemoData() {
     { id:80014, date:d(-38), state:'TX', location:"Love's #388 — Dallas",             gallons:122, price:3.718, total:Math.round(122*3.718*100)/100 },
     { id:80015, date:d(-38), state:'KS', location:"Love's #504 — Wichita KS",         gallons:98,  price:3.744, total:Math.round(98*3.744*100)/100  },
   ];
-  localStorage.setItem('ce_ifta_fuel', JSON.stringify(iftaFuel));
+  CEDB.set('ce_ifta_fuel', iftaFuel);
 
   // ── Credit watchlist ──────────────────────────────────────
   const watchlist = [
@@ -3237,7 +3327,7 @@ function seedDemoData() {
     { id:90002, name:'Coyote Logistics',      mc:'MC-561978', risk:'LOW',      score:83, badge:'badge-green', added:d(-30) },
     { id:90003, name:'LoadLink Freight LLC',  mc:'MC-712344', risk:'HIGH',     score:54, badge:'badge-amber', added:d(-12) },
   ];
-  localStorage.setItem('ce_watchlist', JSON.stringify(watchlist));
+  CEDB.set('ce_watchlist', watchlist);
 
   // ── Invoice Factoring Pipeline ─────────────────────────────
   const pipeline = [
@@ -3248,11 +3338,11 @@ function seedDemoData() {
     { id:'pip005', broker:'Arrive Logistics',        loadDesc:'Fort Worth TX → Denver CO · Dry Van · 1020 mi',       invoiceAmt:3570, submitDate:d(-38), payTerms:30, advancePct:97, factRate:2.4, status:'complete',  advanceDate:d(-37), paidDate:d(-8)  },
     { id:'pip006', broker:'CH Robinson',             loadDesc:'Houston TX → Atlanta GA · Dry Van · 790 mi',          invoiceAmt:2886, submitDate:d(-8),  payTerms:30, advancePct:97, factRate:2.4, status:'submitted', advanceDate:null,   paidDate:null },
   ];
-  localStorage.setItem('ce_factor_pipeline', JSON.stringify(pipeline));
+  CEDB.set('ce_factor_pipeline', pipeline);
 
   // Mark all seeded
-  localStorage.setItem('ce_demo_seeded', '1');
-  localStorage.setItem('ce_wf_seeded',   '1'); // prevent double-seed from seedWorkflowData()
+  CEDB.set('ce_demo_seeded', '1');
+  CEDB.set('ce_wf_seeded',   '1'); // prevent double-seed from seedWorkflowData()
 }
 
 function setDate(){
@@ -3327,7 +3417,7 @@ function showPageBase(id, btn){
 // ============================================================
 function loadSettings(){
   try {
-    const s = JSON.parse(localStorage.getItem('ce_settings') || '{}');
+    const s = CEDB.get('ce_settings') || {};
     APP.settings = s;
     if(s.name){ document.getElementById('s-name').value = s.name; document.getElementById('user-display-name').textContent = s.name; document.getElementById('greeting-name').textContent = s.name.split(' ')[0]; document.getElementById('user-avatar').textContent = s.name.substring(0,2).toUpperCase(); }
     if(s.dot){ document.getElementById('s-dot').value = s.dot; document.getElementById('sidebar-dot').textContent = '#'+s.dot; }
@@ -3379,7 +3469,7 @@ function saveSettings(){
     carrier411Key:document.getElementById('s-carrier411-key')?.value || '',
   };
   APP.settings = s;
-  localStorage.setItem('ce_settings', JSON.stringify(s));
+  CEDB.set('ce_settings', s);
 }
 
 function applySettings(){
@@ -3408,17 +3498,14 @@ function exportBackup() {
   const includeKeys = document.getElementById('backup-include-keys')?.checked !== false;
   const data = {}, counts = {};
   for (const key of CE_BACKUP_KEYS) {
-    const raw = localStorage.getItem(key);
-    if (raw === null) continue;
-    try {
-      let parsed = JSON.parse(raw);
-      if (key === 'ce_settings' && !includeKeys) {
-        parsed = { ...parsed };
-        CE_API_KEY_FIELDS.forEach(f => delete parsed[f]);
-      }
-      data[key] = parsed;
-      counts[key] = Array.isArray(parsed) ? parsed.length : 1;
-    } catch(e) { data[key] = raw; }
+    let val = CEDB.get(key);
+    if (val == null) continue;
+    if (key === 'ce_settings' && !includeKeys) {
+      val = { ...val };
+      CE_API_KEY_FIELDS.forEach(f => delete val[f]);
+    }
+    data[key] = val;
+    counts[key] = Array.isArray(val) ? val.length : 1;
   }
   const backup = {
     app: 'CarrierEdge', version: '0.55',
@@ -3432,7 +3519,7 @@ function exportBackup() {
     download: `carrieredge-backup-${date}.carrieredge`,
   });
   a.click();
-  localStorage.setItem('ce_last_backup', new Date().toISOString());
+  CEDB.set('ce_last_backup', new Date().toISOString());
   refreshBackupCard();
   showToast('Backup exported ✓');
 }
@@ -3459,7 +3546,7 @@ function importBackup(input) {
       if (!confirm(summary)) return;
       for (const [key, value] of Object.entries(backup.data)) {
         if (!CE_BACKUP_KEYS.includes(key)) continue;
-        localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+        CEDB.set(key, value);
       }
       showToast('Backup restored ✓ — reloading…');
       setTimeout(() => location.reload(), 1200);
@@ -3475,7 +3562,7 @@ function refreshBackupCard() {
   if (!statusEl) return;
 
   // Last backup status
-  const lastRaw = localStorage.getItem('ce_last_backup');
+  const lastRaw = CEDB.get('ce_last_backup');
   if (lastRaw) {
     const ago   = Date.now() - new Date(lastRaw).getTime();
     const days  = Math.floor(ago / 86400000);
@@ -3492,38 +3579,30 @@ function refreshBackupCard() {
 
   // Live record counts
   const counts = [];
-  try {
-    const pl = JSON.parse(localStorage.getItem('ce_pl') || '[]');
-    const loads = pl.filter(e => e.type === 'Load Revenue').length;
-    const exp   = pl.filter(e => e.type !== 'Load Revenue').length;
-    if (loads || exp) counts.push(`${loads} loads · ${exp} expenses`);
-  } catch(e) {}
-  try {
-    const fleet = JSON.parse(localStorage.getItem('ce_fleet') || '[]');
-    if (fleet.length) counts.push(`${fleet.length} truck${fleet.length !== 1 ? 's' : ''}`);
-  } catch(e) {}
-  try {
-    const inv = JSON.parse(localStorage.getItem('ce_invoices') || '[]');
-    if (inv.length) counts.push(`${inv.length} invoice${inv.length !== 1 ? 's' : ''}`);
-  } catch(e) {}
-  try {
-    const ifta = JSON.parse(localStorage.getItem('ce_ifta_trips') || '[]');
-    if (ifta.length) counts.push(`${ifta.length} IFTA trips`);
-  } catch(e) {}
+  const pl    = CEDB.get('ce_pl')         || [];
+  const fleet = CEDB.get('ce_fleet')      || [];
+  const inv   = CEDB.get('ce_invoices')   || [];
+  const ifta  = CEDB.get('ce_ifta_trips') || [];
+  const loads = pl.filter(e => e.type === 'Load Revenue').length;
+  const exp   = pl.filter(e => e.type !== 'Load Revenue').length;
+  if (loads || exp) counts.push(`${loads} loads · ${exp} expenses`);
+  if (fleet.length) counts.push(`${fleet.length} truck${fleet.length !== 1 ? 's' : ''}`);
+  if (inv.length)   counts.push(`${inv.length} invoice${inv.length !== 1 ? 's' : ''}`);
+  if (ifta.length)  counts.push(`${ifta.length} IFTA trips`);
   if (countsEl) countsEl.textContent = counts.length ? counts.join(' · ') : 'No data recorded yet.';
 }
 
 function clearAllData(){
   if(confirm('Clear all CarrierEdge local data? This removes your P&L entries, settings, and API keys.')){
-    localStorage.clear(); location.reload();
+    CEDB.clear().then(() => location.reload());
   }
 }
 function resetDemoData(){
   if(!confirm('Reset to demo data? This will overwrite your current P&L, fleet, settings, and workflow data.')) return;
-  ['ce_demo_seeded','ce_wf_seeded','ce_pl','ce_settings','ce_fleet',
+  Promise.all(['ce_demo_seeded','ce_wf_seeded','ce_pl','ce_settings','ce_fleet',
    'ce_invoices','ce_chargebacks','ce_inspections','ce_crm',
-   'ce_ifta_trips','ce_ifta_fuel','ce_watchlist','ce_factor_pipeline'].forEach(k=>localStorage.removeItem(k));
-  location.reload();
+   'ce_ifta_trips','ce_ifta_fuel','ce_watchlist','ce_factor_pipeline'].map(k=>CEDB.remove(k)))
+  .then(() => location.reload());
 }
 
 function showToast(msg){
@@ -3539,14 +3618,14 @@ function showToast(msg){
 // ============================================================
 function loadPL(){
   try {
-    const saved = JSON.parse(localStorage.getItem('ce_pl') || '[]');
+    const saved = CEDB.get('ce_pl') || [];
     if (saved.length > 0) APP.plEntries = saved;
     // else keep the inline demo entries already on APP.plEntries
   } catch(e){}
   renderPL();
 }
 
-function savePL(){ localStorage.setItem('ce_pl', JSON.stringify(APP.plEntries)); }
+function savePL(){ CEDB.set('ce_pl', APP.plEntries); }
 
 function addPLEntry(){
   const type = document.getElementById('et-type').value;
@@ -3866,7 +3945,7 @@ function loadFMCSA(){
   if(!dot){ showToast('Please enter a valid DOT number.'); return; }
   // Save to settings
   APP.settings.dot = dot;
-  localStorage.setItem('ce_settings', JSON.stringify(APP.settings));
+  CEDB.set('ce_settings', APP.settings);
   document.getElementById('sidebar-dot').textContent = '#'+dot;
   document.getElementById('s-dot').value = dot;
   closeDotModal();
@@ -4256,11 +4335,11 @@ function switchWFTab(tab) {
 
 // ── INVOICES ──
 let WF_INVOICES = [];
-function loadInvoices() { try { WF_INVOICES = JSON.parse(localStorage.getItem('ce_invoices')||'[]'); } catch(e) { WF_INVOICES = []; } }
-function saveInvoices() { localStorage.setItem('ce_invoices', JSON.stringify(WF_INVOICES)); }
+function loadInvoices() { WF_INVOICES = CEDB.get('ce_invoices') || []; }
+function saveInvoices() { CEDB.set('ce_invoices', WF_INVOICES); }
 
 function seedWorkflowData() {
-  if (localStorage.getItem('ce_wf_seeded')) return;
+  if (CEDB.get('ce_wf_seeded')) return;
 
   const today = new Date();
   const d = (offset) => new Date(today.getTime() + offset * 86400000).toISOString().slice(0,10);
@@ -4291,10 +4370,10 @@ function seedWorkflowData() {
     { id:3004, date:d(-90), type:'Level 3 — Driver Only',      unit:'T-01', location:'Memphis, TN (Port of Entry)', result:'Pass', violations:0, level:'3' },
   ];
 
-  localStorage.setItem('ce_invoices',    JSON.stringify(invoices));
-  localStorage.setItem('ce_chargebacks', JSON.stringify(cbs));
-  localStorage.setItem('ce_inspections', JSON.stringify(insps));
-  localStorage.setItem('ce_wf_seeded',   '1');
+  CEDB.set('ce_invoices',    invoices);
+  CEDB.set('ce_chargebacks', cbs);
+  CEDB.set('ce_inspections', insps);
+  CEDB.set('ce_wf_seeded',   '1');
 }
 
 function openInvoiceModal(id) {
@@ -4404,8 +4483,8 @@ function renderInvoices() {
 
 // ── CHARGEBACKS ──
 let WF_CBS = [];
-function loadCBs() { try { WF_CBS = JSON.parse(localStorage.getItem('ce_chargebacks')||'[]'); } catch(e) { WF_CBS = []; } }
-function saveCBs() { localStorage.setItem('ce_chargebacks', JSON.stringify(WF_CBS)); }
+function loadCBs()  { WF_CBS  = CEDB.get('ce_chargebacks') || []; }
+function saveCBs()  { CEDB.set('ce_chargebacks', WF_CBS); }
 
 function openCBModal() {
   const broker = prompt('Broker / Shipper name:'); if (!broker) return;
@@ -4454,8 +4533,8 @@ function renderChargebacks() {
 
 // ── INSPECTIONS ──
 let WF_INSPS = [];
-function loadInsps() { try { WF_INSPS = JSON.parse(localStorage.getItem('ce_inspections')||'[]'); } catch(e) { WF_INSPS = []; } }
-function saveInsps() { localStorage.setItem('ce_inspections', JSON.stringify(WF_INSPS)); }
+function loadInsps() { WF_INSPS = CEDB.get('ce_inspections') || []; }
+function saveInsps() { CEDB.set('ce_inspections', WF_INSPS); }
 
 function openInspModal() {
   const type = prompt('Inspection Type (Level 1 / Level 2 / Level 3 / Annual DOT):') || 'Level 1';
@@ -4540,8 +4619,8 @@ function initFleetMap(){
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19}).addTo(_fleetMap);
 }
 let FLEET=[];let _editTruck=null;
-function loadFleet(){try{FLEET=JSON.parse(localStorage.getItem('ce_fleet')||'[]');}catch(e){FLEET=[];}renderFleet();}
-function saveFleet(){localStorage.setItem('ce_fleet',JSON.stringify(FLEET));}
+function loadFleet(){FLEET=CEDB.get('ce_fleet')||[];renderFleet();}
+function saveFleet(){CEDB.set('ce_fleet',FLEET);}
 function openAddTruckModal(id){
   _editTruck=id||null;const t=id?FLEET.find(x=>x.id===id):null;
   [['at-unit','unit'],['at-driver','driver'],['at-city','city'],['at-load','load']].forEach(([el,k])=>{const e=document.getElementById(el);if(e)e.value=t?t[k]||'':'';});
@@ -5815,8 +5894,8 @@ function getBreakEvenData() {
 let PIPELINE = [];
 let PIP_FILTER = 'active';
 
-function loadPipeline() { try { PIPELINE = JSON.parse(localStorage.getItem('ce_factor_pipeline') || '[]'); } catch(e) { PIPELINE = []; } }
-function savePipeline() { localStorage.setItem('ce_factor_pipeline', JSON.stringify(PIPELINE)); }
+function loadPipeline() { PIPELINE = CEDB.get('ce_factor_pipeline') || []; }
+function savePipeline() { CEDB.set('ce_factor_pipeline', PIPELINE); }
 function pipGenId()     { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
 function addDays(dateStr, days) {
@@ -6531,14 +6610,14 @@ function runFuelRoute() {
 }
 
 function addFuelPurchaseFromRoute(state, location, gallons, price) {
-  const purchases = JSON.parse(localStorage.getItem('ce_ifta_fuel')||'[]');
+  const purchases = CEDB.get('ce_ifta_fuel') || [];
   purchases.unshift({
     id: Date.now(), date: new Date().toISOString().slice(0,10),
     state, location, gallons: Math.round(gallons*10)/10,
     price: Math.round(price*1000)/1000,
     total: Math.round(gallons*price*100)/100
   });
-  localStorage.setItem('ce_ifta_fuel', JSON.stringify(purchases));
+  CEDB.set('ce_ifta_fuel', purchases);
   showToast('Fuel purchase logged to IFTA for ' + state);
 }
 
@@ -6565,11 +6644,11 @@ let IFTA_TRIPS = [];
 let IFTA_FUEL  = [];
 
 function loadIFTAData() {
-  try { IFTA_TRIPS = JSON.parse(localStorage.getItem('ce_ifta_trips')||'[]'); } catch(e){ IFTA_TRIPS=[]; }
-  try { IFTA_FUEL  = JSON.parse(localStorage.getItem('ce_ifta_fuel') ||'[]'); } catch(e){ IFTA_FUEL=[]; }
+  IFTA_TRIPS = CEDB.get('ce_ifta_trips') || [];
+  IFTA_FUEL  = CEDB.get('ce_ifta_fuel')  || [];
 }
-function saveIFTATrips() { localStorage.setItem('ce_ifta_trips', JSON.stringify(IFTA_TRIPS)); }
-function saveIFTAFuel()  { localStorage.setItem('ce_ifta_fuel',  JSON.stringify(IFTA_FUEL));  }
+function saveIFTATrips() { CEDB.set('ce_ifta_trips', IFTA_TRIPS); }
+function saveIFTAFuel()  { CEDB.set('ce_ifta_fuel',  IFTA_FUEL);  }
 
 function getQtrRange(q, yr) {
   const ranges = { Q1:[1,3], Q2:[4,6], Q3:[7,9], Q4:[10,12] };
@@ -7347,8 +7426,8 @@ const KNOWN_BROKERS = {
 };
 
 let CC_WATCHLIST = [];
-function loadWatchlist(){ try{ CC_WATCHLIST=JSON.parse(localStorage.getItem('ce_watchlist')||'[]'); }catch(e){ CC_WATCHLIST=[]; } }
-function saveWatchlist(){ localStorage.setItem('ce_watchlist', JSON.stringify(CC_WATCHLIST)); }
+function loadWatchlist(){ CC_WATCHLIST = CEDB.get('ce_watchlist') || []; }
+function saveWatchlist(){ CEDB.set('ce_watchlist', CC_WATCHLIST); }
 
 function hashStr(s){ let h=0; for(let i=0;i<s.length;i++) h=(Math.imul(31,h)+s.charCodeAt(i))|0; return Math.abs(h); }
 function genScore(base, seed, range){ return Math.min(99,Math.max(20, Math.round(base + ((hashStr(seed)%range) - range/2)))); }
@@ -7372,7 +7451,7 @@ const GRADE_COLOR = { 'A+':'var(--green)','A':'var(--green)','A-':'var(--green)'
 
 // ── DSO / Internal payment score ──
 function calcBrokerDSO(brokerName) {
-  if (typeof WF_INVOICES === 'undefined') { try { WF_INVOICES = JSON.parse(localStorage.getItem('ce_invoices')||'[]'); } catch(e){ return null; } }
+  if (typeof WF_INVOICES === 'undefined' || !WF_INVOICES.length) { WF_INVOICES = CEDB.get('ce_invoices') || []; }
   const key = brokerName.toLowerCase().split(' ')[0];
   const inv = WF_INVOICES.filter(i => i.broker && i.broker.toLowerCase().includes(key));
   if (!inv.length) return null;
@@ -8194,8 +8273,8 @@ function clearWatchlist(){ if(!confirm('Clear watchlist?')) return; CC_WATCHLIST
 
 // ── Business Hub ──
 let CRM_CONTACTS=[];
-function loadCRM(){try{CRM_CONTACTS=JSON.parse(localStorage.getItem('ce_crm')||'[]');}catch(e){CRM_CONTACTS=[];}}
-function saveCRM(){localStorage.setItem('ce_crm',JSON.stringify(CRM_CONTACTS));}
+function loadCRM(){CRM_CONTACTS = CEDB.get('ce_crm') || [];}
+function saveCRM(){CEDB.set('ce_crm', CRM_CONTACTS);}
 function addCRMContact(){const company=prompt('Company / Shipper Name:');if(!company)return;const contact=prompt('Contact Name (optional):')||'';loadCRM();CRM_CONTACTS.unshift({id:Date.now(),company,contact,createdAt:new Date().toISOString()});saveCRM();renderCRM();showToast(company+' added!');}
 function renderCRM(){loadCRM();const el=document.getElementById('crm-grid'),empty=document.getElementById('crm-empty');if(!el)return;if(!CRM_CONTACTS.length){el.innerHTML='';if(empty)empty.style.display='block';return;}if(empty)empty.style.display='none';el.innerHTML=CRM_CONTACTS.map(c=>'<div style="padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:13px;font-weight:700">'+c.company+'</div>'+(c.contact?'<div style="font-size:11px;color:var(--text2)">'+c.contact+'</div>':'')+'</div><button onclick="CRM_CONTACTS=CRM_CONTACTS.filter(x=>x.id!=='+c.id+');saveCRM();renderCRM();" class="btn btn-ghost btn-sm" style="font-size:10px;padding:3px 8px;color:var(--red)">x</button></div>').join('');}
 
@@ -8211,14 +8290,14 @@ var IS_LIGHT = false;
 var CMD_GROUPS = { overview:['dashboard','pl'], finance:['factoring','fuelcards','repair','fuelroute','financehub'], fleet:['tracking','workflow'], operations:['operations','compliance','ifta'], credit:['creditcheck','businesshub','market'] };
 
 function loadLayout() {
-  CURRENT_LAYOUT = localStorage.getItem('ce_layout') || 'intelligence';
-  IS_LIGHT = localStorage.getItem('ce_theme') === 'light';
+  CURRENT_LAYOUT = CEDB.get('ce_layout') || 'intelligence';
+  IS_LIGHT = CEDB.get('ce_theme') === 'light';
   applyLayout(CURRENT_LAYOUT);
   applyTheme(IS_LIGHT);
   updateThemePickerUI();
 }
 function setLayout(layout) {
-  CURRENT_LAYOUT = layout; localStorage.setItem('ce_layout', layout);
+  CURRENT_LAYOUT = layout; CEDB.set('ce_layout', layout);
   applyLayout(layout); updateThemePickerUI(); toggleThemePicker(); updateLayoutContent();
 }
 function applyLayout(layout) {
@@ -8230,7 +8309,7 @@ function applyTheme(light) {
   document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
 }
 function toggleLightMode() {
-  IS_LIGHT = !IS_LIGHT; localStorage.setItem('ce_theme', IS_LIGHT ? 'light' : 'dark');
+  IS_LIGHT = !IS_LIGHT; CEDB.set('ce_theme', IS_LIGHT ? 'light' : 'dark');
   applyTheme(IS_LIGHT);
   var sw = document.getElementById('theme-toggle-sw'); if (sw) sw.classList.toggle('on', IS_LIGHT);
 }
@@ -8319,7 +8398,7 @@ function updateHeroKPIBar() {
   var s=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v;};
   s('hkpi-rev','$'+Math.round(rev).toLocaleString()); s('hkpi-profit','$'+Math.round(rev-exp).toLocaleString());
   s('hkpi-trucks',(typeof FLEET!=='undefined'?FLEET.filter(function(t){return t.status==='en_route';}).length:0)+' / '+(typeof FLEET!=='undefined'?FLEET.length:0));
-  try{var invs=JSON.parse(localStorage.getItem('ce_invoices')||'[]');s('hkpi-invoices',invs.filter(function(i){return!i.paid;}).length);}catch(e){}
+  var invs=CEDB.get('ce_invoices')||[];s('hkpi-invoices',invs.filter(function(i){return!i.paid;}).length);
   s('hkpi-diesel','$'+(APP.dieselPrice||3.89).toFixed(3));
 }
 function updateLayoutContent() { if(typeof updateHeroKPIBar!=='undefined') updateHeroKPIBar(); }
