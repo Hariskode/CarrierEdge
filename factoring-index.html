@@ -158,10 +158,52 @@ a { color:var(--blue); text-decoration:none; }
   padding:3px 10px; border-radius:20px;
   font-size:10px; font-weight:700; letter-spacing:.3px;
 }
-.badge-blue   { background:rgba(74,143,255,.1); color:var(--blue); border:1px solid rgba(74,143,255,.2); }
-.badge-green  { background:rgba(34,212,122,.1); color:var(--green); border:1px solid rgba(34,212,122,.2); }
-.badge-amber  { background:rgba(245,166,35,.1); color:var(--amber); border:1px solid rgba(245,166,35,.2); }
-.badge-purple { background:rgba(159,125,255,.1); color:var(--purple); border:1px solid rgba(159,125,255,.2); }
+.badge-blue     { background:rgba(74,143,255,.1); color:var(--blue); border:1px solid rgba(74,143,255,.2); }
+.badge-green    { background:rgba(34,212,122,.1); color:var(--green); border:1px solid rgba(34,212,122,.2); }
+.badge-amber    { background:rgba(245,166,35,.1); color:var(--amber); border:1px solid rgba(245,166,35,.2); }
+.badge-purple   { background:rgba(159,125,255,.1); color:var(--purple); border:1px solid rgba(159,125,255,.2); }
+.badge-teal     { background:rgba(45,212,191,.1); color:var(--teal); border:1px solid rgba(45,212,191,.2); }
+.badge-verified { background:rgba(45,212,191,.12); color:var(--teal); border:1px solid rgba(45,212,191,.3); font-size:9px; padding:2px 8px; }
+
+/* ── SPONSORED SECTION ── */
+.sponsored-header {
+  display:flex; align-items:center; gap:10px; margin-bottom:14px;
+}
+.sponsored-label {
+  font-size:10px; font-weight:700; color:var(--text3);
+  text-transform:uppercase; letter-spacing:.8px;
+  padding:3px 10px; background:var(--bg3);
+  border:1px solid var(--border); border-radius:20px;
+}
+.sponsored-cards {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin-bottom:8px;
+}
+.sponsored-card {
+  background:var(--bg2);
+  border:1.5px solid rgba(45,212,191,.25);
+  border-radius:13px; padding:18px 20px;
+  position:relative;
+  transition:border-color .15s;
+}
+.sponsored-card:hover { border-color:rgba(45,212,191,.45); }
+.partner-cta {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 16px;
+  background:var(--teal); color:#000;
+  font-family:var(--font); font-size:12px; font-weight:800;
+  border:none; border-radius:8px; cursor:pointer;
+  text-decoration:none; transition:opacity .15s;
+}
+.partner-cta:hover { opacity:.88; }
+.partner-cta-ghost {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 14px;
+  background:transparent; color:var(--text2);
+  font-family:var(--font); font-size:11px; font-weight:700;
+  border:1px solid var(--border2); border-radius:8px; cursor:pointer;
+  text-decoration:none; transition:border-color .15s;
+}
+.partner-cta-ghost:hover { border-color:var(--border3); color:var(--text); }
 .badge-teal   { background:rgba(45,212,191,.1); color:var(--teal); border:1px solid rgba(45,212,191,.2); }
 
 /* ── TABLE ── */
@@ -262,6 +304,7 @@ tr:hover td { background:rgba(74,143,255,.03); }
   <button class="tab-btn" onclick="switchTab('sif')">Should I Factor?</button>
   <button class="tab-btn" onclick="switchTab('negotiate')">Negotiation Script</button>
   <button class="tab-btn" onclick="switchTab('education')">Education</button>
+  <button class="tab-btn" onclick="switchTab('partners')" style="color:var(--teal)">For Partners ✦</button>
 </nav>
 
 <main class="main">
@@ -286,6 +329,20 @@ tr:hover td { background:rgba(74,143,255,.03); }
       <div class="section-sub">Market rates, contract terms, and red flags for the most common factoring companies used by truckers. Verify directly with each factor before signing.</div>
     </div>
 
+    <!-- SPONSORED SECTION -->
+    <div style="margin-bottom:24px">
+      <div class="sponsored-header">
+        <span class="sponsored-label">Sponsored Listings</span>
+        <span style="font-size:11px;color:var(--text3)">CE Verified Partners — paid listings. Rankings in the table below are objective and unaffected by partner status.</span>
+      </div>
+      <div class="sponsored-cards" id="sponsored-cards">
+        <div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Loading partners…</div>
+      </div>
+      <p style="font-size:10px;color:var(--text3);margin-top:6px">CE Verified Partners pay CarrierEdge a referral fee when a carrier applies through this page. This does not affect their ranking in the rate table or All-In Cost Engine below.</p>
+    </div>
+
+    <!-- RATE TABLE -->
+    <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.6px">Full Market Rate Table — All Companies</div>
     <div class="tbl-wrap" style="margin-bottom:18px">
       <table>
         <thead>
@@ -302,8 +359,12 @@ tr:hover td { background:rgba(74,143,255,.03); }
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td><strong style="color:var(--text)">Triumph Business Capital</strong><br><span style="font-size:10px;color:var(--text3)">Largest trucking factor in US</span></td>
+          <tr style="background:rgba(45,212,191,.03)">
+            <td>
+              <strong style="color:var(--text)">Triumph Business Capital</strong>
+              <span class="badge-verified badge" style="margin-left:6px">✓ Verified</span>
+              <br><span style="font-size:10px;color:var(--text3)">Largest trucking factor in US</span>
+            </td>
             <td><span class="td-green">1.5–2.5%</span></td>
             <td class="td-mono">97%</td>
             <td><span class="pill pill-g">No lock-in</span></td>
@@ -313,8 +374,12 @@ tr:hover td { background:rgba(74,143,255,.03); }
             <td>Small fleets, O/O</td>
             <td>⭐⭐⭐⭐⭐</td>
           </tr>
-          <tr>
-            <td><strong style="color:var(--text)">OTR Capital</strong><br><span style="font-size:10px;color:var(--text3)">24/7 broker credit checks</span></td>
+          <tr style="background:rgba(45,212,191,.03)">
+            <td>
+              <strong style="color:var(--text)">OTR Capital</strong>
+              <span class="badge-verified badge" style="margin-left:6px">✓ Verified</span>
+              <br><span style="font-size:10px;color:var(--text3)">24/7 broker credit checks</span>
+            </td>
             <td><span class="td-green">1.5–3.0%</span></td>
             <td class="td-mono">95%</td>
             <td><span class="pill pill-a">Month-to-month</span></td>
@@ -324,8 +389,12 @@ tr:hover td { background:rgba(74,143,255,.03); }
             <td>All carrier sizes</td>
             <td>⭐⭐⭐⭐⭐</td>
           </tr>
-          <tr>
-            <td><strong style="color:var(--text)">Porter Freight Funding</strong><br><span style="font-size:10px;color:var(--text3)">Highest advance rate</span></td>
+          <tr style="background:rgba(45,212,191,.03)">
+            <td>
+              <strong style="color:var(--text)">Porter Freight Funding</strong>
+              <span class="badge-verified badge" style="margin-left:6px">✓ Verified</span>
+              <br><span style="font-size:10px;color:var(--text3)">Highest advance rate</span>
+            </td>
             <td><span class="td-green">1.5–2.0%</span></td>
             <td class="td-mono">98%</td>
             <td><span class="pill pill-g">No lock-in</span></td>
@@ -777,11 +846,119 @@ tr:hover td { background:rgba(74,143,255,.03); }
     </div>
   </div>
 
+  <!-- ── TAB: FOR PARTNERS ── -->
+  <div id="tab-partners" class="tab-section">
+    <div class="section-head">
+      <div class="section-title">Become a CE Verified Partner</div>
+      <div class="section-sub">Reach pre-qualified owner-operators and small fleet carriers who are actively comparing factoring options — with real volume data, not tire-kickers.</div>
+    </div>
+
+    <!-- What carriers see -->
+    <div class="card" style="margin-bottom:18px;border-color:rgba(45,212,191,.25)">
+      <div class="card-header">
+        <div class="card-title">Who's Using This Index</div>
+        <span class="badge badge-teal">Your audience</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:26px;font-weight:800;font-family:var(--mono);color:var(--blue)">O/O</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5">Owner-operators actively shopping for their first factor or switching from a current one</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:26px;font-weight:800;font-family:var(--mono);color:var(--green)">$60k+</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5">Average monthly volume of CarrierEdge users — mid-to-high tier, not small fry</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:26px;font-weight:800;font-family:var(--mono);color:var(--teal)">Warm</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5">Leads arrive pre-educated — they've already run the All-In calculator and know their target rate</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+          <div style="font-size:26px;font-weight:800;font-family:var(--mono);color:var(--purple)">Data</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5">Users bring their own volume, freight type, and payment history — your underwriters save time</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px">
+        CarrierEdge is a free tool built for working truckers. Users are not casual browsers — they're making real financial decisions. A carrier who runs the Should I Factor? analysis and clicks Apply has already decided to act.
+      </div>
+    </div>
+
+    <!-- What you get as a partner -->
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-header">
+        <div class="card-title">What CE Verified Partner Includes</div>
+        <span class="badge badge-teal">One tier · Transparent pricing</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Placement</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div style="font-size:12px;color:var(--text2);display:flex;gap:9px;line-height:1.5"><span style="color:var(--teal);flex-shrink:0;font-weight:800">✓</span>Sponsored listing above the rate table — clearly labeled, high visibility</div>
+            <div style="font-size:12px;color:var(--text2);display:flex;gap:9px;line-height:1.5"><span style="color:var(--teal);flex-shrink:0;font-weight:800">✓</span>CE Verified badge in the full rate table and All-In Cost Engine</div>
+            <div style="font-size:12px;color:var(--text2);display:flex;gap:9px;line-height:1.5"><span style="color:var(--teal);flex-shrink:0;font-weight:800">✓</span>Custom promo offer displayed prominently on your sponsored card</div>
+            <div style="font-size:12px;color:var(--text2);display:flex;gap:9px;line-height:1.5"><span style="color:var(--teal);flex-shrink:0;font-weight:800">✓</span>"Apply via CarrierEdge" button — tracked referral link on every card</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Referral Tracking</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div style="font-size:12px;color:var(--text2);display:flex;gap:9px;line-height:1.5"><span style="color:var(--blue);flex-shrink:0;font-weight:800">✓</span>UTM-tagged referral links so you know exactly which accounts came from CarrierEdge</div>
+            <div style="font-size:12px;color:var(--text2);display:flex;gap:9px;line-height:1.5"><span style="color:var(--blue);flex-shrink:0;font-weight:800">✓</span>Monthly click + conversion report shared with your account</div>
+            <div style="font-size:12px;color:var(--text2);display:flex;gap:9px;line-height:1.5"><span style="color:var(--blue);flex-shrink:0;font-weight:800">✓</span>CPA referral fee model available — pay per funded account, not per click</div>
+            <div style="font-size:12px;color:var(--text2);display:flex;gap:9px;line-height:1.5"><span style="color:var(--blue);flex-shrink:0;font-weight:800">✓</span>Flat monthly listing fee available as alternative</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px">Ranking Integrity — Non-Negotiable</div>
+        <div style="font-size:12px;color:var(--text3);line-height:1.7">Partner status does not affect your position in the rate table or the All-In Cost Engine. Rankings are computed from fee data only — always objective, always transparent. This is what makes the tool valuable to carriers, which is what makes it valuable to you. We will not change this.</div>
+      </div>
+    </div>
+
+    <!-- Who qualifies -->
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-header">
+        <div class="card-title">Who Can Join the Index</div>
+        <span class="badge badge-amber">Requirements</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Required</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;display:flex;gap:8px;line-height:1.5"><span style="color:var(--green);flex-shrink:0">✓</span>Licensed and operating freight factoring company</div>
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;display:flex;gap:8px;line-height:1.5"><span style="color:var(--green);flex-shrink:0">✓</span>Non-recourse option available to carriers (or clear disclosure if recourse-only)</div>
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;display:flex;gap:8px;line-height:1.5"><span style="color:var(--green);flex-shrink:0">✓</span>Published fee schedule — no hidden fees not disclosed upfront</div>
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;display:flex;gap:8px;line-height:1.5"><span style="color:var(--green);flex-shrink:0">✓</span>Verified contact point for CE-referred carriers</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Disqualifying</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;display:flex;gap:8px;line-height:1.5"><span style="color:var(--red);flex-shrink:0">✗</span>Undisclosed fee structures or bait-and-switch rates</div>
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;display:flex;gap:8px;line-height:1.5"><span style="color:var(--red);flex-shrink:0">✗</span>Mandatory blanket liens with no carve-out option</div>
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;display:flex;gap:8px;line-height:1.5"><span style="color:var(--red);flex-shrink:0">✗</span>Active regulatory actions or pattern of carrier complaints</div>
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;display:flex;gap:8px;line-height:1.5"><span style="color:var(--red);flex-shrink:0">✗</span>Refusal to provide verifiable fee schedule for the index</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div style="background:linear-gradient(135deg,rgba(45,212,191,.08),rgba(74,143,255,.06));border:1.5px solid rgba(45,212,191,.3);border-radius:16px;padding:28px 30px;text-align:center">
+      <div style="font-size:20px;font-weight:800;letter-spacing:-.3px;margin-bottom:8px">Ready to reach owner-operators who are actively choosing a factor?</div>
+      <div style="font-size:13px;color:var(--text2);max-width:480px;margin:0 auto 20px;line-height:1.65">Send us your fee schedule and we'll run the numbers to confirm your data in the index is accurate. Then we talk terms.</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="mailto:partners@carrieredge.io?subject=CE Verified Partner Inquiry" class="partner-cta" style="font-size:13px;padding:12px 24px">Contact Us to Apply ↗</a>
+        <a href="mailto:partners@carrieredge.io?subject=CE Index Fee Schedule Request" class="partner-cta-ghost" style="font-size:13px;padding:12px 20px">Request Fee Schedule Template</a>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:16px">partners@carrieredge.io · Response within 1 business day</div>
+    </div>
+  </div>
+
 </main>
 
 <footer class="site-footer">
   <div style="margin-bottom:6px"><strong style="color:var(--text2)">CarrierEdge Factoring Tools</strong> — Free for owner-operators and small fleets.</div>
-  <div>Rates and fee data represent 2026 industry benchmarks. Always verify directly with each factoring company before signing. CarrierEdge is not a factoring company and earns no referral fees.</div>
+  <div>Rates and fee data represent 2026 industry benchmarks. Always verify directly with each factoring company before signing. CE Verified Partners pay a referral fee — this does not affect index rankings, which are always objective.</div>
   <div style="margin-top:10px"><a href="index.html">Try CarrierEdge Full Suite — P&amp;L, Fleet, FMCSA, AI Advisor &amp; more →</a></div>
 </footer>
 
@@ -792,6 +969,11 @@ tr:hover td { background:rgba(74,143,255,.03); }
 const ALLIN_DATA = [
   {
     id:'triumph', name:'Triumph Business Capital', logo:'TB', color:'#4a8fff',
+    tagline:'No lock-in · Largest trucking factor in the US',
+    tier:'verified',
+    referralUrl:'https://www.triumphbusiness.com/apply?utm_source=carrieredge&utm_medium=factor-index&utm_campaign=verified',
+    promoOffer:'Priority onboarding + rate review within 24 hours for CE-referred carriers',
+    perks:['Same-day funding','Fuel advances','Free online portal','No minimum volume'],
     recourseType:'Non-recourse', contractMonths:0, earlyTermFee:0, autoRenewalDays:0,
     monthlyMin:0, achFee:5, creditCheckFee:10, sameDayPct:0.5, fuelAdvFee:5,
     redFlags:[],
@@ -799,6 +981,11 @@ const ALLIN_DATA = [
   },
   {
     id:'otr', name:'OTR Capital', logo:'OC', color:'#22d47a',
+    tagline:'Month-to-month · 24/7 broker credit checks',
+    tier:'verified',
+    referralUrl:'https://www.otrcapital.com?utm_source=carrieredge&utm_medium=factor-index&utm_campaign=verified',
+    promoOffer:'Dedicated account rep + no setup fees for CE-referred carriers',
+    perks:['24/7 broker credit checks','Fuel card discounts','No setup fees','Dedicated account rep'],
     recourseType:'Non-recourse', contractMonths:1, earlyTermFee:0, autoRenewalDays:30,
     monthlyMin:0, achFee:10, creditCheckFee:0, sameDayPct:0, fuelAdvFee:10,
     redFlags:['30-day cancellation notice required'],
@@ -806,6 +993,11 @@ const ALLIN_DATA = [
   },
   {
     id:'porter', name:'Porter Freight Funding', logo:'PF', color:'#9f7dff',
+    tagline:'Highest advance rate · Best for high-volume O/O',
+    tier:'verified',
+    referralUrl:'https://www.porterfreightfunding.com?utm_source=carrieredge&utm_medium=factor-index&utm_campaign=verified',
+    promoOffer:'98% same-day advance guaranteed — locked in for CE carriers at signup',
+    perks:['98% same-day advance','No invoice minimums','Free online invoicing','Fuel advance program'],
     recourseType:'Non-recourse', contractMonths:0, earlyTermFee:0, autoRenewalDays:0,
     monthlyMin:0, achFee:5, creditCheckFee:10, sameDayPct:0, fuelAdvFee:5,
     redFlags:[],
@@ -813,6 +1005,11 @@ const ALLIN_DATA = [
   },
   {
     id:'rts', name:'RTS Financial', logo:'RT', color:'#f5a623',
+    tagline:'Good for new authorities',
+    tier:'standard',
+    referralUrl:null,
+    promoOffer:null,
+    perks:[],
     recourseType:'Both options', contractMonths:6, earlyTermFee:500, autoRenewalDays:60,
     monthlyMin:350, achFee:15, creditCheckFee:15, sameDayPct:0.8, fuelAdvFee:8,
     redFlags:['$350/mo minimum even on slow months','6-month contract','60-day auto-renewal notice required','$500 early termination fee'],
@@ -820,6 +1017,11 @@ const ALLIN_DATA = [
   },
   {
     id:'riviera', name:'Riviera Finance', logo:'RF', color:'#f05454',
+    tagline:'Watch the contract',
+    tier:'standard',
+    referralUrl:null,
+    promoOffer:null,
+    perks:[],
     recourseType:'Recourse only', contractMonths:12, earlyTermFee:1500, autoRenewalDays:90,
     monthlyMin:500, achFee:20, creditCheckFee:20, sameDayPct:1.0, fuelAdvFee:10,
     redFlags:['12-month lock-in contract','$1,500 early termination fee','90-day auto-renewal notice required','Recourse only — you absorb broker non-payment risk'],
@@ -827,12 +1029,57 @@ const ALLIN_DATA = [
   },
   {
     id:'thunder', name:'Thunder Funding', logo:'TF', color:'#2dd4bf',
+    tagline:'Flexible, no lock-in',
+    tier:'standard',
+    referralUrl:null,
+    promoOffer:null,
+    perks:[],
     recourseType:'Non-recourse', contractMonths:0, earlyTermFee:0, autoRenewalDays:0,
     monthlyMin:0, achFee:10, creditCheckFee:15, sameDayPct:0.5, fuelAdvFee:10,
     redFlags:['$15/check credit check fee adds up fast with new brokers'],
     baseRate:2.75,
   },
 ];
+
+// ============================================================
+// SPONSORED / VERIFIED PARTNER SECTION
+// ============================================================
+function renderSponsored() {
+  const el = document.getElementById('sponsored-cards');
+  if (!el) return;
+  const verified = ALLIN_DATA.filter(f => f.tier === 'verified');
+  el.innerHTML = verified.map(f => `
+    <div class="sponsored-card">
+      <div style="position:absolute;top:-10px;left:16px">
+        <span class="badge-verified badge">✓ CE Verified Partner</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;margin-top:8px">
+        <div style="width:42px;height:42px;border-radius:10px;background:${f.color}22;border:1.5px solid ${f.color}44;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:${f.color};flex-shrink:0">${f.logo}</div>
+        <div>
+          <div style="font-size:14px;font-weight:800;line-height:1.2">${f.name}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${f.tagline}</div>
+        </div>
+      </div>
+      <div style="background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.2);border-radius:8px;padding:10px 13px;margin-bottom:13px">
+        <div style="font-size:9px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">CE Carrier Offer</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.5">${f.promoOffer}</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px">
+        ${f.perks.map(p => `<span style="font-size:10px;padding:2px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;color:var(--text2)">${p}</span>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <a href="${f.referralUrl}" target="_blank" class="partner-cta" onclick="trackClick('${f.id}','sponsored')">Apply via CarrierEdge ↗</a>
+        <span style="font-size:10px;color:var(--text3)">${f.recourseType} · ${f.contractMonths > 0 ? f.contractMonths+'mo contract' : 'No lock-in'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function trackClick(partnerId, source) {
+  const key = 'ce_clicks_' + partnerId;
+  const count = (parseInt(localStorage.getItem(key)) || 0) + 1;
+  localStorage.setItem(key, count);
+}
 
 // ============================================================
 // TAB SWITCH
@@ -907,6 +1154,7 @@ function runAllIn() {
               <div>
                 <div style="font-size:13px;font-weight:800">${f.name}</div>
                 <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap">
+                  ${f.tier === 'verified' ? `<span style="font-size:9px;padding:1px 7px;background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.3);border-radius:10px;color:var(--teal);font-weight:700">✓ CE Verified</span>` : ''}
                   <span style="font-size:9px;padding:1px 7px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text2)">${f.recourseType}</span>
                   ${f.contractMonths > 0
                     ? `<span style="font-size:9px;padding:1px 7px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);border-radius:10px;color:var(--amber)">${f.contractMonths}mo contract</span>`
@@ -949,12 +1197,25 @@ function runAllIn() {
 
           ${vsBot > 0 ? `<div style="font-size:11px;color:var(--red);background:rgba(240,84,84,.06);border:1px solid rgba(240,84,84,.15);border-radius:7px;padding:7px 11px;margin-bottom:10px">+$${Math.round(vsBot).toLocaleString()}/mo more than #1 · <strong>$${Math.round(vsBot*12).toLocaleString()}/yr extra</strong></div>` : ''}
 
-          <div style="border-top:1px solid var(--border);padding-top:10px">
+          <div style="border-top:1px solid var(--border);padding-top:10px;margin-bottom:12px">
             ${f.redFlags.length > 0
               ? `<div style="font-size:9px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">⚠ Contract Watch-Outs</div>
                  ${f.redFlags.map(r => `<div style="font-size:11px;color:var(--text2);margin-bottom:3px;display:flex;gap:7px"><span style="color:var(--red);flex-shrink:0">•</span><span>${r}</span></div>`).join('')}`
               : `<div style="font-size:11px;color:var(--green)">✓ No major contract red flags</div>`}
           </div>
+
+          ${f.tier === 'verified' ? `
+          <div style="background:rgba(45,212,191,.05);border:1px solid rgba(45,212,191,.2);border-radius:8px;padding:9px 12px;margin-bottom:11px">
+            <div style="font-size:9px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">✓ CE Carrier Offer</div>
+            <div style="font-size:11px;color:var(--text2);line-height:1.5">${f.promoOffer}</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <a href="${f.referralUrl}" target="_blank" class="partner-cta" style="flex:1;justify-content:center" onclick="trackClick('${f.id}','allin')">Apply via CarrierEdge ↗</a>
+          </div>` : `
+          <div style="display:flex;gap:8px">
+            <span style="font-size:11px;color:var(--text3);align-self:center">Not a CE Partner — </span>
+            <a href="?tab=partners" onclick="switchTabById('partners');return false;" style="font-size:11px;color:var(--blue)">apply to join the index</a>
+          </div>`}
         </div>`;
       }).join('')}
     </div>
@@ -1198,7 +1459,7 @@ function runNI() {
     tenure >= 12 && history !== 'mixed' ? `Loyal ${history === 'perfect' ? 'zero-chargeback ' : ''}client for ${tenure >= 24 ? 'over 2 years' : 'over a year'}. Your account costs them almost nothing to service.` : null,
     history === 'perfect' ? 'Zero chargebacks, zero disputes. Clean accounts are rare and worth retaining at a discount.' : null,
     isOverpaying ? `At ${rate}% you're ${aboveFloor.toFixed(2)}% above the market floor for your volume tier. You have data, not just a feeling.` : null,
-    sw === 'yes' ? 'You're actively shopping — the factor knows you have real alternatives.' : null,
+    sw === 'yes' ? 'You’re actively shopping — the factor knows you have real alternatives.' : null,
   ].filter(Boolean).slice(0, 3);
 
   let scriptText;
@@ -1275,8 +1536,23 @@ function copyScript() {
   });
 }
 
+// ── HELPERS ──
+function switchTabById(id) {
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const section = document.getElementById('tab-' + id);
+  if (section) section.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.textContent.trim().startsWith(id.charAt(0).toUpperCase())) b.classList.add('active');
+  });
+  if (id === 'allin') runAllIn();
+  if (id === 'sif')   runSIF();
+  if (id === 'negotiate') runNI();
+}
+
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
+  renderSponsored();
   runAllIn();
   runSIF();
   runNI();
