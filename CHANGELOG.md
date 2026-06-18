@@ -8,7 +8,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased] — v1.0 Stabilization Phase ✓
 
-### Phase 1 complete (2026-06)
+### Phase 3 — Monetization (2026-06)
+
+**Factoring Index — free standalone tool (`factoring-index.html`)**
+- Self-contained single-file site with CarrierEdge branding — no login, no data stored
+- Rate Benchmarks tab: full comparison table (Triumph, OTR, Porter, RTS, Thunder, Riviera) with contract terms, red flags, and volume-rate chart
+- All-In Cost Engine tab: manual inputs → per-company true cost breakdown including all hidden fees, ranked by effective monthly cost
+- Should I Factor? tab: manual cash flow inputs → verdict (factor/skip/selective), key metrics, and cash flow timeline
+- Negotiation Script tab: situation inputs → power score, leverage points, phone or email script with target rate and annual savings figure
+- Education tab: recourse vs non-recourse explainer, fee glossary, due-diligence question list, factor-vs-self-collect decision framework
+- "Upgrade to CarrierEdge" CTAs throughout linking to `index.html`
+
+**Member gate in CarrierEdge full suite (`index.html`)**
+- `APP.isMember` flag; `checkMembership()` runs at startup, reads `ce_license` from CEDB
+- `validateLicense(key)`: calls Lemon Squeezy `/v1/licenses/validate`; caches result 24h; falls back to cache on network error
+- Membership card added to Settings: license key input, Activate button, status display, Subscribe link
+- Soft gate overlays on three premium sections: Invoice Factoring Pipeline, CE Partner Offers, Negotiation Intelligence
+- Gate is `position:absolute` with `backdrop-filter:blur` — section is visible but non-interactive; overlay shows feature description + upgrade CTA
+- All-In Cost Engine and SIF remain free (no gate) — the full-suite versions use profile sync vs. manual inputs in the free tool
+
+### Phase 2 — IndexedDB Migration (2026-06)
 
 **Phase 1.1 — Import/Export + portable full backup**
 - Backup & Restore card in Settings with Export / Import buttons and "Include API keys" toggle

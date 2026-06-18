@@ -1556,7 +1556,14 @@ body { background:var(--layout-bg,var(--bg)); }
       <!-- ═══════════════════════════════════════════════════
            INVOICE FACTORING PIPELINE
            ═══════════════════════════════════════════════════ -->
-      <div class="card" style="margin-bottom:20px;border:1.5px solid rgba(45,212,191,.3)">
+      <div class="card" style="margin-bottom:20px;border:1.5px solid rgba(45,212,191,.3);position:relative;overflow:hidden">
+        <!-- MEMBER GATE -->
+        <div id="gate-pipeline" style="position:absolute;inset:0;border-radius:13px;background:rgba(8,12,20,.88);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:24px;z-index:10">
+          <div style="font-size:15px;font-weight:800;color:var(--text)">Invoice Factoring Pipeline</div>
+          <div style="font-size:12px;color:var(--text2);max-width:300px;line-height:1.65">Track every factoring invoice from submission to funded. See DSO per broker, overdue alerts, and reserve reconciliation — all in one view.</div>
+          <a href="https://carrieredge.io/pricing" target="_blank" class="btn btn-primary" style="font-size:12px;padding:9px 20px">Upgrade to Unlock →</a>
+          <div style="font-size:11px;color:var(--text3)">Already a member? Add your license key in <strong style="color:var(--text2)">Settings → Membership</strong></div>
+        </div>
         <div class="card-header" style="flex-wrap:wrap;gap:10px">
           <div class="card-title">Invoice Factoring Pipeline</div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -1597,7 +1604,14 @@ body { background:var(--layout-bg,var(--bg)); }
       </div>
 
       <!-- ── LIVE CE OFFERS ── -->
-      <div style="background:linear-gradient(135deg,rgba(74,143,255,.06),rgba(159,125,255,.06));border:1px solid rgba(74,143,255,.2);border-radius:14px;padding:20px 22px;margin-bottom:20px">
+      <div style="background:linear-gradient(135deg,rgba(74,143,255,.06),rgba(159,125,255,.06));border:1px solid rgba(74,143,255,.2);border-radius:14px;padding:20px 22px;margin-bottom:20px;position:relative;overflow:hidden">
+        <!-- MEMBER GATE -->
+        <div id="gate-offers" style="position:absolute;inset:0;border-radius:13px;background:rgba(8,12,20,.88);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:24px;z-index:10">
+          <div style="font-size:15px;font-weight:800;color:var(--text)">CE Partner Offers — Personalized for Your Fleet</div>
+          <div style="font-size:12px;color:var(--text2);max-width:300px;line-height:1.65">Pre-negotiated rates from Triumph, OTR Capital, and Porter Freight — calculated from your actual fleet size, monthly volume, and freight type. Plus real-time savings vs your current rate.</div>
+          <a href="https://carrieredge.io/pricing" target="_blank" class="btn btn-primary" style="font-size:12px;padding:9px 20px">Upgrade to Unlock →</a>
+          <div style="font-size:11px;color:var(--text3)">Free tools available at <a href="factoring-index.html" style="color:var(--blue)">carrieredge.io/factoring</a> — no signup required</div>
+        </div>
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
           <div>
             <div style="font-size:14px;font-weight:800;letter-spacing:-.2px">CarrierEdge Partner Offers — Personalized for Your Fleet</div>
@@ -1818,7 +1832,14 @@ body { background:var(--layout-bg,var(--bg)); }
       <!-- =====================================================
            NEGOTIATION INTELLIGENCE
            ===================================================== -->
-      <div class="card" style="border:1.5px solid rgba(45,212,191,.35);margin-top:16px">
+      <div class="card" style="border:1.5px solid rgba(45,212,191,.35);margin-top:16px;position:relative;overflow:hidden">
+        <!-- MEMBER GATE -->
+        <div id="gate-ni" style="position:absolute;inset:0;border-radius:13px;background:rgba(8,12,20,.88);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:24px;z-index:10">
+          <div style="font-size:15px;font-weight:800;color:var(--text)">Negotiation Intelligence</div>
+          <div style="font-size:12px;color:var(--text2);max-width:300px;line-height:1.65">Get the exact words to say on a phone call or send via email to drop your factoring rate. Scripts generated from your volume, tenure, and leverage — not generic templates.</div>
+          <a href="https://carrieredge.io/pricing" target="_blank" class="btn btn-primary" style="font-size:12px;padding:9px 20px">Upgrade to Unlock →</a>
+          <div style="font-size:11px;color:var(--text3)">Already a member? Add your license key in <strong style="color:var(--text2)">Settings → Membership</strong></div>
+        </div>
         <div class="card-header">
           <div class="card-title">Negotiation Intelligence</div>
           <span class="badge badge-blue">Rate Script Generator</span>
@@ -2222,6 +2243,27 @@ body { background:var(--layout-bg,var(--bg)); }
         <div class="api-step"><div class="api-step-num">2</div><div><strong>EIA Diesel Prices</strong> — Free key recommended. Without a key the shared <code>DEMO_KEY</code> is used (1,000 requests/day across all users — frequently exhausted). Register free at <a href="https://www.eia.gov/opendata/register.php" target="_blank">eia.gov/opendata</a> and paste your key below.</div></div>
         <div class="api-step"><div class="api-step-num">3</div><div><strong>DAT FreightView / Truckstop.com</strong> — Paid APIs for live lane rates. Paste your API key below after subscribing. <a href="https://www.dat.com/api" target="_blank">Get DAT API →</a></div></div>
         <div class="api-step"><div class="api-step-num">4</div><div><strong>AI Advisor (Claude)</strong> — Uses the Anthropic API to power the freight AI assistant. Paste your API key below. <a href="https://console.anthropicic.com" target="_blank">Get Anthropic API key →</a></div></div>
+      </div>
+
+      <!-- MEMBERSHIP -->
+      <div class="card" style="margin-bottom:18px;border-color:rgba(74,143,255,.25)">
+        <div class="card-header" style="margin-bottom:10px">
+          <div>
+            <div class="card-title">CarrierEdge Membership</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">Unlock Invoice Pipeline, Partner Rate Offers &amp; Negotiation Intelligence</div>
+          </div>
+          <span id="member-badge" style="font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(245,166,35,.12);color:var(--amber);border:1px solid rgba(245,166,35,.25)">Free Plan</span>
+        </div>
+        <div id="license-status" style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">Checking license…</div>
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+          <div class="fg" style="flex:1;min-width:220px">
+            <label>License Key</label>
+            <input class="fi" id="s-license-key" type="text" placeholder="XXXXX-XXXXX-XXXXX-XXXXX" autocomplete="off" style="font-family:var(--mono);letter-spacing:.08em">
+          </div>
+          <button class="btn btn-primary" style="flex-shrink:0;white-space:nowrap" onclick="activateLicense()">Activate Key</button>
+          <a href="https://carrieredge.io/pricing" target="_blank" class="btn btn-ghost" style="flex-shrink:0;white-space:nowrap">Subscribe →</a>
+        </div>
+        <p class="disc" style="margin-top:10px">Monthly subscription · Cancel anytime · All data stays on your device · License keys issued at <a href="https://carrieredge.io" target="_blank">carrieredge.io</a></p>
       </div>
 
       <div class="grid g2">
@@ -3128,13 +3170,92 @@ let APP = {
   fmcsaData: null,
   aiOpen: false,
   aiHistory: [],
+  isMember: false,
 };
+
+// ============================================================
+// MEMBERSHIP / LICENSE
+// ============================================================
+async function checkMembership() {
+  const lic = CEDB.get('ce_license');
+  if (!lic || !lic.key) { APP.isMember = false; return; }
+  if (lic.status === 'active' && lic.checkedAt && Date.now() - lic.checkedAt < 86400000) {
+    APP.isMember = true; return;
+  }
+  await validateLicense(lic.key, true);
+}
+
+async function validateLicense(key, silent) {
+  if (!silent) {
+    const s = document.getElementById('license-status');
+    if (s) s.textContent = 'Checking…';
+  }
+  try {
+    const res = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ license_key: key, instance_name: 'carrieredge-' + (APP.settings.dot || 'user') }),
+    });
+    const data = await res.json();
+    const valid = data?.valid === true && data?.license_key?.status === 'active';
+    CEDB.set('ce_license', { key, status: valid ? 'active' : 'invalid', checkedAt: Date.now() });
+    APP.isMember = valid;
+  } catch (_) {
+    const cached = CEDB.get('ce_license');
+    APP.isMember = cached?.status === 'active';
+  }
+  refreshLicenseUI();
+  return APP.isMember;
+}
+
+function refreshLicenseUI() {
+  const statusEl = document.getElementById('license-status');
+  const badgeEl  = document.getElementById('member-badge');
+  const keyEl    = document.getElementById('s-license-key');
+  const lic      = CEDB.get('ce_license');
+
+  if (keyEl && lic?.key && !keyEl.value) keyEl.value = lic.key;
+
+  if (statusEl) {
+    if (APP.isMember) {
+      statusEl.innerHTML = '<span style="color:var(--green);font-weight:700">✓ CarrierEdge Member — Full Access Active</span>';
+    } else if (lic?.key) {
+      statusEl.innerHTML = '<span style="color:var(--red)">✗ License invalid or expired.</span> <a href="https://carrieredge.io/pricing" target="_blank">Renew membership →</a>';
+    } else {
+      statusEl.innerHTML = 'Free plan — <a href="https://carrieredge.io/pricing" target="_blank">subscribe to unlock Pipeline, Personalized Offers &amp; Negotiation Intelligence</a>';
+    }
+  }
+  if (badgeEl) {
+    badgeEl.textContent = APP.isMember ? '✓ Member' : 'Free Plan';
+    Object.assign(badgeEl.style, {
+      background: APP.isMember ? 'rgba(34,212,122,.12)' : 'rgba(245,166,35,.12)',
+      color:      APP.isMember ? 'var(--green)'        : 'var(--amber)',
+      border:     APP.isMember ? '1px solid rgba(34,212,122,.25)' : '1px solid rgba(245,166,35,.25)',
+    });
+  }
+  applyMemberGates();
+}
+
+function applyMemberGates() {
+  ['gate-pipeline', 'gate-offers', 'gate-ni'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = APP.isMember ? 'none' : 'flex';
+  });
+}
+
+async function activateLicense() {
+  const key = (document.getElementById('s-license-key')?.value || '').trim();
+  if (!key) { showToast('Enter a license key first'); return; }
+  const valid = await validateLicense(key, false);
+  showToast(valid ? '✓ License activated — welcome to CarrierEdge!' : '✗ License key not found or expired');
+}
 
 // ============================================================
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', async () => {
   await CEDB.init();
+  await checkMembership();
   seedDemoData();
   loadLayout();
   setDate();
@@ -3147,6 +3268,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   fetchDieselPrice();
   autoLoadFMCSA();
   refreshBackupCard();
+  refreshLicenseUI();
   setInterval(fetchDieselPrice, 3600000);
 });
 

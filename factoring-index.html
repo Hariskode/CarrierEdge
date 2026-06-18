@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarrierEdge Factoring Tools — Free for Owner-Operators</title>
+<meta name="description" content="Free freight factoring calculators: All-In Cost Engine, Should I Factor? break-even analysis, rate benchmarks, and negotiation scripts. No signup required.">
+<meta name="theme-color" content="#4a8fff">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:     #080c14;
+  --bg2:    #0d1220;
+  --bg3:    #121929;
+  --bg4:    #18203a;
+  --bg5:    #1e2844;
+  --border: rgba(100,140,255,0.10);
+  --border2:rgba(100,140,255,0.18);
+  --border3:rgba(100,140,255,0.28);
+  --text:   #dde4f8;
+  --text2:  #7a8ab0;
+  --text3:  #44506e;
+  --blue:   #4a8fff;
+  --green:  #22d47a;
+  --amber:  #f5a623;
+  --red:    #f05454;
+  --purple: #9f7dff;
+  --teal:   #2dd4bf;
+  --font:   'Syne', sans-serif;
+  --mono:   'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { font-size:14px; scroll-behavior:smooth; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+a { color:var(--blue); text-decoration:none; }
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:var(--bg2); }
+::-webkit-scrollbar-thumb { background:var(--bg5); border-radius:2px; }
+
+/* ── HEADER ── */
+.site-header {
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  padding:18px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+.logo-lockup { display:flex; align-items:center; gap:12px; }
+.logo-mark {
+  width:38px; height:38px;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px;
+  box-shadow:0 0 20px rgba(74,143,255,.3);
+  flex-shrink:0;
+}
+.logo-name { font-size:16px; font-weight:800; letter-spacing:-.4px; }
+.logo-sub  { font-size:10px; color:var(--text3); letter-spacing:.8px; text-transform:uppercase; margin-top:2px; }
+.header-cta {
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+.btn-upgrade {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:9px 18px;
+  background:var(--blue);
+  color:#fff;
+  font-family:var(--font);
+  font-size:12px; font-weight:800;
+  border:none; border-radius:8px;
+  cursor:pointer; text-decoration:none;
+  letter-spacing:.2px;
+  transition:opacity .15s;
+}
+.btn-upgrade:hover { opacity:.88; }
+.free-badge {
+  font-size:10px; font-weight:700;
+  padding:3px 10px;
+  background:rgba(34,212,122,.1);
+  border:1px solid rgba(34,212,122,.25);
+  border-radius:20px;
+  color:var(--green);
+}
+
+/* ── NAV TABS ── */
+.tab-nav {
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  padding:0 24px;
+  display:flex;
+  gap:4px;
+  overflow-x:auto;
+}
+.tab-btn {
+  padding:12px 16px;
+  border:none; background:transparent;
+  color:var(--text3);
+  font-family:var(--font); font-size:12px; font-weight:700;
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  white-space:nowrap;
+  transition:color .15s, border-color .15s;
+}
+.tab-btn:hover { color:var(--text2); }
+.tab-btn.active { color:var(--blue); border-bottom-color:var(--blue); }
+
+/* ── MAIN CONTAINER ── */
+.main { max-width:1100px; margin:0 auto; padding:28px 20px 60px; }
+
+/* ── SECTION HEADING ── */
+.section-head { margin-bottom:20px; }
+.section-title {
+  font-size:18px; font-weight:800; letter-spacing:-.3px;
+  margin-bottom:4px;
+}
+.section-sub { font-size:12px; color:var(--text2); line-height:1.6; }
+
+/* ── CARDS ── */
+.card {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:20px 22px;
+  margin-bottom:18px;
+}
+.card-title { font-size:14px; font-weight:800; letter-spacing:-.2px; }
+.card-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
+
+/* ── FORM ── */
+.form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:12px; margin-bottom:14px; }
+.fg { display:flex; flex-direction:column; gap:5px; }
+.fg label { font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.6px; }
+.fi {
+  padding:9px 11px;
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  color:var(--text);
+  font-family:var(--mono); font-size:13px;
+  outline:none;
+  transition:border-color .15s;
+  width:100%;
+}
+.fi:focus { border-color:var(--blue); }
+.fi::placeholder { color:var(--text3); }
+
+/* ── BADGES ── */
+.badge {
+  display:inline-flex; align-items:center;
+  padding:3px 10px; border-radius:20px;
+  font-size:10px; font-weight:700; letter-spacing:.3px;
+}
+.badge-blue   { background:rgba(74,143,255,.1); color:var(--blue); border:1px solid rgba(74,143,255,.2); }
+.badge-green  { background:rgba(34,212,122,.1); color:var(--green); border:1px solid rgba(34,212,122,.2); }
+.badge-amber  { background:rgba(245,166,35,.1); color:var(--amber); border:1px solid rgba(245,166,35,.2); }
+.badge-purple { background:rgba(159,125,255,.1); color:var(--purple); border:1px solid rgba(159,125,255,.2); }
+.badge-teal   { background:rgba(45,212,191,.1); color:var(--teal); border:1px solid rgba(45,212,191,.2); }
+
+/* ── TABLE ── */
+.tbl-wrap { overflow-x:auto; border-radius:10px; border:1px solid var(--border); }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th { text-align:left; padding:9px 13px; background:var(--bg3); color:var(--text3); font-size:10px; font-weight:700; letter-spacing:.5px; white-space:nowrap; }
+td { padding:9px 13px; border-top:1px solid var(--border); color:var(--text2); vertical-align:middle; }
+tr:hover td { background:rgba(74,143,255,.03); }
+.pill { display:inline-flex; align-items:center; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:700; }
+.pill-g { background:rgba(34,212,122,.1); color:var(--green); border:1px solid rgba(34,212,122,.2); }
+.pill-a { background:rgba(245,166,35,.1); color:var(--amber); border:1px solid rgba(245,166,35,.2); }
+.pill-b { background:rgba(240,84,84,.1); color:var(--red); border:1px solid rgba(240,84,84,.2); }
+.td-mono { font-family:var(--mono); color:var(--text); font-weight:600; }
+.td-green { font-family:var(--mono); color:var(--green); font-weight:600; }
+
+/* ── UPGRADE NUDGE BANNER ── */
+.upgrade-banner {
+  background:linear-gradient(135deg,rgba(74,143,255,.07),rgba(159,125,255,.07));
+  border:1px solid rgba(74,143,255,.2);
+  border-radius:12px;
+  padding:16px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-bottom:18px;
+}
+.upgrade-banner-title { font-size:13px; font-weight:800; margin-bottom:3px; }
+.upgrade-banner-sub   { font-size:11px; color:var(--text2); }
+
+/* ── DISC / TIP ── */
+.disc { font-size:11px; color:var(--text3); line-height:1.65; margin-top:12px; }
+.tip { background:var(--bg3); border:1px solid var(--border2); border-radius:10px; padding:12px 14px; display:flex; gap:12px; margin-top:14px; }
+.tip-ico { font-size:18px; flex-shrink:0; }
+.tip-title { font-size:12px; font-weight:800; margin-bottom:3px; }
+.tip-body  { font-size:11px; color:var(--text2); line-height:1.6; }
+
+/* ── TAB SECTIONS ── */
+.tab-section { display:none; }
+.tab-section.active { display:block; }
+
+/* ── HERO ── */
+.hero {
+  background:linear-gradient(135deg,rgba(74,143,255,.06),rgba(159,125,255,.04));
+  border:1px solid rgba(74,143,255,.15);
+  border-radius:16px;
+  padding:28px 30px;
+  margin-bottom:28px;
+  text-align:center;
+}
+.hero-title { font-size:26px; font-weight:800; letter-spacing:-.5px; margin-bottom:8px; }
+.hero-sub   { font-size:14px; color:var(--text2); line-height:1.65; max-width:580px; margin:0 auto 20px; }
+.hero-tools { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+.hero-tool  { font-size:11px; padding:5px 13px; background:var(--bg3); border:1px solid var(--border2); border-radius:20px; color:var(--text2); }
+
+/* ── BAR CHART ── */
+.bar-list { display:flex; flex-direction:column; gap:10px; }
+.bar-row  { display:flex; align-items:center; gap:10px; }
+.bar-lbl  { font-size:11px; color:var(--text2); width:90px; flex-shrink:0; text-align:right; }
+.bar-track { flex:1; height:6px; background:var(--bg4); border-radius:3px; overflow:hidden; }
+.bar-fill  { height:100%; border-radius:3px; }
+.bar-rval  { width:64px; font-size:11px; font-family:var(--mono); font-weight:700; text-align:right; flex-shrink:0; }
+
+/* ── FOOTER ── */
+.site-footer {
+  border-top:1px solid var(--border);
+  padding:24px;
+  text-align:center;
+  font-size:11px;
+  color:var(--text3);
+  line-height:1.7;
+  margin-top:40px;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="logo-lockup">
+    <div class="logo-mark">🚛</div>
+    <div>
+      <div class="logo-name">CarrierEdge</div>
+      <div class="logo-sub">Free Factoring Tools</div>
+    </div>
+  </div>
+  <div class="header-cta">
+    <span class="free-badge">Free · No Signup</span>
+    <a href="index.html" class="btn-upgrade">Upgrade to CarrierEdge Full Suite →</a>
+  </div>
+</header>
+
+<!-- TAB NAV -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('rate-table')">Rate Benchmarks</button>
+  <button class="tab-btn" onclick="switchTab('allin')">All-In Cost Engine</button>
+  <button class="tab-btn" onclick="switchTab('sif')">Should I Factor?</button>
+  <button class="tab-btn" onclick="switchTab('negotiate')">Negotiation Script</button>
+  <button class="tab-btn" onclick="switchTab('education')">Education</button>
+</nav>
+
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-title">Factoring Tools for Owner-Operators</div>
+    <div class="hero-sub">Free calculators to cut through the noise. See real all-in costs, decide if factoring makes sense for your cash flow, and get the exact words to negotiate your rate down.</div>
+    <div class="hero-tools">
+      <span class="hero-tool">Rate Benchmarks</span>
+      <span class="hero-tool">All-In Cost Engine</span>
+      <span class="hero-tool">Should I Factor?</span>
+      <span class="hero-tool">Negotiation Scripts</span>
+      <span class="hero-tool">Education</span>
+    </div>
+  </div>
+
+  <!-- ── TAB: RATE BENCHMARKS ── -->
+  <div id="tab-rate-table" class="tab-section active">
+    <div class="section-head">
+      <div class="section-title">Top Factoring Companies — 2026 Rate Benchmarks</div>
+      <div class="section-sub">Market rates, contract terms, and red flags for the most common factoring companies used by truckers. Verify directly with each factor before signing.</div>
+    </div>
+
+    <div class="tbl-wrap" style="margin-bottom:18px">
+      <table>
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Rate Range</th>
+            <th>Advance %</th>
+            <th>Contract</th>
+            <th>Recourse?</th>
+            <th>ACH Fee</th>
+            <th>Monthly Min.</th>
+            <th>Best For</th>
+            <th>CE Rating</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong style="color:var(--text)">Triumph Business Capital</strong><br><span style="font-size:10px;color:var(--text3)">Largest trucking factor in US</span></td>
+            <td><span class="td-green">1.5–2.5%</span></td>
+            <td class="td-mono">97%</td>
+            <td><span class="pill pill-g">No lock-in</span></td>
+            <td><span class="pill pill-g">Non-recourse</span></td>
+            <td class="td-mono">$5/ACH</td>
+            <td><span class="pill pill-g">None</span></td>
+            <td>Small fleets, O/O</td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--text)">OTR Capital</strong><br><span style="font-size:10px;color:var(--text3)">24/7 broker credit checks</span></td>
+            <td><span class="td-green">1.5–3.0%</span></td>
+            <td class="td-mono">95%</td>
+            <td><span class="pill pill-a">Month-to-month</span></td>
+            <td><span class="pill pill-g">Non-recourse</span></td>
+            <td class="td-mono">$10/ACH</td>
+            <td><span class="pill pill-g">None</span></td>
+            <td>All carrier sizes</td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--text)">Porter Freight Funding</strong><br><span style="font-size:10px;color:var(--text3)">Highest advance rate</span></td>
+            <td><span class="td-green">1.5–2.0%</span></td>
+            <td class="td-mono">98%</td>
+            <td><span class="pill pill-g">No lock-in</span></td>
+            <td><span class="pill pill-g">Non-recourse</span></td>
+            <td class="td-mono">$5/ACH</td>
+            <td><span class="pill pill-g">None</span></td>
+            <td>High-volume O/O</td>
+            <td>⭐⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--text)">RTS Financial</strong><br><span style="font-size:10px;color:var(--text3)">Good for new authorities</span></td>
+            <td class="td-mono">2.0–3.5%</td>
+            <td class="td-mono">95%</td>
+            <td><span class="pill pill-a">6-mo contract</span></td>
+            <td><span class="pill pill-a">Both options</span></td>
+            <td class="td-mono">$15/ACH</td>
+            <td><span class="pill pill-b">$350/mo</span></td>
+            <td>New authorities</td>
+            <td>⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--text)">Thunder Funding</strong><br><span style="font-size:10px;color:var(--text3)">Flexible, no lock-in</span></td>
+            <td class="td-mono">2.0–3.5%</td>
+            <td class="td-mono">97%</td>
+            <td><span class="pill pill-g">Flexible</span></td>
+            <td><span class="pill pill-g">Non-recourse</span></td>
+            <td class="td-mono">$10/ACH</td>
+            <td><span class="pill pill-g">None</span></td>
+            <td>New carriers, O/O</td>
+            <td>⭐⭐⭐⭐</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--text)">Riviera Finance</strong><br><span style="font-size:10px;color:var(--text3)">Watch the contract</span></td>
+            <td class="td-mono">2.5–4.0%</td>
+            <td class="td-mono">95%</td>
+            <td><span class="pill pill-b">12-mo lock-in</span></td>
+            <td><span class="pill pill-b">Recourse only</span></td>
+            <td class="td-mono">$20/ACH</td>
+            <td><span class="pill pill-b">$500/mo</span></td>
+            <td>Volume operations</td>
+            <td>⭐⭐⭐</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="disc">⚠ Rates change. Always request a full fee schedule — the rate alone never tells the full story. See the All-In Cost Engine tab to model your true monthly cost.</p>
+
+    <!-- Volume vs Rate chart -->
+    <div class="card" style="margin-top:20px">
+      <div class="card-header">
+        <div class="card-title">What Rate Should You Expect at Your Volume?</div>
+        <span class="badge badge-amber">2026 market</span>
+      </div>
+      <div class="bar-list">
+        <div class="bar-row">
+          <div class="bar-lbl">&lt;$25k/mo</div>
+          <div class="bar-track"><div class="bar-fill" style="width:90%;background:var(--red)"></div></div>
+          <div class="bar-rval" style="color:var(--red)">2.5–4.0%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-lbl">$25–75k/mo</div>
+          <div class="bar-track"><div class="bar-fill" style="width:60%;background:var(--amber)"></div></div>
+          <div class="bar-rval" style="color:var(--amber)">2.0–3.0%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-lbl">$75–150k/mo</div>
+          <div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--blue)"></div></div>
+          <div class="bar-rval" style="color:var(--blue)">1.5–2.5%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-lbl">&gt;$150k/mo</div>
+          <div class="bar-track"><div class="bar-fill" style="width:22%;background:var(--green)"></div></div>
+          <div class="bar-rval" style="color:var(--green)">1.0–1.8%</div>
+        </div>
+      </div>
+      <p class="disc">Shopping 2–3 factors before signing saves $4,000–$8,000/year on a typical O/O volume. Always ask for a volume discount — they rarely advertise the best rates publicly.</p>
+    </div>
+
+    <!-- Red flags table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Contract Red Flags to Watch For</div>
+        <span class="badge badge-amber">Read before signing</span>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Red Flag</th><th>What It Means</th><th>Acceptable?</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Monthly minimum fee</strong></td><td>You pay the minimum even on slow months with few invoices. Can cost $300–$500+/mo in idle months.</td><td><span class="pill pill-b">Avoid if possible</span></td></tr>
+            <tr><td><strong>Long-term lock-in (6–12 mo)</strong></td><td>Early termination fees of $500–$2,000. No escape if they give bad service or you change strategy.</td><td><span class="pill pill-b">Avoid</span></td></tr>
+            <tr><td><strong>Auto-renewal clause (60–90 days notice)</strong></td><td>If you miss the window, you're locked in another full term automatically. Easy to miss.</td><td><span class="pill pill-a">Caution</span></td></tr>
+            <tr><td><strong>Recourse-only (no non-recourse option)</strong></td><td>If a broker doesn't pay, the bad debt is yours. One failed load can wipe a week of revenue.</td><td><span class="pill pill-b">Avoid for O/O</span></td></tr>
+            <tr><td><strong>Blanket lien on all receivables</strong></td><td>Factor gets first claim on every invoice, even ones you don't factor. Can complicate financing.</td><td><span class="pill pill-a">Negotiate</span></td></tr>
+            <tr><td><strong>High same-day fee (0.8–1.5%)</strong></td><td>Same-day funding sounds like a perk — but each draw can add 0.5–1% to your effective rate on that invoice.</td><td><span class="pill pill-a">Know the cost</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Upgrade nudge -->
+    <div class="upgrade-banner">
+      <div>
+        <div class="upgrade-banner-title">Want personalized rate quotes calculated from your actual fleet &amp; volume?</div>
+        <div class="upgrade-banner-sub">CarrierEdge Full Suite syncs your P&amp;L data to show pre-negotiated partner rates, track factoring invoices, and calculate your DSO per broker automatically.</div>
+      </div>
+      <a href="index.html" class="btn-upgrade">Try CarrierEdge Free →</a>
+    </div>
+  </div>
+
+  <!-- ── TAB: ALL-IN COST ENGINE ── -->
+  <div id="tab-allin" class="tab-section">
+    <div class="section-head">
+      <div class="section-title">True All-In Cost Engine</div>
+      <div class="section-sub">Every factor charges hidden fees on top of the headline rate. Enter your typical monthly usage to see what you actually pay — and rank every major factor by true monthly cost.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Your Monthly Profile</div>
+        <span class="badge badge-purple">Industry First</span>
+      </div>
+      <div class="form-grid">
+        <div class="fg">
+          <label>Monthly Revenue ($)</label>
+          <input class="fi" id="fi-volume" type="number" placeholder="84200" value="84200" oninput="runAllIn()">
+        </div>
+        <div class="fg">
+          <label>Factoring Rate (%)</label>
+          <input class="fi" id="fi-rate" type="number" placeholder="2.5" value="2.5" step="0.1" oninput="runAllIn()">
+        </div>
+        <div class="fg">
+          <label>Invoices / Month</label>
+          <input class="fi" id="fi-invoices" type="number" placeholder="12" value="12" min="1" oninput="runAllIn()">
+        </div>
+        <div class="fg">
+          <label>Broker Credit Checks</label>
+          <input class="fi" id="fi-checks" type="number" placeholder="8" value="8" min="0" oninput="runAllIn()">
+        </div>
+        <div class="fg">
+          <label>Same-Day Funding (%)</label>
+          <input class="fi" id="fi-sameday" type="number" placeholder="50" value="50" min="0" max="100" oninput="runAllIn()">
+        </div>
+        <div class="fg">
+          <label>Fuel Advance Draws</label>
+          <input class="fi" id="fi-fueldraws" type="number" placeholder="8" value="8" min="0" oninput="runAllIn()">
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--text3);margin-bottom:4px">Rates shown use industry averages for uncontracted carriers. <a href="index.html" style="color:var(--blue)">Upgrade to CarrierEdge</a> to model your actual negotiated rate.</p>
+    </div>
+
+    <div id="allin-result">
+      <div style="text-align:center;padding:30px;color:var(--text3);font-size:12px">Loading…</div>
+    </div>
+
+    <div class="upgrade-banner">
+      <div>
+        <div class="upgrade-banner-title">Track every factoring invoice in real time — know exactly where your money is</div>
+        <div class="upgrade-banner-sub">CarrierEdge Full Suite adds a pipeline tracker, DSO per broker, and automatic reserve reconciliation — all synced to your P&amp;L.</div>
+      </div>
+      <a href="index.html" class="btn-upgrade">Try CarrierEdge Full Suite →</a>
+    </div>
+  </div>
+
+  <!-- ── TAB: SHOULD I FACTOR? ── -->
+  <div id="tab-sif" class="tab-section">
+    <div class="section-head">
+      <div class="section-title">Should I Factor? — Break-Even Analysis</div>
+      <div class="section-sub">See exactly when factoring pays for itself, when it doesn't, and which invoices to factor vs self-collect.</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start">
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="card" style="margin-bottom:0">
+          <div class="card-title" style="margin-bottom:14px">Your Numbers</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+
+            <div class="fg">
+              <label>Monthly Revenue ($)</label>
+              <input class="fi" id="sif-volume" type="number" placeholder="84200" value="84200" oninput="runSIF()">
+            </div>
+
+            <div class="fg">
+              <label>Factoring Rate (%)</label>
+              <input class="fi" id="sif-rate" type="number" placeholder="2.5" value="2.5" step="0.1" oninput="runSIF()">
+            </div>
+
+            <div class="fg">
+              <label>Avg Broker Payment (days)</label>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:3px">
+                <input type="range" id="sif-days" min="7" max="90" value="35"
+                  oninput="document.getElementById('sif-days-val').textContent=this.value+'d'; runSIF()"
+                  style="flex:1;accent-color:var(--teal);height:4px">
+                <span id="sif-days-val" style="font-family:var(--mono);font-size:14px;font-weight:800;color:var(--teal);width:38px;text-align:right;flex-shrink:0">35d</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-top:2px"><span>7d fast-pay</span><span>90d slow</span></div>
+            </div>
+
+            <div class="fg">
+              <label>Monthly Fixed Obligations ($)</label>
+              <input class="fi" id="sif-fixed" type="number" placeholder="14000" value="14000" oninput="runSIF()">
+              <div style="font-size:10px;color:var(--text3);margin-top:2px">Truck note + insurance + lease + ops</div>
+            </div>
+
+            <div class="fg">
+              <label>Cash Reserves ($)</label>
+              <input class="fi" id="sif-reserves" type="number" placeholder="8000" value="8000" oninput="runSIF()">
+              <div style="font-size:10px;color:var(--text3);margin-top:2px">Total cash on hand right now</div>
+            </div>
+
+            <div class="fg">
+              <label>Alt. Capital Rate (APR %)</label>
+              <input class="fi" id="sif-altrate" type="number" value="24" step="1" min="0" oninput="runSIF()">
+              <div style="font-size:10px;color:var(--text3);margin-top:2px">Your credit card or line of credit rate</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:var(--text3);line-height:1.65;padding:10px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:8px">
+          Enter your monthly revenue and factoring rate above. The engine models your specific cash-flow gap, fixed cost coverage, and break-even day.
+        </div>
+      </div>
+
+      <div id="sif-result">
+        <div style="text-align:center;padding:40px 20px;color:var(--text3);font-size:12px">Fill in your numbers on the left to get your factoring decision.</div>
+      </div>
+    </div>
+
+    <div class="upgrade-banner" style="margin-top:20px">
+      <div>
+        <div class="upgrade-banner-title">Want this analysis auto-filled from your actual P&amp;L?</div>
+        <div class="upgrade-banner-sub">CarrierEdge Full Suite pulls your real monthly revenue, fixed costs, and DSO per broker to run this analysis automatically — updated every time you add a load.</div>
+      </div>
+      <a href="index.html" class="btn-upgrade">Try CarrierEdge →</a>
+    </div>
+  </div>
+
+  <!-- ── TAB: NEGOTIATION ── -->
+  <div id="tab-negotiate" class="tab-section">
+    <div class="section-head">
+      <div class="section-title">Rate Negotiation Script Generator</div>
+      <div class="section-sub">Your volume + history = leverage. Get the exact words to say on the phone or send via email to drop your factoring rate.</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start">
+
+      <div class="card" style="margin-bottom:0">
+        <div class="card-title" style="margin-bottom:14px">Your Situation</div>
+        <div style="display:flex;flex-direction:column;gap:11px">
+
+          <div class="fg">
+            <label>Monthly Revenue ($)</label>
+            <input class="fi" id="ni-volume" type="number" placeholder="84200" value="84200" oninput="runNI()">
+          </div>
+
+          <div class="fg">
+            <label>Current / Quoted Rate (%)</label>
+            <input class="fi" id="ni-rate" type="number" value="2.5" step="0.1" min="0.5" max="5" oninput="runNI()">
+          </div>
+
+          <div class="fg">
+            <label>Factor Company</label>
+            <select class="fi" id="ni-factor" onchange="runNI()">
+              <option value="triumph">Triumph Business Capital</option>
+              <option value="otr">OTR Capital</option>
+              <option value="porter">Porter Freight Funding</option>
+              <option value="rts">RTS Financial</option>
+              <option value="riviera">Riviera Finance</option>
+              <option value="thunder">Thunder Funding</option>
+              <option value="other">Other / Unknown</option>
+            </select>
+          </div>
+
+          <div class="fg">
+            <label>Time with This Factor</label>
+            <select class="fi" id="ni-tenure" onchange="runNI()">
+              <option value="0">New / Shopping around</option>
+              <option value="3">1–3 months</option>
+              <option value="6">3–6 months</option>
+              <option value="12" selected>6–12 months</option>
+              <option value="24">1–2 years</option>
+              <option value="36">2+ years</option>
+            </select>
+          </div>
+
+          <div class="fg">
+            <label>Payment History</label>
+            <select class="fi" id="ni-history" onchange="runNI()">
+              <option value="perfect">Always on time — zero chargebacks</option>
+              <option value="good">Mostly on time, rare issues</option>
+              <option value="mixed">Some chargebacks / disputes</option>
+            </select>
+          </div>
+
+          <div class="fg">
+            <label>Willing to Switch?</label>
+            <select class="fi" id="ni-switch" onchange="runNI()">
+              <option value="yes">Yes — actively shopping</option>
+              <option value="maybe">Maybe — right deal would do it</option>
+              <option value="no">No — prefer to stay</option>
+            </select>
+          </div>
+
+          <div class="fg">
+            <label>Script Format</label>
+            <select class="fi" id="ni-method" onchange="runNI()">
+              <option value="phone">Phone call</option>
+              <option value="email">Email</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="ni-result">
+        <div style="text-align:center;padding:40px 20px;color:var(--text3);font-size:12px">Fill in your situation on the left to generate your personalised negotiation script.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: EDUCATION ── -->
+  <div id="tab-education" class="tab-section">
+    <div class="section-head">
+      <div class="section-title">Factoring Education</div>
+      <div class="section-sub">Everything you need to know before signing with a factor. Written for truckers, not accountants.</div>
+    </div>
+
+    <!-- Recourse vs Non-Recourse -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Recourse vs Non-Recourse Factoring</div>
+        <span class="badge badge-blue">Most Important Decision</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div style="background:var(--bg3);border:1px solid rgba(240,84,84,.25);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:800;color:var(--red);margin-bottom:10px">Recourse Factoring</div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.7">
+            <div style="margin-bottom:6px"><strong style="color:var(--text)">How it works:</strong> The factor buys your invoice at a discount. If the broker doesn't pay, you have to buy it back (or they deduct it from future reserves).</div>
+            <div style="margin-bottom:6px"><strong style="color:var(--text)">Rate range:</strong> 1.5–3.0% (lower than non-recourse)</div>
+            <div style="margin-bottom:6px"><strong style="color:var(--text)">Your risk:</strong> Full. If a broker goes under or disputes a load, the loss is yours.</div>
+            <div><strong style="color:var(--red)">Bottom line:</strong> Only makes sense if you have long-standing relationships with rock-solid brokers. One bad debt can wipe out months of savings from the lower rate.</div>
+          </div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid rgba(34,212,122,.25);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:800;color:var(--green);margin-bottom:10px">Non-Recourse Factoring</div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.7">
+            <div style="margin-bottom:6px"><strong style="color:var(--text)">How it works:</strong> The factor buys your invoice AND assumes the credit risk. If a broker can't pay (insolvency, dispute-covered), you keep the advance.</div>
+            <div style="margin-bottom:6px"><strong style="color:var(--text)">Rate range:</strong> 1.8–3.5% (slightly higher)</div>
+            <div style="margin-bottom:6px"><strong style="color:var(--text)">Your risk:</strong> Minimal for credit failure. You're still responsible for disputes, shortages, or service claims.</div>
+            <div><strong style="color:var(--green)">Bottom line:</strong> Almost always worth the extra 0.3–0.8% for owner-operators. The non-payment protection is like insurance — you don't miss it until you need it.</div>
+          </div>
+        </div>
+      </div>
+      <div class="tip" style="margin-top:16px">
+        <div class="tip-ico">💡</div>
+        <div>
+          <div class="tip-title">The Math on Non-Recourse</div>
+          <div class="tip-body">At $84k/month, the extra 0.5% for non-recourse costs about $420/month ($5,040/year). One bad broker invoice for $3,000–$5,000 — which happens to most carriers within 2–3 years — costs more than 6 months of that premium. The math usually favors non-recourse.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fee Types -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Every Fee Type Explained</div>
+        <span class="badge badge-amber">Hidden cost traps</span>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Fee</th><th>What It Is</th><th>Typical Cost</th><th>Avoidable?</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Discount Rate</strong></td><td>The headline factoring percentage — fee charged on face value of each invoice</td><td class="td-mono">1.5–4.0%</td><td><span class="pill pill-g">Negotiate</span></td></tr>
+            <tr><td><strong>ACH / Wire Fee</strong></td><td>Charged every time funds are transferred to your bank account</td><td class="td-mono">$5–$25/tx</td><td><span class="pill pill-a">Sometimes</span></td></tr>
+            <tr><td><strong>Broker Credit Check</strong></td><td>Fee to verify a broker's credit before approving the invoice. Adds up fast with new brokers.</td><td class="td-mono">$0–$20</td><td><span class="pill pill-a">Shop around</span></td></tr>
+            <tr><td><strong>Same-Day Funding Premium</strong></td><td>Extra charge if you need same-day or next-morning advance instead of standard 1–2 day</td><td class="td-mono">0.25–1.0%</td><td><span class="pill pill-g">By choice</span></td></tr>
+            <tr><td><strong>Fuel Advance Draw Fee</strong></td><td>Fee per fuel card draw or cash advance before the load is picked up</td><td class="td-mono">$5–$15/draw</td><td><span class="pill pill-g">By choice</span></td></tr>
+            <tr><td><strong>Monthly Minimum</strong></td><td>Minimum fee even if you factor few invoices. Charged regardless of volume.</td><td class="td-mono">$200–$500+</td><td><span class="pill pill-b">Avoid</span></td></tr>
+            <tr><td><strong>Early Termination</strong></td><td>Fee for canceling contract early. Can be hundreds or thousands.</td><td class="td-mono">$0–$2,000</td><td><span class="pill pill-b">Avoid</span></td></tr>
+            <tr><td><strong>Reserve Holdback</strong></td><td>The portion of invoice face value held until broker pays. Usually 3–5%. Released when invoice is collected.</td><td class="td-mono">3–5%</td><td><span class="pill pill-g">Normal</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Questions to Ask -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Questions to Ask Before Signing</div>
+        <span class="badge badge-teal">Due diligence checklist</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Rate & Fees</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;line-height:1.5">What is your full fee schedule — including ACH, credit checks, same-day, and fuel advance fees?</div>
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;line-height:1.5">Is there a volume discount if I consistently invoice over $X/month?</div>
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;line-height:1.5">What triggers a rate review — and can I request one after 6 months?</div>
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;line-height:1.5">Is there a monthly minimum? What happens on slow months?</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Contract</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;line-height:1.5">What is the term length? Is there an auto-renewal clause — and what is the cancellation notice window?</div>
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;line-height:1.5">What is the early termination fee, if any?</div>
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;line-height:1.5">Is this recourse or non-recourse? What exactly is covered under non-recourse?</div>
+            <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:7px;line-height:1.5">Do you require a blanket lien on all receivables, or only factored invoices?</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- When to Factor vs Self-Collect -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">When to Factor vs Self-Collect</div>
+        <span class="badge badge-green">Decision framework</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:rgba(34,212,122,.04);border:1px solid rgba(34,212,122,.2);border-radius:10px;padding:15px">
+          <div style="font-size:12px;font-weight:800;color:var(--green);margin-bottom:10px">Factor This Invoice When…</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:11px;color:var(--text2);display:flex;gap:8px;line-height:1.5"><span style="color:var(--green);flex-shrink:0">✓</span>New broker you haven't worked with before (&lt;3 loads)</div>
+            <div style="font-size:11px;color:var(--text2);display:flex;gap:8px;line-height:1.5"><span style="color:var(--green);flex-shrink:0">✓</span>Large invoice (&gt;1.5× your average invoice size)</div>
+            <div style="font-size:11px;color:var(--text2);display:flex;gap:8px;line-height:1.5"><span style="color:var(--green);flex-shrink:0">✓</span>Broker's stated terms are 35+ days</div>
+            <div style="font-size:11px;color:var(--text2);display:flex;gap:8px;line-height:1.5"><span style="color:var(--green);flex-shrink:0">✓</span>Your cash falls below 1 month of fixed costs</div>
+            <div style="font-size:11px;color:var(--text2);display:flex;gap:8px;line-height:1.5"><span style="color:var(--green);flex-shrink:0">✓</span>The advance funds your next load's fuel + expenses</div>
+          </div>
+        </div>
+        <div style="background:rgba(240,84,84,.04);border:1px solid rgba(240,84,84,.2);border-radius:10px;padding:15px">
+          <div style="font-size:12px;font-weight:800;color:var(--red);margin-bottom:10px">Self-Collect When…</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:11px;color:var(--text2);display:flex;gap:8px;line-height:1.5"><span style="color:var(--red);flex-shrink:0">✗</span>Established broker who always pays in under 21 days</div>
+            <div style="font-size:11px;color:var(--text2);display:flex;gap:8px;line-height:1.5"><span style="color:var(--red);flex-shrink:0">✗</span>Small invoice where fees eat most of the factoring benefit</div>
+            <div style="font-size:11px;color:var(--text2);display:flex;gap:8px;line-height:1.5"><span style="color:var(--red);flex-shrink:0">✗</span>Broker offers QuickPay (same terms as factoring, no fee)</div>
+            <div style="font-size:11px;color:var(--text2);display:flex;gap:8px;line-height:1.5"><span style="color:var(--red);flex-shrink:0">✗</span>Your reserves already cover 45+ days of fixed costs</div>
+            <div style="font-size:11px;color:var(--text2);display:flex;gap:8px;line-height:1.5"><span style="color:var(--red);flex-shrink:0">✗</span>You're factoring just out of habit, not cash need</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="upgrade-banner">
+      <div>
+        <div class="upgrade-banner-title">CarrierEdge tracks your DSO per broker and tells you exactly which invoices to factor</div>
+        <div class="upgrade-banner-sub">The full suite connects your P&amp;L, factoring pipeline, and broker payment history to automate this decision — updated every time you log a load.</div>
+      </div>
+      <a href="index.html" class="btn-upgrade">Try CarrierEdge Full Suite →</a>
+    </div>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div style="margin-bottom:6px"><strong style="color:var(--text2)">CarrierEdge Factoring Tools</strong> — Free for owner-operators and small fleets.</div>
+  <div>Rates and fee data represent 2026 industry benchmarks. Always verify directly with each factoring company before signing. CarrierEdge is not a factoring company and earns no referral fees.</div>
+  <div style="margin-top:10px"><a href="index.html">Try CarrierEdge Full Suite — P&amp;L, Fleet, FMCSA, AI Advisor &amp; more →</a></div>
+</footer>
+
+<script>
+// ============================================================
+// FACTORING DATA
+// ============================================================
+const ALLIN_DATA = [
+  {
+    id:'triumph', name:'Triumph Business Capital', logo:'TB', color:'#4a8fff',
+    recourseType:'Non-recourse', contractMonths:0, earlyTermFee:0, autoRenewalDays:0,
+    monthlyMin:0, achFee:5, creditCheckFee:10, sameDayPct:0.5, fuelAdvFee:5,
+    redFlags:[],
+    baseRate:2.2,
+  },
+  {
+    id:'otr', name:'OTR Capital', logo:'OC', color:'#22d47a',
+    recourseType:'Non-recourse', contractMonths:1, earlyTermFee:0, autoRenewalDays:30,
+    monthlyMin:0, achFee:10, creditCheckFee:0, sameDayPct:0, fuelAdvFee:10,
+    redFlags:['30-day cancellation notice required'],
+    baseRate:2.4,
+  },
+  {
+    id:'porter', name:'Porter Freight Funding', logo:'PF', color:'#9f7dff',
+    recourseType:'Non-recourse', contractMonths:0, earlyTermFee:0, autoRenewalDays:0,
+    monthlyMin:0, achFee:5, creditCheckFee:10, sameDayPct:0, fuelAdvFee:5,
+    redFlags:[],
+    baseRate:2.0,
+  },
+  {
+    id:'rts', name:'RTS Financial', logo:'RT', color:'#f5a623',
+    recourseType:'Both options', contractMonths:6, earlyTermFee:500, autoRenewalDays:60,
+    monthlyMin:350, achFee:15, creditCheckFee:15, sameDayPct:0.8, fuelAdvFee:8,
+    redFlags:['$350/mo minimum even on slow months','6-month contract','60-day auto-renewal notice required','$500 early termination fee'],
+    baseRate:2.75,
+  },
+  {
+    id:'riviera', name:'Riviera Finance', logo:'RF', color:'#f05454',
+    recourseType:'Recourse only', contractMonths:12, earlyTermFee:1500, autoRenewalDays:90,
+    monthlyMin:500, achFee:20, creditCheckFee:20, sameDayPct:1.0, fuelAdvFee:10,
+    redFlags:['12-month lock-in contract','$1,500 early termination fee','90-day auto-renewal notice required','Recourse only — you absorb broker non-payment risk'],
+    baseRate:3.25,
+  },
+  {
+    id:'thunder', name:'Thunder Funding', logo:'TF', color:'#2dd4bf',
+    recourseType:'Non-recourse', contractMonths:0, earlyTermFee:0, autoRenewalDays:0,
+    monthlyMin:0, achFee:10, creditCheckFee:15, sameDayPct:0.5, fuelAdvFee:10,
+    redFlags:['$15/check credit check fee adds up fast with new brokers'],
+    baseRate:2.75,
+  },
+];
+
+// ============================================================
+// TAB SWITCH
+// ============================================================
+function switchTab(id) {
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (id === 'allin') runAllIn();
+  if (id === 'sif')   runSIF();
+  if (id === 'negotiate') runNI();
+}
+
+// ============================================================
+// ALL-IN COST ENGINE
+// ============================================================
+function runAllIn() {
+  const volume    = parseFloat(document.getElementById('fi-volume')?.value)   || 84200;
+  const userRate  = parseFloat(document.getElementById('fi-rate')?.value)     || 2.5;
+  const invoices  = parseInt(document.getElementById('fi-invoices')?.value)   || 12;
+  const checks    = parseInt(document.getElementById('fi-checks')?.value)     || 8;
+  const sameDay   = parseFloat(document.getElementById('fi-sameday')?.value)  || 50;
+  const fuelDraws = parseInt(document.getElementById('fi-fueldraws')?.value)  || 8;
+
+  const sameDayInv = Math.round(invoices * sameDay / 100);
+  const avgInv     = volume / Math.max(1, invoices);
+
+  const rows = ALLIN_DATA.map(f => {
+    const headlineRate  = f.id === 'triumph' || f.id === 'otr' || f.id === 'porter'
+      ? Math.max(0.8, Math.min(userRate, f.baseRate + 0.3))
+      : f.baseRate;
+    const rateCost      = volume * headlineRate / 100;
+    const achCost       = invoices * f.achFee;
+    const checkCost     = checks * f.creditCheckFee;
+    const sameDayCost   = sameDayInv * avgInv * (f.sameDayPct / 100);
+    const fuelCost      = fuelDraws * f.fuelAdvFee;
+    const minCost       = Math.max(0, f.monthlyMin - rateCost);
+    const hiddenTotal   = achCost + checkCost + sameDayCost + fuelCost + minCost;
+    const allInTotal    = rateCost + hiddenTotal;
+    const effectiveRate = allInTotal / volume * 100;
+    return { f, headlineRate, rateCost, achCost, checkCost, sameDayCost, fuelCost, minCost, hiddenTotal, allInTotal, effectiveRate };
+  }).sort((a, b) => a.allInTotal - b.allInTotal);
+
+  const cheapest = rows[0].allInTotal;
+  const mostExp  = rows[rows.length - 1].allInTotal;
+  const ec = r => r <= 2.0 ? 'var(--green)' : r <= 2.5 ? 'var(--blue)' : r <= 3.0 ? 'var(--amber)' : 'var(--red)';
+  const bw = v => Math.max(4, Math.round(v / mostExp * 100));
+
+  const result = document.getElementById('allin-result');
+  result.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:18px">
+      ${rows.map(({ f, headlineRate, rateCost, achCost, checkCost, sameDayCost, fuelCost, minCost, hiddenTotal, allInTotal, effectiveRate }, idx) => {
+        const isBest  = idx === 0;
+        const rank    = idx + 1;
+        const rankCol = rank === 1 ? 'var(--green)' : rank <= 3 ? 'var(--blue)' : rank <= 4 ? 'var(--amber)' : 'var(--red)';
+        const vsBot   = allInTotal - cheapest;
+        const bdown   = [
+          { label:'Rate cost',      val:rateCost,    col:'var(--blue)'   },
+          { label:'ACH fees',       val:achCost,     col:'var(--purple)' },
+          { label:'Credit checks',  val:checkCost,   col:'var(--teal)'   },
+          { label:'Same-day prem.', val:sameDayCost, col:'var(--amber)'  },
+          { label:'Fuel advances',  val:fuelCost,    col:'var(--amber)'  },
+          { label:'Monthly min.',   val:minCost,     col:'var(--red)'    },
+        ].filter(x => x.val > 0);
+
+        return `<div style="background:var(--bg2);border:${isBest?'2px solid rgba(34,212,122,.35)':'1px solid var(--border)'};border-radius:13px;padding:18px 20px;position:relative">
+          ${isBest ? `<div style="position:absolute;top:-11px;left:16px;background:var(--green);color:#000;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.3px">✓ LOWEST TRUE COST</div>` : ''}
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;${isBest?'margin-top:8px':''}">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:36px;height:36px;border-radius:9px;background:${f.color}22;border:1px solid ${f.color}44;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:${f.color};flex-shrink:0">${f.logo}</div>
+              <div>
+                <div style="font-size:13px;font-weight:800">${f.name}</div>
+                <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap">
+                  <span style="font-size:9px;padding:1px 7px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text2)">${f.recourseType}</span>
+                  ${f.contractMonths > 0
+                    ? `<span style="font-size:9px;padding:1px 7px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);border-radius:10px;color:var(--amber)">${f.contractMonths}mo contract</span>`
+                    : `<span style="font-size:9px;padding:1px 7px;background:rgba(34,212,122,.08);border:1px solid rgba(34,212,122,.18);border-radius:10px;color:var(--green)">No lock-in</span>`}
+                </div>
+              </div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Rank</div>
+              <div style="font-size:24px;font-weight:800;font-family:var(--mono);color:${rankCol};line-height:1">#${rank}</div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;background:var(--bg3);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+            <div style="text-align:center">
+              <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">Headline Rate</div>
+              <div style="font-size:22px;font-weight:800;font-family:var(--mono);color:var(--text2)">${headlineRate.toFixed(2)}%</div>
+            </div>
+            <div style="font-size:20px;color:var(--text3)">→</div>
+            <div style="text-align:center">
+              <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">True Cost</div>
+              <div style="font-size:26px;font-weight:800;font-family:var(--mono);color:${ec(effectiveRate)}">${effectiveRate.toFixed(2)}%</div>
+              <div style="font-size:9px;color:${hiddenTotal > 0 ? 'var(--amber)' : 'var(--green)'};margin-top:2px">+$${Math.round(hiddenTotal).toLocaleString()}/mo in fees</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:12px">
+            <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">Monthly Cost Breakdown — <strong style="color:${ec(effectiveRate)}">$${Math.round(allInTotal).toLocaleString()}/mo total</strong></div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              ${bdown.map(x => `
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="width:90px;font-size:10px;color:var(--text2);flex-shrink:0;text-align:right">${x.label}</div>
+                  <div style="flex:1;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden">
+                    <div style="height:100%;width:${bw(x.val)}%;background:${x.col};border-radius:3px"></div>
+                  </div>
+                  <div style="width:54px;font-size:10px;font-family:var(--mono);color:var(--text);text-align:right;flex-shrink:0">$${Math.round(x.val).toLocaleString()}</div>
+                </div>`).join('')}
+            </div>
+          </div>
+
+          ${vsBot > 0 ? `<div style="font-size:11px;color:var(--red);background:rgba(240,84,84,.06);border:1px solid rgba(240,84,84,.15);border-radius:7px;padding:7px 11px;margin-bottom:10px">+$${Math.round(vsBot).toLocaleString()}/mo more than #1 · <strong>$${Math.round(vsBot*12).toLocaleString()}/yr extra</strong></div>` : ''}
+
+          <div style="border-top:1px solid var(--border);padding-top:10px">
+            ${f.redFlags.length > 0
+              ? `<div style="font-size:9px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">⚠ Contract Watch-Outs</div>
+                 ${f.redFlags.map(r => `<div style="font-size:11px;color:var(--text2);margin-bottom:3px;display:flex;gap:7px"><span style="color:var(--red);flex-shrink:0">•</span><span>${r}</span></div>`).join('')}`
+              : `<div style="font-size:11px;color:var(--green)">✓ No major contract red flags</div>`}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px">All-In Summary — sorted by true monthly cost</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th>Factor</th><th style="text-align:right">Headline</th><th style="text-align:right">Rate Cost</th>
+            <th style="text-align:right">ACH</th><th style="text-align:right">Checks</th>
+            <th style="text-align:right">Same-Day</th><th style="text-align:right">Fuel</th>
+            <th style="text-align:right">Min Fee</th><th style="text-align:right">All-In/Mo</th><th style="text-align:right">Eff. Rate</th>
+          </tr></thead>
+          <tbody>
+            ${rows.map(({ f, headlineRate, rateCost, achCost, checkCost, sameDayCost, fuelCost, minCost, allInTotal, effectiveRate }, idx) => `
+              <tr style="${idx===0?'background:rgba(34,212,122,.04)':''}">
+                <td><span style="font-weight:700;color:${idx===0?'var(--green)':'var(--text)'}">${idx===0?'✓ ':''}${f.name}</span></td>
+                <td style="text-align:right;font-family:var(--mono);color:var(--text2)">${headlineRate.toFixed(2)}%</td>
+                <td style="text-align:right;font-family:var(--mono)">$${Math.round(rateCost).toLocaleString()}</td>
+                <td style="text-align:right;font-family:var(--mono);color:${achCost>0?'var(--amber)':'var(--text3)'}">$${Math.round(achCost).toLocaleString()}</td>
+                <td style="text-align:right;font-family:var(--mono);color:${checkCost>0?'var(--amber)':'var(--green)'}">$${Math.round(checkCost).toLocaleString()}</td>
+                <td style="text-align:right;font-family:var(--mono);color:${sameDayCost>0?'var(--amber)':'var(--green)'}">$${Math.round(sameDayCost).toLocaleString()}</td>
+                <td style="text-align:right;font-family:var(--mono);color:${fuelCost>0?'var(--amber)':'var(--text3)'}">$${Math.round(fuelCost).toLocaleString()}</td>
+                <td style="text-align:right;font-family:var(--mono);color:${minCost>0?'var(--red)':'var(--text3)'}">$${Math.round(minCost).toLocaleString()}</td>
+                <td style="text-align:right;font-family:var(--mono);font-weight:800;color:${ec(effectiveRate)}">$${Math.round(allInTotal).toLocaleString()}</td>
+                <td style="text-align:right;font-family:var(--mono);font-weight:800;color:${ec(effectiveRate)}">${effectiveRate.toFixed(2)}%</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:12px;line-height:1.6">⚠ Fee data based on published rates and industry averages for 2026. CE partner rates (Triumph, OTR, Porter) shown at/near your entered rate. Actual fees may vary — always request a full fee schedule before signing.</p>
+  `;
+}
+
+// ============================================================
+// SHOULD I FACTOR?
+// ============================================================
+function runSIF() {
+  const result    = document.getElementById('sif-result');
+  const volume    = parseFloat(document.getElementById('sif-volume')?.value)  || 84200;
+  const userRate  = parseFloat(document.getElementById('sif-rate')?.value)    || 2.5;
+  const avgDays   = parseInt(document.getElementById('sif-days')?.value)      || 35;
+  const fixedCosts= parseFloat(document.getElementById('sif-fixed')?.value)   || 14000;
+  const reserves  = parseFloat(document.getElementById('sif-reserves')?.value)|| 8000;
+  const altApr    = parseFloat(document.getElementById('sif-altrate')?.value) || 24;
+
+  const bestCost      = volume * userRate / 100;
+  const advance       = volume * 0.95;
+  const reserveNet    = volume * 0.05 - bestCost;
+  const gapDays       = Math.max(0, avgDays - 1);
+  const dailyFixed    = fixedCosts / 30;
+  const fixedInGap    = dailyFixed * gapDays;
+  const coverageDays  = fixedCosts > 0 ? reserves / dailyFixed : 999;
+  const cashAtRisk    = reserves - fixedInGap;
+  const receivablesInFlight = volume * (gapDays / 30);
+  const altMonthlyCost      = receivablesInFlight * (altApr / 100 / 12);
+  const annualFactor  = bestCost * 12;
+  const annualAlt     = altMonthlyCost * 12;
+  const annualSaving  = annualAlt - annualFactor;
+  const mustFactor    = cashAtRisk < 0;
+  const thinReserves  = coverageDays < gapDays;
+  const factorWins    = bestCost < altMonthlyCost;
+  const fastPay       = avgDays <= 21;
+
+  let vTitle, vColor, vBg, vBorder, vIcon, vBody, vBadge;
+  if (mustFactor) {
+    vTitle = 'Factor — Cash Shortfall Incoming';
+    vIcon  = '⚠';
+    vColor = 'var(--red)';
+    vBg    = 'rgba(240,84,84,.06)';
+    vBorder= 'rgba(240,84,84,.3)';
+    vBadge = 'background:rgba(240,84,84,.15);color:var(--red);border:1px solid rgba(240,84,84,.3)';
+    vBody  = `Your $${reserves.toLocaleString()} reserves won't cover the $${Math.round(fixedInGap).toLocaleString()} in fixed obligations that hit during your ${gapDays}-day cash gap. Without factoring, you'll be negative $${Math.abs(Math.round(cashAtRisk)).toLocaleString()} before brokers pay. Factoring at $${Math.round(bestCost).toLocaleString()}/mo is not optional — it's what keeps the wheels turning.`;
+  } else if (thinReserves && !fastPay) {
+    vTitle = 'Factor — Thin Reserves, Real Risk';
+    vIcon  = '⚡';
+    vColor = 'var(--amber)';
+    vBg    = 'rgba(245,166,35,.06)';
+    vBorder= 'rgba(245,166,35,.3)';
+    vBadge = 'background:rgba(245,166,35,.15);color:var(--amber);border:1px solid rgba(245,166,35,.3)';
+    vBody  = `Your reserves cover ${Math.round(coverageDays)} days of fixed costs. Your brokers average ${avgDays} days. That's a ${Math.round(gapDays - coverageDays)}-day vulnerability window — one slow-pay broker or a quiet week could put you behind. Factoring at $${Math.round(bestCost).toLocaleString()}/mo buys you operational certainty.`;
+  } else if (fastPay) {
+    vTitle = 'Skip Factoring — Brokers Pay Fast';
+    vIcon  = '✓';
+    vColor = 'var(--green)';
+    vBg    = 'rgba(34,212,122,.06)';
+    vBorder= 'rgba(34,212,122,.3)';
+    vBadge = 'background:rgba(34,212,122,.15);color:var(--green);border:1px solid rgba(34,212,122,.3)';
+    vBody  = `At ${avgDays}-day payment terms, your brokers pay fast. Your $${reserves.toLocaleString()} reserves cover the ${gapDays}-day gap with room to spare (${Math.round(coverageDays)} days of coverage). Factoring $${Math.round(annualFactor).toLocaleString()}/yr would be pure overhead. Put that money into your reserve fund instead.`;
+  } else if (factorWins) {
+    vTitle = 'Factor — Cheaper Than Your Alternatives';
+    vIcon  = '💡';
+    vColor = 'var(--blue)';
+    vBg    = 'rgba(74,143,255,.06)';
+    vBorder= 'rgba(74,143,255,.3)';
+    vBadge = 'background:rgba(74,143,255,.15);color:var(--blue);border:1px solid rgba(74,143,255,.3)';
+    vBody  = `Factoring at $${Math.round(bestCost).toLocaleString()}/mo costs less than bridging the same cash gap with your ${altApr}% credit line ($${Math.round(altMonthlyCost).toLocaleString()}/mo equivalent). You save $${Math.round(annualSaving).toLocaleString()}/yr vs using alternative capital. Your reserves are adequate, but factoring actively improves your cash position.`;
+  } else {
+    vTitle = 'Factor Selectively — Mixed Picture';
+    vIcon  = '↗';
+    vColor = 'var(--teal)';
+    vBg    = 'rgba(45,212,191,.06)';
+    vBorder= 'rgba(45,212,191,.3)';
+    vBadge = 'background:rgba(45,212,191,.15);color:var(--teal);border:1px solid rgba(45,212,191,.25)';
+    vBody  = `You have enough reserves to wait out most brokers, but ${avgDays}-day terms still tie up $${Math.round(receivablesInFlight).toLocaleString()} in receivables at any given time. Factor invoices from new brokers or large loads — self-collect from your established, fast-pay relationships.`;
+  }
+
+  const billsDay = Math.min(15, Math.round(gapDays * 0.4));
+  const snapshots = [
+    { label:'Day 0',        sub:'Invoice sent',             noFact: reserves,                                     withFact: reserves },
+    { label:'Day 1',        sub:'Advance received',         noFact: reserves,                                     withFact: reserves + advance },
+    { label:`Day ${billsDay}`, sub:'Fixed bills due',       noFact: reserves - dailyFixed*billsDay,               withFact: reserves + advance - dailyFixed*billsDay },
+    { label:`Day ${avgDays}`,  sub:'Broker pays / reserve', noFact: reserves - fixedInGap + volume,               withFact: reserves + advance - fixedInGap + Math.max(0, reserveNet) },
+  ];
+  const snapFmt = v => {
+    const d = v < 0;
+    const w = v >= 0 && v < fixedCosts * 0.5;
+    const c = d ? 'var(--red)' : w ? 'var(--amber)' : 'var(--green)';
+    return `<span style="font-family:var(--mono);font-weight:800;color:${c}">${d?'-$':'$'}${Math.abs(Math.round(v)).toLocaleString()}</span>${d?' <span style="font-size:9px;color:var(--red)">⚠</span>':w?' <span style="font-size:9px;color:var(--amber)">●</span>':''}`;
+  };
+
+  result.innerHTML = `
+    <div style="background:${vBg};border:1px solid ${vBorder};border-radius:12px;padding:18px 20px;margin-bottom:18px">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <div style="font-size:28px;line-height:1;flex-shrink:0;margin-top:2px">${vIcon}</div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
+            <div style="font-size:16px;font-weight:800;color:${vColor}">${vTitle}</div>
+            <span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;${vBadge}">Verdict</span>
+          </div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.7">${vBody}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px">Key Numbers</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0">
+        <div style="padding:12px 14px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)">
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">Factoring Cost/Mo</div>
+          <div style="font-size:22px;font-weight:800;font-family:var(--mono);color:var(--amber)">$${Math.round(bestCost).toLocaleString()}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">$${Math.round(annualFactor).toLocaleString()}/yr</div>
+        </div>
+        <div style="padding:12px 14px;border-bottom:1px solid var(--border)">
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">Alt. Capital Cost/Mo</div>
+          <div style="font-size:22px;font-weight:800;font-family:var(--mono);color:var(--text2)">$${Math.round(altMonthlyCost).toLocaleString()}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">bridging ${gapDays}d gap at ${altApr}% APR</div>
+        </div>
+        <div style="padding:12px 14px;border-right:1px solid var(--border)">
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">Reserve Coverage</div>
+          <div style="font-size:22px;font-weight:800;font-family:var(--mono);color:${coverageDays < gapDays ? 'var(--red)' : 'var(--green)'}">${Math.round(Math.min(coverageDays, 999))}d</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">cash gap is ${gapDays}d</div>
+        </div>
+        <div style="padding:12px 14px">
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">${annualSaving >= 0 ? 'Annual Savings vs Alt.' : 'Annual Cost vs Alt.'}</div>
+          <div style="font-size:22px;font-weight:800;font-family:var(--mono);color:${annualSaving >= 0 ? 'var(--green)' : 'var(--red)'}">$${Math.abs(Math.round(annualSaving)).toLocaleString()}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">factoring vs ${altApr}% credit line</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px">Cash Flow Timeline</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:11px">
+          <thead><tr>
+            <th>Milestone</th><th>Event</th>
+            <th style="text-align:right;color:var(--red)">Without Factoring</th>
+            <th style="text-align:right;color:var(--green)">With Factoring</th>
+          </tr></thead>
+          <tbody>
+            ${snapshots.map(s => `<tr>
+              <td style="font-family:var(--mono);font-weight:700;color:var(--text);white-space:nowrap">${s.label}</td>
+              <td style="color:var(--text3)">${s.sub}</td>
+              <td style="text-align:right">${snapFmt(s.noFact)}</td>
+              <td style="text-align:right">${snapFmt(s.withFact)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// NEGOTIATION SCRIPT
+// ============================================================
+const FACTOR_NAMES = {
+  triumph: 'Triumph Business Capital',
+  otr:     'OTR Capital',
+  porter:  'Porter Freight Funding',
+  rts:     'RTS Financial',
+  riviera: 'Riviera Finance',
+  thunder: 'Thunder Funding',
+  other:   'your factoring company',
+};
+
+function runNI() {
+  const result   = document.getElementById('ni-result');
+  const volume   = parseFloat(document.getElementById('ni-volume')?.value) || 84200;
+  const rate     = parseFloat(document.getElementById('ni-rate')?.value)   || 2.5;
+  const factorId = document.getElementById('ni-factor')?.value             || 'triumph';
+  const tenure   = parseInt(document.getElementById('ni-tenure')?.value)   || 12;
+  const history  = document.getElementById('ni-history')?.value            || 'perfect';
+  const sw       = document.getElementById('ni-switch')?.value             || 'yes';
+  const method   = document.getElementById('ni-method')?.value             || 'phone';
+
+  let volPts, mktFloor, targetRate;
+  if      (volume < 30000)  { volPts=10; mktFloor=2.75; targetRate=2.75; }
+  else if (volume < 60000)  { volPts=20; mktFloor=2.25; targetRate=2.25; }
+  else if (volume < 100000) { volPts=30; mktFloor=1.75; targetRate=1.85; }
+  else if (volume < 150000) { volPts=40; mktFloor=1.50; targetRate=1.60; }
+  else                      { volPts=50; mktFloor=1.25; targetRate=1.35; }
+
+  targetRate = Math.min(targetRate, rate - 0.15);
+  targetRate = Math.max(0.5, Math.round(targetRate * 4) / 4);
+
+  const currentCost  = volume * rate / 100;
+  const targetCost   = volume * targetRate / 100;
+  const annualSaving = (currentCost - targetCost) * 12;
+  const aboveFloor   = rate - mktFloor;
+  const isOverpaying = aboveFloor > 0.25;
+  const isNew        = tenure === 0;
+
+  const tenureMap = {0:0,3:5,6:10,12:15,24:20,36:25};
+  const tenurePts  = tenureMap[tenure] ?? 10;
+  const histPts    = history === 'perfect' ? 15 : history === 'good' ? 10 : 0;
+  const switchPts  = sw === 'yes' ? 15 : sw === 'maybe' ? 8 : 0;
+  const powerScore = Math.min(100, Math.round((volPts + tenurePts + histPts + switchPts) / 105 * 100));
+  const powerLabel = powerScore >= 70 ? 'Strong' : powerScore >= 45 ? 'Moderate' : 'Weak';
+  const powerColor = powerScore >= 70 ? 'var(--green)' : powerScore >= 45 ? 'var(--amber)' : 'var(--red)';
+
+  const factorName = FACTOR_NAMES[factorId] || 'your factoring company';
+  const tenureStr  = tenure >= 36 ? 'over three years' : tenure >= 24 ? 'over two years' : tenure >= 12 ? 'over a year' : tenure >= 6 ? 'about six months' : 'a few months';
+  const histStr    = history === 'perfect' ? 'zero chargebacks and no disputes' : history === 'good' ? 'solid payment history, minimal issues' : 'generally clean account';
+
+  const leveragePool = [
+    volume >= 60000 ? `You move $${Math.round(volume/1000)}k/month — top tier for volume discounts. Factors compete hard for accounts this size.` : null,
+    tenure >= 12 && history !== 'mixed' ? `Loyal ${history === 'perfect' ? 'zero-chargeback ' : ''}client for ${tenure >= 24 ? 'over 2 years' : 'over a year'}. Your account costs them almost nothing to service.` : null,
+    history === 'perfect' ? 'Zero chargebacks, zero disputes. Clean accounts are rare and worth retaining at a discount.' : null,
+    isOverpaying ? `At ${rate}% you're ${aboveFloor.toFixed(2)}% above the market floor for your volume tier. You have data, not just a feeling.` : null,
+    sw === 'yes' ? 'You're actively shopping — the factor knows you have real alternatives.' : null,
+  ].filter(Boolean).slice(0, 3);
+
+  let scriptText;
+  const compLine = isOverpaying ? `I've benchmarked rates for my volume tier and ${targetRate.toFixed(2)}% is achievable in this market` : '';
+
+  if (method === 'phone') {
+    if (isNew) {
+      scriptText = `"Hi — I'm evaluating factoring partners. My name is [YOUR NAME], I run [COMPANY], DOT [NUMBER].\nI move $${Math.round(volume/1000)}k a month, ${histStr}.\n\nI've been looking at ${factorName} — can I talk to someone about rates?\n\n[When connected to account management:]\n\nI'm looking to sign at ${targetRate.toFixed(2)}%. ${compLine ? compLine.charAt(0).toUpperCase() + compLine.slice(1) + ', so I know where the market is. ' : ''}Can you hit that?\n\n[Pause — let them answer. Don't fill the silence.]\n\n[If yes:] Great, let's move forward today.\n[If they need time:] I'm making a decision by [DATE — THIS WEEK]. I'd like to give you first shot."`;
+    } else {
+      scriptText = `"Hi — this is [YOUR NAME], DOT [NUMBER], I'm an existing client. Can I speak with my account manager?\n\n[When connected:]\n\nI've been with you for ${tenureStr} — $${Math.round(volume/1000)}k a month, ${histStr}.\nI'm currently at ${rate}% and I want to talk about getting to ${targetRate.toFixed(2)}%.\n\n${compLine ? compLine.charAt(0).toUpperCase() + compLine.slice(1) + '. ' : ''}I'd prefer to stay — but I need this to go somewhere.\nCan you submit a rate review, or do I need to escalate?\n\n[Pause. Let them respond.]\n\n[If they need approval:] Fine — what's your timeline? I need an answer by [DATE — ONE WEEK OUT].\n[Then stop talking.]"`;
+    }
+  } else {
+    if (isNew) {
+      scriptText = `Subject: Factoring Rate Inquiry — $${Math.round(volume/1000)}k/mo Account, [YOUR NAME]\n\nHi [CONTACT NAME],\n\nI'm evaluating factoring partners and ${factorName} is on my shortlist.\n\nQuick profile:\n  Company: [YOUR COMPANY]\n  DOT: [NUMBER]\n  Monthly volume: $${Math.round(volume).toLocaleString()}\n  Freight type: [TYPE]\n  History: ${histStr}\n\nI'm targeting ${targetRate.toFixed(2)}%. ${compLine ? compLine.charAt(0).toUpperCase() + compLine.slice(1) + '.' : ''}\n\nCan you confirm if that's achievable, or connect me to someone who can make that call? I'm deciding this week.\n\n[YOUR NAME]`;
+    } else {
+      scriptText = `Subject: Rate Review Request — [YOUR COMPANY], ${tenureStr} Client\n\nHi [ACCOUNT MANAGER],\n\nI've been with ${factorName} for ${tenureStr} at $${Math.round(volume/1000)}k/month with ${histStr}.\n\nI'm at ${rate}% today. I'd like to talk about getting to ${targetRate.toFixed(2)}%. ${compLine ? compLine.charAt(0).toUpperCase() + compLine.slice(1) + '.' : ''}\n\nI'd prefer to stay — but I need the rate to reflect the volume and history I've built here. Can you submit this for a rate review?\n\nI need an answer by [DATE — 7 DAYS OUT].\n\n[YOUR NAME]`;
+    }
+  }
+
+  result.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:13px 14px;text-align:center">
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Current Rate</div>
+        <div style="font-size:24px;font-weight:800;font-family:var(--mono);color:var(--red)">${rate}%</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">$${Math.round(currentCost).toLocaleString()}/mo</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:13px 14px;text-align:center">
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Target Rate</div>
+        <div style="font-size:24px;font-weight:800;font-family:var(--mono);color:var(--green)">${targetRate.toFixed(2)}%</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">$${Math.round(targetCost).toLocaleString()}/mo</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:13px 14px;text-align:center">
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Annual Savings</div>
+        <div style="font-size:24px;font-weight:800;font-family:var(--mono);color:var(--green)">$${Math.round(annualSaving).toLocaleString()}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">if you close this</div>
+      </div>
+    </div>
+
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px">Your Negotiating Power</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:60px;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${powerScore}%;background:${powerColor};border-radius:3px"></div>
+          </div>
+          <span style="font-size:11px;font-weight:700;color:${powerColor}">${powerLabel} (${powerScore}/100)</span>
+        </div>
+      </div>
+      ${leveragePool.length > 0 ? `
+        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Your Leverage Points</div>
+        ${leveragePool.map(l => `<div style="font-size:11px;color:var(--text2);margin-bottom:6px;display:flex;gap:8px;line-height:1.5"><span style="color:var(--green);flex-shrink:0">●</span><span>${l}</span></div>`).join('')}
+      ` : ''}
+    </div>
+
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:10px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg3)">
+        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px">Your ${method === 'phone' ? 'Phone' : 'Email'} Script</div>
+        <button onclick="copyScript()" style="font-size:10px;font-weight:700;padding:3px 10px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;color:var(--text2);cursor:pointer;font-family:var(--font)">Copy</button>
+      </div>
+      <pre id="script-text" style="padding:16px;font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.7;white-space:pre-wrap;word-break:break-word;margin:0;background:transparent">${scriptText}</pre>
+    </div>
+    <p class="disc" style="margin-top:10px">The target rate is based on market data for your volume tier. Factors may counter — anything within 0.25% of target is a win. Be willing to walk.</p>
+  `;
+}
+
+function copyScript() {
+  const el = document.getElementById('script-text');
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    const btn = event.currentTarget;
+    btn.textContent = 'Copied!';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; }, 1800);
+  });
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  runAllIn();
+  runSIF();
+  runNI();
+});
+</script>
+</body>
+</html>
