@@ -2236,8 +2236,29 @@ body { background:var(--layout-bg,var(--bg)); }
             </div>
           </div>
           <div class="disc" style="margin-top:14px">🔒 All API keys are stored only in your browser's localStorage. They are never sent to any server other than the respective API provider.</div>
-          <button class="btn btn-danger btn-sm" style="margin-top:12px" onclick="clearAllData()">Clear All Local Data</button>
-          <button class="btn btn-primary btn-sm" style="margin-top:12px;margin-left:8px" onclick="resetDemoData()">↺ Reset Demo Data</button>
+
+          <!-- ── Backup & Restore ── -->
+          <div style="margin-top:20px;padding:16px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px">
+            <div style="font-size:12px;font-weight:700;color:var(--text1);letter-spacing:.06em;margin-bottom:6px">DATA BACKUP &amp; RESTORE</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px">Export all CarrierEdge data as a single portable file. Use to move between browsers or devices, or keep an offline copy before making big changes.</div>
+            <label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2);cursor:pointer;margin-bottom:12px;user-select:none">
+              <input type="checkbox" id="backup-include-keys" checked style="accent-color:var(--accent);width:14px;height:14px">
+              Include API keys in backup
+            </label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-primary btn-sm" onclick="exportBackup()">⬇ Export Backup</button>
+              <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ce-backup-file').click()">⬆ Import Backup</button>
+              <input type="file" id="ce-backup-file" accept=".carrieredge,.json" style="display:none" onchange="importBackup(this)">
+            </div>
+            <div style="font-size:11px;color:var(--text3);margin-top:10px">Includes: P&amp;L · Fleet · Invoices · Chargebacks · Inspections · CRM · IFTA · Watchlist · Factoring pipeline · Settings</div>
+          </div>
+
+          <!-- ── Danger zone ── -->
+          <div style="margin-top:16px">
+            <div style="font-size:11px;font-weight:700;color:var(--danger,#ef4444);letter-spacing:.06em;margin-bottom:8px">DANGER ZONE</div>
+            <button class="btn btn-danger btn-sm" onclick="clearAllData()">Clear All Local Data</button>
+            <button class="btn btn-primary btn-sm" style="margin-left:8px" onclick="resetDemoData()">↺ Reset Demo Data</button>
+          </div>
         </div>
       </div>
     </div>
@@ -3201,6 +3222,35 @@ function fetchWithTimeout(url, ms, opts){
   return fetch(url, { ...(opts||{}), signal: ctrl.signal }).finally(()=>clearTimeout(tid));
 }
 
+// ── Central Anthropic API helper ──────────────────────────────
+// All four AI call sites route through here so timeout, headers,
+// model, and error parsing stay consistent in one place.
+async function callAI(messages, { system = '', maxTokens = 700, timeout = 25000 } = {}) {
+  const apiKey = APP.settings.anthropicKey;
+  if (!apiKey) throw Object.assign(new Error('NO_KEY'), { isNoKey: true });
+
+  const body = { model: 'claude-sonnet-4-6', max_tokens: maxTokens, messages };
+  if (system) body.system = system;
+
+  const res = await fetchWithTimeout('https://api.anthropic.com/v1/messages', timeout, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const msg = data.error?.message || `API error ${res.status}`;
+    throw Object.assign(new Error(msg), { status: res.status, isApiError: true });
+  }
+  return data.content?.[0]?.text || '';
+}
+
 // ============================================================
 // NAVIGATION
 // ============================================================
@@ -3289,6 +3339,80 @@ function applySettings(){
   showToast('Settings saved! Refreshing data…');
   if(s.dot) loadFMCSAForDot(s.dot);
   fetchDieselPrice();
+}
+
+// ── Backup / Restore ──────────────────────────────────────────
+const CE_BACKUP_KEYS = [
+  'ce_pl','ce_settings','ce_fleet','ce_invoices',
+  'ce_chargebacks','ce_inspections','ce_crm',
+  'ce_ifta_trips','ce_ifta_fuel','ce_watchlist',
+  'ce_factor_pipeline','ce_layout','ce_theme'
+];
+const CE_API_KEY_FIELDS = [
+  'anthropicKey','eiaKey','datKey','fmcsaKey',
+  'ansoniaKey','dnbKey','experianKey','carrier411Key'
+];
+
+function exportBackup() {
+  const includeKeys = document.getElementById('backup-include-keys')?.checked !== false;
+  const data = {}, counts = {};
+  for (const key of CE_BACKUP_KEYS) {
+    const raw = localStorage.getItem(key);
+    if (raw === null) continue;
+    try {
+      let parsed = JSON.parse(raw);
+      if (key === 'ce_settings' && !includeKeys) {
+        parsed = { ...parsed };
+        CE_API_KEY_FIELDS.forEach(f => delete parsed[f]);
+      }
+      data[key] = parsed;
+      counts[key] = Array.isArray(parsed) ? parsed.length : 1;
+    } catch(e) { data[key] = raw; }
+  }
+  const backup = {
+    app: 'CarrierEdge', version: '0.55',
+    exported_at: new Date().toISOString(),
+    includes_api_keys: includeKeys,
+    record_counts: counts, data,
+  };
+  const date = new Date().toISOString().slice(0, 10);
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' })),
+    download: `carrieredge-backup-${date}.carrieredge`,
+  });
+  a.click();
+  showToast('Backup exported ✓');
+}
+
+function importBackup(input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const backup = JSON.parse(e.target.result);
+      if (backup.app !== 'CarrierEdge' || !backup.data) {
+        showToast('⚠️ Not a valid CarrierEdge backup file.'); return;
+      }
+      const counts = backup.record_counts || {};
+      const plCount = counts.ce_pl ?? (Array.isArray(backup.data.ce_pl) ? backup.data.ce_pl.length : '?');
+      const summary = [
+        `Date: ${backup.exported_at ? new Date(backup.exported_at).toLocaleDateString() : 'unknown'}`,
+        `P&L entries: ${plCount}`,
+        `API keys: ${backup.includes_api_keys ? 'included' : 'not included'}`,
+        '', 'This will overwrite your current data. Continue?'
+      ].join('\n');
+      if (!confirm(summary)) return;
+      for (const [key, value] of Object.entries(backup.data)) {
+        if (!CE_BACKUP_KEYS.includes(key)) continue;
+        localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+      }
+      showToast('Backup restored ✓ — reloading…');
+      setTimeout(() => location.reload(), 1200);
+    } catch(err) { showToast('⚠️ Could not read backup: ' + err.message); }
+  };
+  reader.readAsText(file);
 }
 
 function clearAllData(){
@@ -3736,22 +3860,8 @@ async function sendAI(){
   const thinkId = addAIMsg('thinking', '');
   APP.aiHistory.push({ role:'user', content: msg });
 
-  // Build context from current state
   const ctx = buildAIContext();
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 700,
-        system: `You are FreightEdge AI — a freight industry specialist and financial advisor for U.S. trucking owner-operators and small fleets. You have deep expertise in:
+  const system = `You are FreightEdge AI — a freight industry specialist and financial advisor for U.S. trucking owner-operators and small fleets. You have deep expertise in:
 - Freight factoring (rates 1.5–4%, recourse vs non-recourse, negotiation tactics)
 - FMCSA safety ratings, SMS BASIC scores, DataQs challenges, compliance
 - Fuel cards (WEX, Comdata, Mudflap, DAT, TCS) and diesel price strategy
@@ -3762,23 +3872,21 @@ async function sendAI(){
 
 Current user context: ${ctx}
 
-Keep answers practical, specific, and actionable. Use real numbers. Keep responses concise (3–5 sentences or a short bullet list). Never hallucinate rates or companies. If you don't know current live data, say so and direct them to the right source.`,
-        messages: APP.aiHistory.slice(-10),
-      })
-    });
+Keep answers practical, specific, and actionable. Use real numbers. Keep responses concise (3–5 sentences or a short bullet list). Never hallucinate rates or companies. If you don't know current live data, say so and direct them to the right source.`;
 
+  try {
+    const reply = await callAI(APP.aiHistory.slice(-10), { system, maxTokens: 700 });
     removeAIMsg(thinkId);
-    if(!res.ok){
-      const err = await res.json().catch(()=>({}));
-      throw new Error(err.error?.message || 'API error '+res.status);
-    }
-    const data = await res.json();
-    const reply = data.content?.[0]?.text || 'No response.';
     APP.aiHistory.push({ role:'assistant', content: reply });
     addAIMsg('bot', reply);
   } catch(e){
     removeAIMsg(thinkId);
-    addAIMsg('error', `Error: ${e.message}. Check your API key in Settings.`);
+    if (e.isNoKey) {
+      APP.aiHistory.pop();
+      addAIMsg('bot', '⚠️ To use the AI Advisor, add your Anthropic API key in <strong>Settings → API Keys</strong>. Get a free key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>.');
+    } else {
+      addAIMsg('error', `Error: ${e.message}. Check your API key in Settings.`);
+    }
   }
 }
 
@@ -5826,7 +5934,13 @@ async function getRateAdvice(){
   const apiKey=APP.settings.anthropicKey;
   if(!apiKey){el.innerHTML='<strong style="color:var(--green)">True cost: $'+Math.round(trueCost).toLocaleString()+'</strong><br>Target (25% margin): <strong style="color:var(--blue)">$'+target.toLocaleString()+'</strong><br><br>Script: "My cost on this lane is $'+Math.round(trueCost).toLocaleString()+'. I need $'+target.toLocaleString()+' to cover my expenses."<br><br>Add Anthropic API key in Settings for AI advice.';return;}
   el.innerHTML='<div class="loader"><div class="loader-dots"><div class="loader-dot"></div><div class="loader-dot"></div><div class="loader-dot"></div></div> Analyzing...</div>';
-  try{const r=await fetchWithTimeout('https://api.anthropic.com/v1/messages',8000,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:200,messages:[{role:'user',content:'Rate negotiation. Lane: '+(lane||'given')+(broker?'. Broker: '+broker:'')+'. Offered: $'+offered+'. Miles: '+miles+'. My cost: $'+Math.round(trueCost)+'. Target: $'+target+'. Give a counter-offer and one negotiation line. Be brief.'}]})});const d=await r.json();const txt=d.content?.[0]?.text||'';el.innerHTML='<strong>Cost: $'+Math.round(trueCost).toLocaleString()+' | Target: $'+target.toLocaleString()+'</strong><div style="padding:10px;background:rgba(159,125,255,.08);border:1px solid rgba(159,125,255,.2);border-radius:8px;margin-top:8px"><div style="font-size:10px;color:var(--purple);font-weight:700;margin-bottom:5px">AI ADVICE</div>'+txt.replace(/\n/g,'<br>')+'</div>';}catch(e){el.innerHTML='<span style="color:var(--red)">Error: '+e.message+'</span>';}
+  try {
+    const prompt = 'Rate negotiation. Lane: '+(lane||'given')+(broker?'. Broker: '+broker:'')+'. Offered: $'+offered+'. Miles: '+miles+'. My cost: $'+Math.round(trueCost)+'. Target: $'+target+'. Give a counter-offer and one negotiation line. Be brief.';
+    const txt = await callAI([{role:'user',content:prompt}], {maxTokens:200});
+    el.innerHTML='<strong>Cost: $'+Math.round(trueCost).toLocaleString()+' | Target: $'+target.toLocaleString()+'</strong><div style="padding:10px;background:rgba(159,125,255,.08);border:1px solid rgba(159,125,255,.2);border-radius:8px;margin-top:8px"><div style="font-size:10px;color:var(--purple);font-weight:700;margin-bottom:5px">AI ADVICE</div>'+txt.replace(/\n/g,'<br>')+'</div>';
+  } catch(e) {
+    el.innerHTML='<span style="color:var(--red)">'+(e.isNoKey?'Add Anthropic API key in Settings to get AI advice.':'Error: '+e.message)+'</span>';
+  }
 }
 
 
@@ -7848,9 +7962,14 @@ async function rpAskAI() {
   if(!input||!msgs||!input.value.trim()) return;
   var q=input.value.trim(); input.value='';
   msgs.innerHTML+='<div style="font-size:9px;color:#c0c0e0;padding:2px 0">You: '+q+'</div>';
-  if(!APP.settings.anthropicKey){msgs.innerHTML+='<div style="font-size:9px;color:#f5a623">Add Anthropic key in Settings.</div>';return;}
   msgs.innerHTML+='<div id="rp-thinking" style="font-size:9px;color:#3a3a5a">...</div>';
-  try{var r=await fetchWithTimeout('https://api.anthropic.com/v1/messages',8000,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':APP.settings.anthropicKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:120,messages:[{role:'user',content:'Trucking O/O. Brief answer: '+q}]})});var d=await r.json();var t=document.getElementById('rp-thinking');if(t)t.textContent='CE: '+(d.content?.[0]?.text||'Error');}catch(e){var t=document.getElementById('rp-thinking');if(t)t.textContent='Error: '+e.message;}
+  try {
+    const txt = await callAI([{role:'user',content:'Trucking O/O. Brief answer: '+q}], {maxTokens:120});
+    var t=document.getElementById('rp-thinking'); if(t)t.textContent='CE: '+txt;
+  } catch(e) {
+    var t=document.getElementById('rp-thinking');
+    if(t) t.textContent = e.isNoKey ? 'Add Anthropic key in Settings.' : 'Error: '+e.message;
+  }
   msgs.scrollTop=msgs.scrollHeight;
 }
 function updateInsightBar(pageId) {
@@ -7866,12 +7985,17 @@ async function aipSendMsg() {
   if(!input||!msgs||!input.value.trim()) return;
   var q=input.value.trim(); input.value='';
   msgs.innerHTML+='<div class="aip-msg user">'+q+'</div>';
-  if(!APP.settings.anthropicKey){msgs.innerHTML+='<div class="aip-msg ai"><strong>Note</strong>Add Anthropic API key in Settings.</div>';msgs.scrollTop=msgs.scrollHeight;return;}
   msgs.innerHTML+='<div class="aip-msg ai" id="aip-thinking"><strong>AI</strong>Thinking...</div>';
   msgs.scrollTop=msgs.scrollHeight;
   var rev=APP.plEntries.filter(function(e){return e.type==='Load Revenue';}).reduce(function(a,e){return a+e.amount;},0);
-  var ctx='You are FreightEdge AI for a trucking O/O. Fleet: '+(typeof FLEET!=='undefined'?FLEET.length:0)+' trucks. Revenue: $'+Math.round(rev)+'. Page: '+(document.getElementById('topbar-title')?.textContent||'Dashboard');
-  try{var r=await fetchWithTimeout('https://api.anthropic.com/v1/messages',10000,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':APP.settings.anthropicKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:200,system:ctx,messages:[{role:'user',content:q}]})});var d=await r.json();var t=document.getElementById('aip-thinking');if(t)t.innerHTML='<strong>AI</strong>'+(d.content?.[0]?.text||'Error');}catch(e){var t=document.getElementById('aip-thinking');if(t)t.innerHTML='<strong>Error</strong>'+e.message;}
+  var sys='You are FreightEdge AI for a trucking O/O. Fleet: '+(typeof FLEET!=='undefined'?FLEET.length:0)+' trucks. Revenue: $'+Math.round(rev)+'. Page: '+(document.getElementById('topbar-title')?.textContent||'Dashboard');
+  try {
+    var txt=await callAI([{role:'user',content:q}],{system:sys,maxTokens:200});
+    var t=document.getElementById('aip-thinking'); if(t)t.innerHTML='<strong>AI</strong>'+txt;
+  } catch(e) {
+    var t=document.getElementById('aip-thinking');
+    if(t) t.innerHTML='<strong>'+(e.isNoKey?'Note':'Error')+'</strong>'+(e.isNoKey?'Add Anthropic API key in Settings.':e.message);
+  }
   msgs.scrollTop=msgs.scrollHeight;
 }
 function updateHeroKPIBar() {
