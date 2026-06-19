@@ -3191,14 +3191,16 @@ async function validateLicense(key, silent) {
     if (s) s.textContent = 'Checking…';
   }
   try {
+    const cached = CEDB.get('ce_license');
+    const instanceId = cached?.instanceId;
     const res = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ license_key: key, instance_name: 'carrieredge-' + (APP.settings.dot || 'user') }),
+      body: JSON.stringify({ license_key: key, instance_id: instanceId }),
     });
     const data = await res.json();
     const valid = data?.valid === true && data?.license_key?.status === 'active';
-    CEDB.set('ce_license', { key, status: valid ? 'active' : 'invalid', checkedAt: Date.now() });
+    CEDB.set('ce_license', { key, status: valid ? 'active' : 'invalid', checkedAt: Date.now(), instanceId });
     APP.isMember = valid;
   } catch (_) {
     const cached = CEDB.get('ce_license');
@@ -3246,8 +3248,24 @@ function applyMemberGates() {
 async function activateLicense() {
   const key = (document.getElementById('s-license-key')?.value || '').trim();
   if (!key) { showToast('Enter a license key first'); return; }
-  const valid = await validateLicense(key, false);
-  showToast(valid ? '✓ License activated — welcome to CarrierEdge!' : '✗ License key not found or expired');
+  try {
+    const s = document.getElementById('license-status');
+    if (s) s.textContent = 'Checking…';
+    const res = await fetch('https://api.lemonsqueezy.com/v1/licenses/activate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ license_key: key, instance_name: 'carrieredge-' + (APP.settings?.dot || 'user') }),
+    });
+    const data = await res.json();
+    const valid = data?.activated === true;
+    const instanceId = data?.instance?.id;
+    CEDB.set('ce_license', { key, status: valid ? 'active' : 'invalid', checkedAt: Date.now(), instanceId });
+    APP.isMember = valid;
+    refreshLicenseUI();
+    showToast(valid ? '✓ License activated — welcome to CarrierEdge!' : '✗ ' + (data?.error || 'License key not found or expired'));
+  } catch (_) {
+    showToast('✗ Could not reach license server. Check your connection.');
+  }
 }
 
 // ============================================================
