@@ -1137,7 +1137,7 @@ body { background:var(--layout-bg,var(--bg)); }
 /* ── QUICK ACTIONS ── */
 .quick-actions {
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
   gap:10px;
   margin-bottom:16px;
 }
@@ -1177,6 +1177,33 @@ body { background:var(--layout-bg,var(--bg)); }
 .ifta-alert-title { font-size:13px;font-weight:700; }
 .ifta-alert-sub   { font-size:11px;color:var(--text2);margin-top:2px; }
 .ifta-alert-btn   { font-size:11px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer;border:none;white-space:nowrap; }
+
+/* ── Load Profitability Calculator ── */
+#lpc-overlay {
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;
+  align-items:center;justify-content:center;padding:16px;
+}
+#lpc-modal {
+  background:var(--bg2);border:1px solid var(--border);border-radius:16px;
+  width:100%;max-width:480px;padding:24px;position:relative;
+  max-height:90vh;overflow-y:auto;
+}
+.lpc-title { font-size:15px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px; }
+.lpc-grid  { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px; }
+.lpc-grid .fg { margin:0; }
+.lpc-full  { grid-column:1/-1; }
+.lpc-results { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0; }
+.lpc-stat { background:var(--bg3);border-radius:10px;padding:10px 12px;border:1px solid var(--border); }
+.lpc-stat-label { font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em; }
+.lpc-stat-val   { font-size:18px;font-weight:800;font-family:var(--mono);margin-top:2px; }
+.lpc-verdict {
+  border-radius:10px;padding:14px 16px;text-align:center;margin-top:4px;
+  font-weight:800;font-size:14px;letter-spacing:.01em;
+}
+.lpc-verdict.go      { background:rgba(34,212,122,.1);border:1px solid rgba(34,212,122,.3);color:var(--green); }
+.lpc-verdict.nogo    { background:rgba(240,84,84,.1);border:1px solid rgba(240,84,84,.3);color:var(--red); }
+.lpc-verdict.neutral { background:var(--bg3);border:1px solid var(--border);color:var(--text3); }
+.lpc-close { position:absolute;top:14px;right:16px;background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;line-height:1;padding:0; }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1392,6 +1419,11 @@ body { background:var(--layout-bg,var(--bg)); }
           <span class="qa-icon">🚛</span>
           <div class="qa-label">Load Operations</div>
           <div class="qa-sub">Accept / reject a load</div>
+        </div>
+        <div class="qa-btn" onclick="openLPC()">
+          <span class="qa-icon">📊</span>
+          <div class="qa-label">Load Calculator</div>
+          <div class="qa-sub">RPM · go / no-go</div>
         </div>
       </div>
 
@@ -2401,6 +2433,8 @@ body { background:var(--layout-bg,var(--bg)); }
             <div class="fg"><label>Number of Trucks</label><input class="fi" id="s-trucks" type="number" placeholder="1" oninput="saveSettings()"></div>
             <div class="fg"><label>Home State</label><select class="fi" id="s-state" onchange="saveSettings()"><option value="">Select state</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>FL</option><option>GA</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VA</option><option>WA</option><option>WI</option><option>WY</option></select></div>
             <div class="fg"><label>Primary Freight Type</label><select class="fi" id="s-freight" onchange="saveSettings()"><option>Dry Van</option><option>Reefer</option><option>Flatbed</option><option>Tanker</option><option>Specialized</option><option>LTL</option></select></div>
+            <div class="fg"><label>Truck MPG</label><input class="fi" id="s-mpg" type="number" placeholder="6.5" step="0.1" min="1" oninput="saveSettings()"></div>
+            <div class="fg"><label>Target RPM ($/mi)</label><input class="fi" id="s-target-rpm" type="number" placeholder="e.g. 2.20" step="0.01" min="0" oninput="saveSettings()"><div style="font-size:10px;color:var(--text3);margin-top:3px">Used for go/no-go in Load Calculator</div></div>
           </div>
           <button class="btn btn-primary" style="margin-top:14px" onclick="applySettings()">✓ Save & Apply</button>
         </div>
@@ -3700,6 +3734,8 @@ function loadSettings(){
     if(s.dnbKey){ document.getElementById('s-dnb-key').value = s.dnbKey; }
     if(s.experianKey){ document.getElementById('s-experian-key').value = s.experianKey; }
     if(s.carrier411Key){ document.getElementById('s-carrier411-key').value = s.carrier411Key; }
+    if(s.mpg)       { document.getElementById('s-mpg').value = s.mpg; }
+    if(s.targetRpm) { document.getElementById('s-target-rpm').value = s.targetRpm; }
 
     // Update API status badges
     function setBadge(id, ok, okLabel, warnLabel) {
@@ -3734,6 +3770,8 @@ function saveSettings(){
     dnbKey:      document.getElementById('s-dnb-key')?.value      || '',
     experianKey: document.getElementById('s-experian-key')?.value || '',
     carrier411Key:document.getElementById('s-carrier411-key')?.value || '',
+    mpg:          document.getElementById('s-mpg')?.value          || '',
+    targetRpm:    document.getElementById('s-target-rpm')?.value   || '',
   };
   APP.settings = s;
   CEDB.set('ce_settings', s);
@@ -8858,6 +8896,40 @@ if ('serviceWorker' in navigator) {
   </div>
 </div>
 
+<!-- ── Load Profitability Calculator Modal ── -->
+<div id="lpc-overlay" onclick="if(event.target===this)closeLPC()">
+  <div id="lpc-modal">
+    <button class="lpc-close" onclick="closeLPC()">✕</button>
+    <div class="lpc-title">📊 Load Profitability Calculator</div>
+    <div class="lpc-grid">
+      <div class="fg"><label>Loaded Miles</label><input class="fi" id="lpc-loaded" type="number" placeholder="850" oninput="calcLPC()"></div>
+      <div class="fg"><label>Deadhead Miles</label><input class="fi" id="lpc-dead" type="number" placeholder="120" value="0" oninput="calcLPC()"></div>
+      <div class="fg"><label>Load Rate ($)</label><input class="fi" id="lpc-rate" type="number" placeholder="2800" oninput="calcLPC()"></div>
+      <div class="fg"><label>Fuel Price ($/gal)</label><input class="fi" id="lpc-fuel" type="number" placeholder="3.85" step="0.01" oninput="calcLPC()"></div>
+      <div class="fg"><label>Truck MPG</label><input class="fi" id="lpc-mpg" type="number" placeholder="6.5" step="0.1" oninput="calcLPC()"></div>
+      <div class="fg">
+        <label>Factor Fee</label>
+        <select class="fi" id="lpc-factor-sel" onchange="calcLPC();document.getElementById('lpc-custom-wrap').style.display=this.value==='custom'?'block':'none'">
+          <option value="0">None (0%)</option>
+          <option value="1.5">1.5% — Low (negotiated)</option>
+          <option value="2">2% — Competitive</option>
+          <option value="3" selected>3% — Industry standard</option>
+          <option value="3.5">3.5% — Standard+</option>
+          <option value="4">4% — High</option>
+          <option value="5">5% — Premium</option>
+          <option value="custom">Custom %</option>
+        </select>
+      </div>
+      <div class="fg lpc-full" id="lpc-custom-wrap" style="display:none">
+        <label>Custom Factor Fee %</label>
+        <input class="fi" id="lpc-factor-custom" type="number" placeholder="2.75" step="0.01" min="0" max="20" oninput="calcLPC()">
+      </div>
+    </div>
+    <div id="lpc-out"><div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Enter miles and rate to calculate</div></div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="closeLPC()">Close</button>
+  </div>
+</div>
+
 <script>
 // ── ONBOARDING WIZARD ──────────────────────────────────
 function checkOnboarding() {
@@ -8916,6 +8988,84 @@ function obComplete() {
 function obSkip() {
   CEDB.set('ce_onboarded', true);
   document.getElementById('onboarding-overlay').style.display = 'none';
+}
+
+// ── LOAD PROFITABILITY CALCULATOR ──────────────────────
+function openLPC() {
+  const s = APP.settings || {};
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  set('lpc-mpg', s.mpg || '6.5');
+  if (APP.dieselPrice) set('lpc-fuel', APP.dieselPrice.toFixed(3));
+  document.getElementById('lpc-overlay').style.display = 'flex';
+  calcLPC();
+}
+
+function closeLPC() {
+  document.getElementById('lpc-overlay').style.display = 'none';
+}
+
+function calcLPC() {
+  const v = id => parseFloat(document.getElementById(id)?.value) || 0;
+  const loaded   = v('lpc-loaded');
+  const dead     = v('lpc-dead');
+  const rate     = v('lpc-rate');
+  const fuelPx   = v('lpc-fuel');
+  const mpg      = v('lpc-mpg') || 6.5;
+  const sel      = document.getElementById('lpc-factor-sel')?.value;
+  const factorPct = sel === 'custom' ? (v('lpc-factor-custom') || 0) : (parseFloat(sel) || 0);
+  const out = document.getElementById('lpc-out');
+
+  if (!loaded || !rate) {
+    out.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Enter miles and rate to calculate</div>';
+    return;
+  }
+
+  const totalMiles  = loaded + dead;
+  const totalGal    = totalMiles / mpg;
+  const fuelCost    = fuelPx ? totalGal * fuelPx : 0;
+  const factorFee   = rate * (factorPct / 100);
+  const netRev      = rate - factorFee;
+  const netProfit   = netRev - fuelCost;
+  const grossRpm    = rate / loaded;
+  const netRpm      = netRev / totalMiles;
+  const effCpm      = fuelCost && totalMiles ? fuelCost / totalMiles : 0;
+  const fmt = n => '$' + n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const rpm3 = n => '$' + n.toFixed(3);
+
+  const targetRpm = parseFloat(APP.settings?.targetRpm) || 0;
+  const isGo = targetRpm > 0 ? netRpm >= targetRpm : netProfit > 0;
+  const vCls = isGo ? 'go' : 'nogo';
+  const extras = (factorPct ? ' & factoring' : '');
+  const vText = isGo
+    ? `✓ GO — net ${fmt(netProfit)} after fuel${extras}`
+    : `✗ NO-GO — net ${fmt(netProfit)} after fuel${extras}`;
+
+  out.innerHTML = `
+    <div class="lpc-results">
+      <div class="lpc-stat">
+        <div class="lpc-stat-label">Gross RPM</div>
+        <div class="lpc-stat-val" style="color:var(--blue)">${rpm3(grossRpm)}</div>
+      </div>
+      <div class="lpc-stat">
+        <div class="lpc-stat-label">Net RPM</div>
+        <div class="lpc-stat-val" style="color:${isGo?'var(--green)':'var(--red)'}">${rpm3(netRpm)}</div>
+      </div>
+      <div class="lpc-stat">
+        <div class="lpc-stat-label">Total Fuel Cost</div>
+        <div class="lpc-stat-val" style="color:var(--amber)">${fuelPx ? fmt(fuelCost) : '—'}</div>
+      </div>
+      <div class="lpc-stat">
+        <div class="lpc-stat-label">Factor Fee</div>
+        <div class="lpc-stat-val" style="color:var(--text2)">${factorPct ? fmt(factorFee) : '—'}</div>
+      </div>
+      ${effCpm ? `<div class="lpc-stat lpc-full">
+        <div class="lpc-stat-label">Effective Cost Per Mile · ${totalMiles.toLocaleString()} total mi</div>
+        <div class="lpc-stat-val" style="color:var(--text2);font-size:14px">${rpm3(effCpm)}/mi</div>
+      </div>` : ''}
+    </div>
+    <div class="lpc-verdict ${vCls}">${vText}</div>
+    ${!targetRpm ? '<div style="font-size:10px;color:var(--text3);text-align:center;margin-top:8px">Set a Target RPM in Settings for a precise go/no-go threshold</div>' : ''}
+  `;
 }
 
 // ── IFTA DEADLINE ALERT ────────────────────────────────
