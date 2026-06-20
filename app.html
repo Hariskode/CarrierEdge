@@ -3244,75 +3244,6 @@ body { background:var(--layout-bg,var(--bg)); }
       </div>
     </div>
 
-  </main>
-
-  </div><!-- /main-and-right -->
-</div><!-- /shell -->
-
-<!-- =====================================================
-     AI PANEL
-     ===================================================== -->
-<div id="ai-panel" class="ai-panel">
-  <div class="ai-header">
-    <div class="ai-logo">✦</div>
-    <div>
-      <div class="ai-title">FreightEdge AI</div>
-      <div class="ai-sub">Powered by Claude · Freight specialist</div>
-    </div>
-    <button class="ai-close" onclick="toggleAI()">✕</button>
-  </div>
-  <div class="ai-messages" id="ai-messages">
-    <div class="ai-msg bot">
-      Hey! I'm your FreightEdge AI advisor — I know factoring, FMCSA ratings, fuel cards, lane rates, and P&L strategy for owner-operators and small fleets.<br><br>
-      Ask me anything about your trucking business. Try a quick question below 👇
-    </div>
-  </div>
-  <div class="ai-quick">
-    <button class="ai-quick-btn" onclick="askAI('How can I lower my factoring rate at my current volume?')">Lower factoring rate</button>
-    <button class="ai-quick-btn" onclick="askAI('What fuel card saves the most for an OTR owner-operator?')">Best fuel card</button>
-    <button class="ai-quick-btn" onclick="askAI('How do I improve my FMCSA vehicle maintenance BASIC score?')">Fix FMCSA score</button>
-    <button class="ai-quick-btn" onclick="askAI('What is a good net profit margin for an owner-operator in 2026?')">Good profit margin?</button>
-    <button class="ai-quick-btn" onclick="askAI('Should I use recourse or non-recourse factoring?')">Recourse vs non-recourse</button>
-    <button class="ai-quick-btn" onclick="askAI('How do I calculate my true cost per mile?')">Cost per mile</button>
-  </div>
-  <div class="ai-input-row">
-    <textarea id="ai-input" class="ai-input" rows="2" placeholder="Ask anything about freight, factoring, fuel, repairs…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI();}"></textarea>
-    <button class="ai-send" onclick="sendAI()">↑</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="add-truck-modal">
-  <div class="modal" style="width:480px">
-    <button class="modal-close" onclick="closeAddTruckModal()">x</button>
-    <div class="modal-title">Add Truck / Check-In</div>
-    <div class="modal-sub">Add a truck or update its position. Enter any US city name (e.g. Dallas, TX).</div>
-    <div class="form-grid">
-      <div class="fg"><label>Truck # / Unit ID</label><input class="fi" id="at-unit" placeholder="e.g. T-01"></div>
-      <div class="fg"><label>Driver Name</label><input class="fi" id="at-driver" placeholder="e.g. James T."></div>
-      <div class="fg"><label>Current City</label><input class="fi" id="at-city" placeholder="e.g. Dallas, TX"></div>
-      <div class="fg"><label>Status</label>
-        <select class="fi" id="at-status">
-          <option value="en_route">En Route</option><option value="stopped">Stopped</option>
-          <option value="loading">Loading / Unloading</option><option value="hos_break">HOS Break</option><option value="off_duty">Off Duty</option>
-        </select>
-      </div>
-      <div class="fg"><label>Current Load / Route</label><input class="fi" id="at-load" placeholder="e.g. Dallas to Chicago Dry Van"></div>
-      <div class="fg"><label>Speed (mph)</label><input class="fi" id="at-speed" type="number" value="0"></div>
-      <div class="fg"><label>Miles Today</label><input class="fi" id="at-miles-t" type="number" value="0"></div>
-      <div class="fg"><label>Pin Color</label>
-        <select class="fi" id="at-color">
-          <option value="#22d47a">Green</option><option value="#4a8fff">Blue</option>
-          <option value="#f5a623">Amber</option><option value="#f05454">Red</option><option value="#9f7dff">Purple</option>
-        </select>
-      </div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:14px">
-      <button class="btn btn-primary" onclick="saveTruck()" style="flex:1;justify-content:center">Save Truck</button>
-      <button class="btn btn-ghost" onclick="closeAddTruckModal()">Cancel</button>
-    </div>
-  </div>
-</div>
-
 <!-- ── DRIVER MANAGEMENT PAGE ── -->
 <div id="page-drivers" class="page fade-in">
   <div class="page-header">
@@ -3680,6 +3611,75 @@ body { background:var(--layout-bg,var(--bg)); }
     <div style="display:flex;gap:8px;margin-top:10px">
       <button class="btn btn-primary" onclick="saveMaintNewItem()">Add Item</button>
       <button class="btn btn-ghost" onclick="document.getElementById('maint-add-card').style.display='none'">Cancel</button>
+    </div>
+  </div>
+</div>
+
+  </main>
+
+  </div><!-- /main-and-right -->
+</div><!-- /shell -->
+
+<!-- =====================================================
+     AI PANEL
+     ===================================================== -->
+<div id="ai-panel" class="ai-panel">
+  <div class="ai-header">
+    <div class="ai-logo">✦</div>
+    <div>
+      <div class="ai-title">FreightEdge AI</div>
+      <div class="ai-sub">Powered by Claude · Freight specialist</div>
+    </div>
+    <button class="ai-close" onclick="toggleAI()">✕</button>
+  </div>
+  <div class="ai-messages" id="ai-messages">
+    <div class="ai-msg bot">
+      Hey! I'm your FreightEdge AI advisor — I know factoring, FMCSA ratings, fuel cards, lane rates, and P&L strategy for owner-operators and small fleets.<br><br>
+      Ask me anything about your trucking business. Try a quick question below 👇
+    </div>
+  </div>
+  <div class="ai-quick">
+    <button class="ai-quick-btn" onclick="askAI('How can I lower my factoring rate at my current volume?')">Lower factoring rate</button>
+    <button class="ai-quick-btn" onclick="askAI('What fuel card saves the most for an OTR owner-operator?')">Best fuel card</button>
+    <button class="ai-quick-btn" onclick="askAI('How do I improve my FMCSA vehicle maintenance BASIC score?')">Fix FMCSA score</button>
+    <button class="ai-quick-btn" onclick="askAI('What is a good net profit margin for an owner-operator in 2026?')">Good profit margin?</button>
+    <button class="ai-quick-btn" onclick="askAI('Should I use recourse or non-recourse factoring?')">Recourse vs non-recourse</button>
+    <button class="ai-quick-btn" onclick="askAI('How do I calculate my true cost per mile?')">Cost per mile</button>
+  </div>
+  <div class="ai-input-row">
+    <textarea id="ai-input" class="ai-input" rows="2" placeholder="Ask anything about freight, factoring, fuel, repairs…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI();}"></textarea>
+    <button class="ai-send" onclick="sendAI()">↑</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="add-truck-modal">
+  <div class="modal" style="width:480px">
+    <button class="modal-close" onclick="closeAddTruckModal()">x</button>
+    <div class="modal-title">Add Truck / Check-In</div>
+    <div class="modal-sub">Add a truck or update its position. Enter any US city name (e.g. Dallas, TX).</div>
+    <div class="form-grid">
+      <div class="fg"><label>Truck # / Unit ID</label><input class="fi" id="at-unit" placeholder="e.g. T-01"></div>
+      <div class="fg"><label>Driver Name</label><input class="fi" id="at-driver" placeholder="e.g. James T."></div>
+      <div class="fg"><label>Current City</label><input class="fi" id="at-city" placeholder="e.g. Dallas, TX"></div>
+      <div class="fg"><label>Status</label>
+        <select class="fi" id="at-status">
+          <option value="en_route">En Route</option><option value="stopped">Stopped</option>
+          <option value="loading">Loading / Unloading</option><option value="hos_break">HOS Break</option><option value="off_duty">Off Duty</option>
+        </select>
+      </div>
+      <div class="fg"><label>Current Load / Route</label><input class="fi" id="at-load" placeholder="e.g. Dallas to Chicago Dry Van"></div>
+      <div class="fg"><label>Speed (mph)</label><input class="fi" id="at-speed" type="number" value="0"></div>
+      <div class="fg"><label>Miles Today</label><input class="fi" id="at-miles-t" type="number" value="0"></div>
+      <div class="fg"><label>Pin Color</label>
+        <select class="fi" id="at-color">
+          <option value="#22d47a">Green</option><option value="#4a8fff">Blue</option>
+          <option value="#f5a623">Amber</option><option value="#f05454">Red</option><option value="#9f7dff">Purple</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn btn-primary" onclick="saveTruck()" style="flex:1;justify-content:center">Save Truck</button>
+      <button class="btn btn-ghost" onclick="closeAddTruckModal()">Cancel</button>
     </div>
   </div>
 </div>
