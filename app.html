@@ -8692,26 +8692,54 @@ function buildCreditProfile(name, mc, type, fmcsaResult, ansonia, dnb, experian,
     insufficient:true, chargebacks:0, recentInvoices:[]
   };
 
-  // ── Composite score ──
-  var bondOk  = src.fmcsa.bondOnFile;
-  var authOk  = src.fmcsa.authorityActive;
-  var cbs     = Number(src.dso.chargebacks) || 0;
-  var raw = (src.ansonia.score * 0.25) + (src.dnb.paydex * 0.20) +
-            (src.experian.score * 0.12) + (src.equifax.score * 0.10) +
-            (src.ansonia.score * 0.15) +
-            (bondOk  ? 0 : -25) + (authOk ? 0 : -40) +
-            (src.experian.bankruptcy ? -30 : 0) +
-            (src.experian.liens      ? -15 : 0) +
-            (src.tia.member ? 5 : 0) + (cbs * -5);
+  // ── Composite score — only live sources contribute ──
+  var bondOk = src.fmcsa.bondOnFile;
+  var authOk = src.fmcsa.authorityActive;
+  var cbs    = Number(src.dso.chargebacks) || 0;
 
-  var composite = Math.min(100, Math.max(1, Math.round(raw / 0.82)));
-  var grade     = compositeToGrade(composite);
-  var gradeColor= GRADE_COLOR[grade] || 'var(--text)';
-  var riskLevel = composite >= 80 ? 'LOW' : composite >= 65 ? 'MODERATE' : composite >= 50 ? 'HIGH' : 'CRITICAL';
-  var riskColor = composite >= 80 ? 'var(--green)' : composite >= 65 ? 'var(--blue)' : composite >= 50 ? 'var(--amber)' : 'var(--red)';
-  var riskBadge = composite >= 80 ? 'badge-green' : composite >= 65 ? 'badge-blue' : composite >= 50 ? 'badge-amber' : 'badge-red';
+  // Weight only bureau sources that returned live data
+  var bureauScore = 0, bureauWeight = 0;
+  if (src.ansonia.live)  { bureauScore += src.ansonia.score  * 0.40; bureauWeight += 0.40; }
+  if (src.dnb.live)      { bureauScore += src.dnb.paydex    * 0.35; bureauWeight += 0.35; }
+  if (src.experian.live) { bureauScore += src.experian.score * 0.25; bureauWeight += 0.25; }
 
-  var termRec = composite >= 85
+  var hasBureauData = bureauWeight > 0;
+  var hasDSOData    = src.dso.internalScore !== null && !src.dso.insufficient;
+
+  var baseScore;
+  if (hasBureauData && hasDSOData) {
+    baseScore = (bureauScore / bureauWeight) * 0.75 + src.dso.internalScore * 0.25;
+  } else if (hasBureauData) {
+    baseScore = bureauScore / bureauWeight;
+  } else if (hasDSOData) {
+    baseScore = 40 + src.dso.internalScore * 0.40;
+  } else {
+    baseScore = src.fmcsa.live ? (authOk ? (bondOk ? 55 : 30) : 10) : 50;
+  }
+
+  // Hard penalties — only applied when data is confirmed live
+  if (src.fmcsa.live && !authOk)                    baseScore -= 40;
+  if (src.fmcsa.live && !bondOk)                    baseScore -= 20;
+  if (src.experian.live && src.experian.bankruptcy) baseScore -= 30;
+  if (src.experian.live && src.experian.liens)      baseScore -= 15;
+  baseScore -= cbs * 5;
+
+  var composite = Math.min(100, Math.max(1, Math.round(baseScore)));
+  var hasScore  = hasBureauData || hasDSOData;
+
+  var grade      = hasScore ? compositeToGrade(composite) : '—';
+  var gradeColor = hasScore ? (GRADE_COLOR[grade] || 'var(--text)') : 'var(--text3)';
+  var riskLevel  = !hasScore ? 'UNSCORED'
+    : composite >= 80 ? 'LOW' : composite >= 65 ? 'MODERATE' : composite >= 50 ? 'HIGH' : 'CRITICAL';
+  var riskColor  = !hasScore ? 'var(--text3)'
+    : composite >= 80 ? 'var(--green)' : composite >= 65 ? 'var(--blue)' : composite >= 50 ? 'var(--amber)' : 'var(--red)';
+  var riskBadge  = !hasScore ? 'badge-blue'
+    : composite >= 80 ? 'badge-green' : composite >= 65 ? 'badge-blue' : composite >= 50 ? 'badge-amber' : 'badge-red';
+  var scoreLabel = hasBureauData ? 'CE SCORE' : hasDSOData ? 'DSO ONLY' : 'FMCSA ONLY';
+
+  var termRec = !hasScore
+    ? 'Connect Ansonia or D&B in Settings for a verified payment risk recommendation.'
+    : composite >= 85
     ? 'Standard Net 30 — low risk. Verify invoice on delivery.'
     : composite >= 70
     ? 'Net 30 with signed rate confirmation required — moderate risk.'
@@ -8720,17 +8748,24 @@ function buildCreditProfile(name, mc, type, fmcsaResult, ansonia, dnb, experian,
     : 'Do not haul — request prepayment or verify bond with FMCSA.';
 
   var redFlags = [];
-  if (!authOk)                   redFlags.push({sev:'critical', text:'Authority inactive or revoked — verify at safer.fmcsa.dot.gov' + (src.fmcsa.live ? ' (live FMCSA)' : ' (estimated)')});
-  if (!bondOk)                   redFlags.push({sev:'critical', text:'Bond not on file — broker not legally authorized'});
-  if (src.experian.bankruptcy)   redFlags.push({sev:'critical', text:'Bankruptcy on record' + (src.experian.live ? ' (live Experian)' : ' (estimated)')});
-  if (src.experian.liens)        redFlags.push({sev:'high',     text:'Tax lien detected' + (src.experian.live ? ' (live Experian)' : ' (estimated)')});
-  if (src.ansonia.avgDaysPay > 45) redFlags.push({sev:'high',  text:'Avg payment ' + src.ansonia.avgDaysPay + 'd — beyond Net 30' + (src.ansonia.live ? ' (Ansonia)' : ' (est.)')});
-  if (src.dnb.paydex < 65)       redFlags.push({sev:'moderate', text:'D&B PAYDEX ' + src.dnb.paydex + ' — below factor threshold 70' + (src.dnb.live ? ' (live)' : ' (est.)')});
-  if (cbs > 0)                   redFlags.push({sev:'high',     text:cbs + ' chargeback(s) in your CarrierEdge records'});
-  if (src.dso.unpaid > 0 && src.dso.outstanding > 0) redFlags.push({sev:'high', text:src.dso.unpaid + ' unpaid invoice(s) — $' + src.dso.outstanding.toLocaleString() + ' outstanding'});
-  if (src.dso.avgDTP !== null && src.dso.avgDTP > 35) redFlags.push({sev:'moderate', text:'Your actual avg days to pay: ' + src.dso.avgDTP + 'd (internal data)'});
-  if (!src.tia.member && yearsOld < 5) redFlags.push({sev:'moderate', text:'Non-TIA member, under 5 years of authority'});
-  if (redFlags.length === 0)     redFlags.push({sev:'ok', text:'No significant red flags from available sources'});
+  if (!authOk && src.fmcsa.live)                       redFlags.push({sev:'critical', text:'Authority inactive or revoked — verify at safer.fmcsa.dot.gov (live FMCSA)'});
+  if (!authOk && !src.fmcsa.live)                      redFlags.push({sev:'moderate', text:'Authority status unverified — enter MC # and re-run to get live FMCSA data'});
+  if (!bondOk && src.fmcsa.live)                       redFlags.push({sev:'critical', text:'Bond not on file — broker not legally authorized (live FMCSA)'});
+  if (src.experian.live && src.experian.bankruptcy)    redFlags.push({sev:'critical', text:'Bankruptcy on record (live Experian)'});
+  if (src.experian.live && src.experian.liens)         redFlags.push({sev:'high',     text:'Tax lien detected (live Experian)'});
+  if (src.ansonia.live && src.ansonia.avgDaysPay > 45) redFlags.push({sev:'high',    text:'Avg payment ' + src.ansonia.avgDaysPay + 'd — beyond Net 30 (live Ansonia)'});
+  if (src.dnb.live && src.dnb.paydex < 65)             redFlags.push({sev:'moderate', text:'D&B PAYDEX ' + src.dnb.paydex + ' — below factor threshold 70 (live D&B)'});
+  if (src.c411.live && src.c411.alerts && src.c411.alerts.length) redFlags.push({sev:'high', text:'Carrier411: ' + src.c411.alerts[0]});
+  if (cbs > 0)                                         redFlags.push({sev:'high',     text:cbs + ' chargeback(s) in your CarrierEdge records'});
+  if (src.dso.unpaid > 0 && src.dso.outstanding > 0)  redFlags.push({sev:'high',     text:src.dso.unpaid + ' unpaid invoice(s) — $' + src.dso.outstanding.toLocaleString() + ' outstanding (your records)'});
+  if (hasDSOData && src.dso.avgDTP !== null && src.dso.avgDTP > 35) redFlags.push({sev:'moderate', text:'Your avg days to pay: ' + src.dso.avgDTP + 'd (internal records)'});
+  if (redFlags.length === 0) {
+    if (hasBureauData || src.fmcsa.live) {
+      redFlags.push({sev:'ok', text:'No significant red flags from available live sources'});
+    } else {
+      redFlags.push({sev:'moderate', text:'No live credit data — add API keys in Settings to check payment risk'});
+    }
+  }
 
   var liveCount = (fmcsaPrimary ? 1 : 0) + (ansonia ? 1 : 0) + (dnb ? 1 : 0) + (experian ? 1 : 0) + (c411 ? 1 : 0);
 
@@ -8740,6 +8775,8 @@ function buildCreditProfile(name, mc, type, fmcsaResult, ansonia, dnb, experian,
     riskLevel: riskLevel, riskColor: riskColor, riskBadge: riskBadge,
     termRec: termRec, redFlags: redFlags, src: src,
     yearsOld: yearsOld, liveCount: liveCount,
+    hasScore: hasScore, hasBureauData: hasBureauData, hasDSOData: hasDSOData,
+    scoreLabel: scoreLabel,
   };
 }
 
@@ -8775,17 +8812,21 @@ function renderCreditResult(p, el) {
     // ── Profile card ──
     var html = '<div class="card" style="margin-bottom:16px;border-left:4px solid ' + p.riskColor + '">';
 
-    // Disclaimer banner — shown whenever no live API sources are connected
-    if (p.liveCount === 0) {
-      html += '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;margin-bottom:14px;background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.25);border-radius:8px">'
-        + '<span style="font-size:15px;flex-shrink:0">⚠️</span>'
-        + '<div style="font-size:11px;color:var(--text2);line-height:1.65">'
-        + '<strong style="color:var(--amber)">Estimated scores — not verified data.</strong> '
-        + 'No live credit API keys are configured (Ansonia, D&amp;B, Experian, Carrier411). '
-        + 'The scores below are statistical estimates based on company name, MC number, and industry averages. '
-        + 'The FMCSA authority check is the only live data source available without API keys. '
-        + '<strong>Do not use estimated scores as a substitute for real credit verification before hauling.</strong>'
-        + '</div>'
+    // Disclaimer banner — shown when no credit bureau data is connected
+    if (!p.hasBureauData) {
+      var bannerMsg = p.hasDSOData
+        ? '<strong style="color:var(--blue)">Score based on your internal invoice history only.</strong> '
+          + 'No external credit bureau (Ansonia, D&amp;B, Experian) is connected. '
+          + 'Add keys in Settings for third-party payment verification.'
+        : '<strong style="color:var(--amber)">No credit bureau data connected.</strong> '
+          + 'FMCSA authority and bond status are shown from live data where an MC # was provided. '
+          + 'Credit scores (Ansonia, D&amp;B, Experian, Carrier411) require API keys in Settings. '
+          + '<strong>Do not rely on FMCSA data alone as a substitute for credit verification before hauling.</strong>';
+      var bannerBorder = p.hasDSOData ? 'rgba(74,143,255,.25)' : 'rgba(245,166,35,.25)';
+      var bannerBg     = p.hasDSOData ? 'rgba(74,143,255,.06)'  : 'rgba(245,166,35,.07)';
+      html += '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;margin-bottom:14px;background:' + bannerBg + ';border:1px solid ' + bannerBorder + ';border-radius:8px">'
+        + '<span style="font-size:15px;flex-shrink:0">' + (p.hasDSOData ? 'ℹ️' : '⚠️') + '</span>'
+        + '<div style="font-size:11px;color:var(--text2);line-height:1.65">' + bannerMsg + '</div>'
         + '</div>';
     }
 
@@ -8802,8 +8843,8 @@ function renderCreditResult(p, el) {
       + '<circle cx="45" cy="45" r="38" fill="none" stroke="' + p.riskColor + '" stroke-width="9" stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '" stroke-linecap="round"/>'
       + '</svg>'
       + '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">'
-      + '<div style="font-size:20px;font-weight:800;font-family:var(--mono);color:' + p.riskColor + ';line-height:1">' + p.composite + '</div>'
-      + '<div style="font-size:8px;color:' + (p.liveCount === 0 ? 'var(--amber)' : 'var(--text3)') + '">' + (p.liveCount === 0 ? 'ESTIMATE' : 'CE SCORE') + '</div>'
+      + '<div style="font-size:20px;font-weight:800;font-family:var(--mono);color:' + p.riskColor + ';line-height:1">' + (p.hasScore ? p.composite : '—') + '</div>'
+      + '<div style="font-size:8px;color:' + (p.hasBureauData ? 'var(--text3)' : p.hasDSOData ? 'var(--blue)' : 'var(--amber)') + '">' + p.scoreLabel + '</div>'
       + '</div></div>';
 
     // Grade box
@@ -8820,7 +8861,7 @@ function renderCreditResult(p, el) {
       html += '<div style="font-size:11px;color:var(--text3);margin-bottom:3px">DBA: ' + esc(src.fmcsa.dbaName) + '</div>';
     }
     html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:5px">';
-    html += '<span class="badge ' + p.riskBadge + '">' + p.riskLevel + ' RISK</span>';
+    html += '<span class="badge ' + p.riskBadge + '">' + p.riskLevel + (p.hasScore ? ' RISK' : '') + '</span>';
     var cleanMC = p.mc ? p.mc.replace(/[^0-9]/g,'') : '';
     if (cleanMC) html += '<span class="badge badge-blue">MC-' + cleanMC + '</span>';
     if (src.fmcsa.dotNumber) html += '<span class="badge badge-blue">DOT-' + esc(src.fmcsa.dotNumber) + '</span>';
@@ -8834,9 +8875,9 @@ function renderCreditResult(p, el) {
     // Quick KPIs right side
     html += '<div style="display:grid;grid-template-columns:repeat(4,auto);gap:12px;text-align:center">';
     var kpis = [
-      ['Ext Avg Pay', src.ansonia.avgDaysPay + 'd', src.ansonia.avgDaysPay <= 30 ? 'var(--green)' : src.ansonia.avgDaysPay <= 45 ? 'var(--amber)' : 'var(--red)', src.ansonia.live],
+      ['Ext Avg Pay', src.ansonia.live ? src.ansonia.avgDaysPay + 'd' : '—', src.ansonia.live ? (src.ansonia.avgDaysPay <= 30 ? 'var(--green)' : src.ansonia.avgDaysPay <= 45 ? 'var(--amber)' : 'var(--red)') : 'var(--text3)', src.ansonia.live],
       ['Your Avg Pay', dso.avgDTP != null ? dso.avgDTP + 'd' : '—', dso.avgDTP == null ? 'var(--text3)' : dso.avgDTP <= 30 ? 'var(--green)' : dso.avgDTP <= 45 ? 'var(--amber)' : 'var(--red)', true],
-      ['PAYDEX', src.dnb.paydex, src.dnb.paydex >= 80 ? 'var(--green)' : src.dnb.paydex >= 65 ? 'var(--amber)' : 'var(--red)', src.dnb.live],
+      ['PAYDEX', src.dnb.live ? src.dnb.paydex : '—', src.dnb.live ? (src.dnb.paydex >= 80 ? 'var(--green)' : src.dnb.paydex >= 65 ? 'var(--amber)' : 'var(--red)') : 'var(--text3)', src.dnb.live],
       ['Your Grade', dso.internalGrade || '—', dso.internalGrade ? (GRADE_COLOR[dso.internalGrade] || 'var(--text)') : 'var(--text3)', true],
     ];
     for (var ki = 0; ki < kpis.length; ki++) {
@@ -8937,31 +8978,62 @@ function renderCreditResult(p, el) {
     // ── Source breakdown table ──
     html += '<div class="card" style="margin-bottom:16px">';
     html += '<div class="card-header"><div class="card-title">Source Breakdown</div>';
-    html += '<span class="badge ' + (p.liveCount > 0 ? 'badge-green' : 'badge-blue') + '">' + p.liveCount + ' live &middot; ' + (8 - p.liveCount) + ' estimated</span></div>';
-    html += '<div class="tbl-wrap"><table><thead><tr><th>Source</th><th>Score</th><th>Type</th><th>Weight</th><th>&nearr;</th></tr></thead><tbody>';
+    var connectedSrc = (src.fmcsa.live?1:0) + (src.ansonia.live?1:0) + (src.dnb.live?1:0) + (src.experian.live?1:0) + (src.c411.live?1:0);
+    var srcBadgeCls = connectedSrc >= 4 ? 'badge-green' : connectedSrc >= 2 ? 'badge-amber' : 'badge-red';
+    html += '<span class="badge ' + srcBadgeCls + '">' + connectedSrc + ' of 5 sources live</span></div>';
+    html += '<div class="tbl-wrap"><table><thead><tr><th>Source</th><th>Score / Status</th><th>Status</th><th>Weight</th><th>&nearr;</th></tr></thead><tbody>';
 
+    function noDataCell() {
+      return '<span style="font-size:11px;color:var(--text3)">Not connected &middot; <a href="#" onclick="showPage(\'settings\',null);return false;" style="color:var(--blue)">Add key ↗</a></span>';
+    }
     var srcRows = [
-      { label:'FMCSA Authority & Bond', score: (src.fmcsa.authorityActive ? 'Active' : 'Inactive') + ' &bull; Bond: ' + (src.fmcsa.bondOnFile ? 'On File' : 'Missing'), live:src.fmcsa.live, weight:'Critical', link:'https://safer.fmcsa.dot.gov' },
-      { label:'Ansonia Credit Data',   score: scoreBar(src.ansonia.score),  live:src.ansonia.live,  weight:'25%', link:'https://www.ansoniabd.com' },
-      { label:'D&B PAYDEX',            score: scoreBar(src.dnb.paydex),     live:src.dnb.live,      weight:'20%', link:'https://www.dnb.com' },
-      { label:'Experian Business',     score: scoreBar(src.experian.score), live:src.experian.live, weight:'12%', link:'https://developer.experian.com' },
-      { label:'Equifax Business',      score: scoreBar(src.equifax.score),  live:false,             weight:'10%', link:'https://www.equifax.com/business' },
-      { label:'Carrier411',            score: gradeTag(src.c411.grade),     live:src.c411.live,     weight:'—',   link:'https://www.carrier411.com' },
-      { label:'TIA Membership',        score: '<strong style="color:' + (src.tia.member ? 'var(--green)' : 'var(--text2)') + '">' + (src.tia.member ? 'Yes' : 'No') + '</strong>', live:false, weight:'—', link:'https://www.tianet.org' },
-      { label:'BBB Rating',            score: gradeTag(src.bbb.rating),     live:false,             weight:'—',   link:'https://www.bbb.org' },
+      { label:'FMCSA Authority & Bond',
+        score: src.fmcsa.live
+          ? ((src.fmcsa.authorityActive ? '<span style="color:var(--green);font-weight:700">Active</span>' : '<span style="color:var(--red);font-weight:700">Inactive</span>') + ' &bull; Bond: ' + (src.fmcsa.bondOnFile ? '<span style="color:var(--green)">On File</span>' : '<span style="color:var(--red)">Not Found</span>'))
+          : '<span style="color:var(--text3);font-size:11px">Enter MC # above and re-run</span>',
+        live:src.fmcsa.live, weight:'Critical', link:'https://safer.fmcsa.dot.gov' },
+      { label:'Ansonia Credit Data',
+        score: src.ansonia.live ? scoreBar(src.ansonia.score) : noDataCell(),
+        live:src.ansonia.live, weight: src.ansonia.live ? '40%' : '—', link:'https://www.ansoniabd.com' },
+      { label:'D&amp;B PAYDEX',
+        score: src.dnb.live ? scoreBar(src.dnb.paydex) : noDataCell(),
+        live:src.dnb.live, weight: src.dnb.live ? '35%' : '—', link:'https://www.dnb.com' },
+      { label:'Experian Business',
+        score: src.experian.live ? scoreBar(src.experian.score) : noDataCell(),
+        live:src.experian.live, weight: src.experian.live ? '25%' : '—', link:'https://developer.experian.com' },
+      { label:'Equifax Business',
+        score: '<span style="color:var(--text3);font-size:11px">Enterprise contract required</span>',
+        live:false, weight:'—', link:'https://www.equifax.com/business' },
+      { label:'Carrier411',
+        score: src.c411.live ? gradeTag(src.c411.grade) : noDataCell(),
+        live:src.c411.live, weight:'—', link:'https://www.carrier411.com' },
+      { label:'TIA Membership',
+        score: p.known
+          ? '<strong style="color:' + (src.tia.member ? 'var(--green)' : 'var(--text2)') + '">' + (src.tia.member ? 'Yes — verified' : 'No') + '</strong>'
+          : '<a href="https://www.tianet.org" target="_blank" style="font-size:11px;color:var(--blue)">Check at TIA ↗</a>',
+        live: !!p.known, weight:'—', link:'https://www.tianet.org' },
+      { label:'BBB Rating',
+        score: '<a href="https://www.bbb.org/search?find_text=' + encodeURIComponent(p.name) + '" target="_blank" style="font-size:11px;color:var(--blue)">Look up on BBB ↗</a>',
+        live:false, weight:'—', link:'https://www.bbb.org' },
     ];
 
     for (var si = 0; si < srcRows.length; si++) {
       var sr = srcRows[si];
       html += '<tr><td><strong>' + sr.label + '</strong>' + liveTag(sr.live) + '</td>';
       html += '<td>' + sr.score + '</td>';
-      html += '<td><span class="pill ' + (sr.live ? 'pill-g' : 'pill-b') + '" style="font-size:10px">' + (sr.live ? 'Live' : 'Est') + '</span></td>';
+      html += '<td><span class="pill ' + (sr.live ? 'pill-g' : 'pill-b') + '" style="font-size:10px">' + (sr.live ? 'Live' : 'Not connected') + '</span></td>';
       html += '<td><span class="badge badge-blue" style="font-size:10px">' + sr.weight + '</span></td>';
       html += '<td><a href="' + sr.link + '" target="_blank" style="font-size:10px;color:var(--blue)">&nearr;</a></td></tr>';
     }
     html += '</tbody></table></div>';
-    if (p.liveCount < 5) {
-      html += '<div style="margin-top:10px;padding:9px 13px;background:rgba(74,143,255,.06);border:1px solid rgba(74,143,255,.2);border-radius:8px;font-size:11px;color:var(--text2)">Add Ansonia, D&B, Experian, Carrier411 keys in Settings for fully live scores.</div>';
+    var missingKeys = [];
+    if (!src.ansonia.live)  missingKeys.push('Ansonia');
+    if (!src.dnb.live)      missingKeys.push('D&amp;B');
+    if (!src.experian.live) missingKeys.push('Experian');
+    if (!src.c411.live)     missingKeys.push('Carrier411');
+    if (missingKeys.length) {
+      html += '<div style="margin-top:10px;padding:9px 13px;background:rgba(74,143,255,.06);border:1px solid rgba(74,143,255,.2);border-radius:8px;font-size:11px;color:var(--text2)">'
+        + 'Connect <strong>' + missingKeys.join(', ') + '</strong> in <a href="#" onclick="showPage(\'settings\',null);return false;" style="color:var(--blue)">Settings</a> for live credit scores.</div>';
     }
     html += '</div>'; // end source card
 
