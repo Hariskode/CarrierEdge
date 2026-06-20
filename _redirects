@@ -1,4 +1,5 @@
-/app        /app.html       302
-/factoring  /factoring-index.html  302
-/pricing    /pricing.html   302
-/legal      /legal/privacy.html    302
+/           /index.html         200
+/app        /app.html           200
+/factoring  /factoring-index.html  200
+/pricing    /pricing.html       200
+/legal      /legal/privacy.html 200
