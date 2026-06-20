@@ -4291,6 +4291,17 @@ function saveSettings(){
   };
   APP.settings = s;
   CEDB.set('ce_settings', s);
+  // Sync status badges live as user types/pastes
+  function updBadge(id, ok, okL, warnL, okCls, warnCls) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = ok ? okL : warnL;
+    el.className = 'badge ' + (ok ? (okCls||'badge-green') : (warnCls||'badge-amber'));
+  }
+  updBadge('st-anthropic', !!s.anthropicKey, '✦ AI — active',    '✦ AI — no key');
+  updBadge('st-fmcsa',     !!s.fmcsaKey,     'FMCSA — live key', 'FMCSA — demo key');
+  updBadge('st-eia',       !!s.eiaKey,        'EIA — live key',   'EIA — demo key');
+  updBadge('st-dat',       !!s.datKey,        'DAT — connected',  'DAT — not set', 'badge-green', '');
 }
 
 function applySettings(){
