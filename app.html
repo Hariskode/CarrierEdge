@@ -1204,6 +1204,28 @@ body { background:var(--layout-bg,var(--bg)); }
 .lpc-verdict.nogo    { background:rgba(240,84,84,.1);border:1px solid rgba(240,84,84,.3);color:var(--red); }
 .lpc-verdict.neutral { background:var(--bg3);border:1px solid var(--border);color:var(--text3); }
 .lpc-close { position:absolute;top:14px;right:16px;background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;line-height:1;padding:0; }
+
+/* ── Maintenance Tracker ── */
+.maint-row { display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--border); }
+.maint-row:last-child { border-bottom:none; }
+.maint-name { font-size:13px;font-weight:700; }
+.maint-meta { font-size:11px;color:var(--text3);margin-top:2px;line-height:1.5; }
+.maint-badge { font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap; }
+.maint-badge.ok   { background:rgba(34,212,122,.1);color:var(--green);border:1px solid rgba(34,212,122,.25); }
+.maint-badge.soon { background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.25); }
+.maint-badge.due  { background:rgba(240,84,84,.1);color:var(--red);border:1px solid rgba(240,84,84,.3); }
+.maint-badge.none { background:var(--bg3);color:var(--text3);border:1px solid var(--border); }
+.maint-log-form { background:var(--bg3);border-radius:8px;padding:12px;margin-top:8px;display:none;border:1px solid var(--border); }
+
+/* ── Broker Scorecard ── */
+.bs-tbl { width:100%;border-collapse:collapse; }
+.bs-tbl th { font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border); }
+.bs-tbl td { font-size:12px;padding:8px 8px;border-bottom:1px solid var(--border);vertical-align:middle; }
+.bs-tbl tr:last-child td { border-bottom:none; }
+.bs-score { font-family:var(--mono);font-weight:800; }
+.bs-flag  { font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px; }
+.bs-flag.slow { background:rgba(240,84,84,.1);color:var(--red);border:1px solid rgba(240,84,84,.25); }
+.bs-flag.ok   { background:rgba(34,212,122,.1);color:var(--green);border:1px solid rgba(34,212,122,.25); }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1294,6 +1316,11 @@ body { background:var(--layout-bg,var(--bg)); }
       <button class="nav-btn" data-label="IFTA Log" onclick="showPage('ifta',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v3H2zm0 4h5v8H2zm7 0h5v8H9z"/></svg>
         <span>IFTA Log</span>
+      </button>
+      <button class="nav-btn" data-label="Maintenance" onclick="showPage('maintenance',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.7 2.3a.5.5 0 00-.7 0l-2 2-.8-.8 2-2a3 3 0 00-3.8 3.6L4.5 9a1.5 1.5 0 002 2l3.9-3.9a3 3 0 003.6-3.8l-1.7 1.7-1.4-1.4 1.7-1.7-.9-.6z"/></svg>
+        <span>Maintenance</span>
+        <span id="maint-nav-badge" style="display:none" class="badge badge-red" style="font-size:9px;padding:1px 5px">!</span>
       </button>
       <button class="nav-btn" data-label="Finance Hub" onclick="showPage('financehub',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 4.75V9l2.5 1.5-.75 1.25-3-1.75V5.75h1.25z"/></svg>
@@ -1397,6 +1424,9 @@ body { background:var(--layout-bg,var(--bg)); }
 
       <!-- IFTA Deadline Alert -->
       <div id="ifta-deadline-alert"></div>
+
+      <!-- Maintenance Alert -->
+      <div id="maint-dashboard-alert"></div>
 
       <!-- Quick Actions -->
       <div class="quick-actions">
@@ -3104,6 +3134,50 @@ body { background:var(--layout-bg,var(--bg)); }
           </div>
         </div>
       </div>
+
+      <!-- ── Broker Scorecard ── -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-header">
+          <div class="card-title">Broker Scorecard</div>
+          <span class="badge badge-blue">Your Ratings</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.65">Rate brokers after every load. Track payment speed, communication, and load accuracy. Flag slow payers before you book the next one.</div>
+
+        <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:16px;border:1px solid var(--border)">
+          <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:var(--text)">Log a Rating</div>
+          <div class="form-grid">
+            <div class="fg"><label>Broker Name</label><input class="fi" id="bs-broker" placeholder="Echo Global Logistics"></div>
+            <div class="fg"><label>MC Number</label><input class="fi" id="bs-mc" placeholder="MC-137703"></div>
+            <div class="fg"><label>Load Date</label><input class="fi" id="bs-date" type="date"></div>
+            <div class="fg"><label>Rate Paid ($)</label><input class="fi" id="bs-rate" type="number" placeholder="2800"></div>
+            <div class="fg"><label>Days to Pay</label><input class="fi" id="bs-days" type="number" placeholder="28" min="1" max="180"></div>
+            <div class="fg">
+              <label>Communication (1–5)</label>
+              <select class="fi" id="bs-comm">
+                <option value="5">5 — Excellent</option>
+                <option value="4">4 — Good</option>
+                <option value="3" selected>3 — Average</option>
+                <option value="2">2 — Poor</option>
+                <option value="1">1 — Very poor</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Load Accuracy (1–5)</label>
+              <select class="fi" id="bs-rel">
+                <option value="5">5 — Always accurate</option>
+                <option value="4">4 — Usually accurate</option>
+                <option value="3" selected>3 — Mostly accurate</option>
+                <option value="2">2 — Often changes</option>
+                <option value="1">1 — Unreliable</option>
+              </select>
+            </div>
+            <div class="fg" style="grid-column:1/-1"><label>Notes</label><input class="fi" id="bs-notes" placeholder="Optional — detention, lumper, anything notable"></div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:10px" onclick="submitBrokerScore()">Save Rating</button>
+        </div>
+
+        <div id="bs-table"><div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">No ratings yet. Log your first broker after a load.</div></div>
+      </div>
     </div>
 
   </main>
@@ -3171,6 +3245,50 @@ body { background:var(--layout-bg,var(--bg)); }
     <div style="display:flex;gap:10px;margin-top:14px">
       <button class="btn btn-primary" onclick="saveTruck()" style="flex:1;justify-content:center">Save Truck</button>
       <button class="btn btn-ghost" onclick="closeAddTruckModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAINTENANCE TRACKER PAGE ── -->
+<div id="page-maintenance" class="page fade-in">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div class="page-title">Maintenance Tracker</div>
+        <div class="page-subtitle">Service intervals · Overdue alerts · Full history per item</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header"><div class="card-title">Current Odometer</div></div>
+    <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap">
+      <div class="fg" style="max-width:220px;margin:0">
+        <label>Odometer Reading (miles)</label>
+        <input class="fi" id="maint-odo" type="number" placeholder="e.g. 487500" oninput="saveMaintOdo()">
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-bottom:1px" onclick="renderMaintenance()">Update Status</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Service Schedule</div>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('maint-add-card').style.display='block';document.getElementById('maint-new-name').focus()">+ Add Item</button>
+    </div>
+    <div id="maint-list"><div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Loading…</div></div>
+  </div>
+
+  <div class="card" id="maint-add-card" style="margin-top:16px;display:none">
+    <div class="card-header"><div class="card-title">Add Custom Item</div></div>
+    <div class="form-grid">
+      <div class="fg"><label>Item Name</label><input class="fi" id="maint-new-name" placeholder="e.g. Water Separator Filter"></div>
+      <div class="fg"><label>Mile Interval</label><input class="fi" id="maint-new-mi" type="number" placeholder="e.g. 15000"></div>
+      <div class="fg"><label>Day Interval</label><input class="fi" id="maint-new-day" type="number" placeholder="e.g. 90"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-primary" onclick="saveMaintNewItem()">Add Item</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('maint-add-card').style.display='none'">Cancel</button>
     </div>
   </div>
 </div>
@@ -3447,6 +3565,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   refreshBackupCard();
   refreshLicenseUI();
   renderIFTAAlert();
+  renderMaintenanceAlert();
   checkOnboarding();
   setInterval(fetchDieselPrice, 3600000);
 });
@@ -3702,6 +3821,8 @@ const pageTitles = {
   repair:'Repair Pricing', market:'Market Hub', settings:'API Settings',
   fuelroute:'Fuel Route Optimizer', ifta:'IFTA State Log', creditcheck:'Credit Check',
   compliance:'Compliance Hub', financehub:'Finance Hub', businesshub:'Business Hub',
+  maintenance:'Maintenance Tracker', tracking:'Fleet Tracker', operations:'Load Operations',
+  workflow:'Edge Workflow',
 };
 
 function showPageBase(id, btn){
@@ -3736,6 +3857,7 @@ function loadSettings(){
     if(s.carrier411Key){ document.getElementById('s-carrier411-key').value = s.carrier411Key; }
     if(s.mpg)       { document.getElementById('s-mpg').value = s.mpg; }
     if(s.targetRpm) { document.getElementById('s-target-rpm').value = s.targetRpm; }
+    if(s.odometer)  { const oe = document.getElementById('maint-odo'); if(oe) oe.value = s.odometer; }
 
     // Update API status badges
     function setBadge(id, ok, okLabel, warnLabel) {
@@ -3772,6 +3894,7 @@ function saveSettings(){
     carrier411Key:document.getElementById('s-carrier411-key')?.value || '',
     mpg:          document.getElementById('s-mpg')?.value          || '',
     targetRpm:    document.getElementById('s-target-rpm')?.value   || '',
+    odometer:     document.getElementById('maint-odo')?.value      || '',
   };
   APP.settings = s;
   CEDB.set('ce_settings', s);
@@ -4902,8 +5025,9 @@ function showPage(id, btn) {
   if (id === 'compliance')  { initComplianceCalendar(); }
   if (id === 'dashboard')   { renderDashboard(); }
   if (id === 'financehub')  { calcCF(); calcBreakEven(); generateTaxSum(); }
-  if (id === 'creditcheck') { renderWatchlist(); }
-  if (id === 'businesshub') { renderBrokerScores(); renderCRM(); }
+  if (id === 'creditcheck')  { renderWatchlist(); renderBrokerScorecard(); }
+  if (id === 'businesshub')  { renderBrokerScores(); renderCRM(); }
+  if (id === 'maintenance')  { renderMaintenance(); }
   if (id === 'operations')  { const d=document.getElementById('ops-diesel'); if(d&&!d.value&&APP.dieselPrice) d.value=APP.dieselPrice.toFixed(3); }
   if (id === 'settings')    { refreshBackupCard(); }
   // Update layout chrome
@@ -9066,6 +9190,262 @@ function calcLPC() {
     <div class="lpc-verdict ${vCls}">${vText}</div>
     ${!targetRpm ? '<div style="font-size:10px;color:var(--text3);text-align:center;margin-top:8px">Set a Target RPM in Settings for a precise go/no-go threshold</div>' : ''}
   `;
+}
+
+// ── MAINTENANCE TRACKER ────────────────────────────────
+const MAINT_DEFAULTS = [
+  { id:1,  name:'Oil & Filter Change',       mileInterval:15000,  dayInterval:90,   lastMiles:null, lastDate:null, notes:'' },
+  { id:2,  name:'DEF Fluid Check',           mileInterval:5000,   dayInterval:null,  lastMiles:null, lastDate:null, notes:'' },
+  { id:3,  name:'Tire Inspection',           mileInterval:10000,  dayInterval:30,   lastMiles:null, lastDate:null, notes:'' },
+  { id:4,  name:'Brake Inspection',          mileInterval:25000,  dayInterval:90,   lastMiles:null, lastDate:null, notes:'' },
+  { id:5,  name:'Air Filter',                mileInterval:50000,  dayInterval:180,  lastMiles:null, lastDate:null, notes:'' },
+  { id:6,  name:'Fuel Filter',               mileInterval:25000,  dayInterval:null,  lastMiles:null, lastDate:null, notes:'' },
+  { id:7,  name:'Coolant Flush',             mileInterval:100000, dayInterval:730,  lastMiles:null, lastDate:null, notes:'' },
+  { id:8,  name:'Transmission Service',      mileInterval:60000,  dayInterval:null,  lastMiles:null, lastDate:null, notes:'' },
+  { id:9,  name:'DOT Annual Inspection',     mileInterval:null,   dayInterval:365,  lastMiles:null, lastDate:null, notes:'' },
+  { id:10, name:'PM (Preventive Maintenance)',mileInterval:25000,  dayInterval:90,   lastMiles:null, lastDate:null, notes:'' },
+];
+
+function getMaintItems() {
+  let items = CEDB.get('ce_maintenance');
+  if (!items || !items.length) {
+    items = MAINT_DEFAULTS.map(i => Object.assign({}, i));
+    CEDB.set('ce_maintenance', items);
+  }
+  return items;
+}
+
+function saveMaintItems(items) {
+  CEDB.set('ce_maintenance', items);
+}
+
+function getMaintStatus(item, odo) {
+  const hasLast = item.lastMiles != null || item.lastDate != null;
+  if (!hasLast) return { cls: 'none', text: 'Not logged' };
+
+  let milesLeft = Infinity, daysLeft = Infinity;
+
+  if (item.mileInterval && item.lastMiles != null && odo) {
+    const nextMi = item.lastMiles + item.mileInterval;
+    milesLeft = nextMi - odo;
+  }
+  if (item.dayInterval && item.lastDate) {
+    const daysSince = Math.floor((Date.now() - new Date(item.lastDate)) / 86400000);
+    daysLeft = item.dayInterval - daysSince;
+  }
+
+  const worst = Math.min(milesLeft === Infinity ? daysLeft : milesLeft / 300, daysLeft);
+  if (milesLeft <= 0 || daysLeft <= 0) return { cls: 'due', text: milesLeft <= 0 ? `${Math.abs(Math.round(milesLeft)).toLocaleString()} mi overdue` : `${Math.abs(Math.round(daysLeft))}d overdue` };
+  if (milesLeft < 2500 || daysLeft < 14) return { cls: 'soon', text: milesLeft < daysLeft * 300 ? `~${Math.round(milesLeft).toLocaleString()} mi left` : `${Math.round(daysLeft)}d left` };
+  return { cls: 'ok', text: milesLeft < daysLeft * 300 ? `~${Math.round(milesLeft).toLocaleString()} mi left` : `${Math.round(daysLeft)}d left` };
+}
+
+function renderMaintenance() {
+  const items = getMaintItems();
+  const odo   = parseFloat(document.getElementById('maint-odo')?.value) || 0;
+  const list  = document.getElementById('maint-list');
+  if (!list) return;
+  if (!items.length) { list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">No items. Add one above.</div>'; return; }
+
+  list.innerHTML = items.map(item => {
+    const st = getMaintStatus(item, odo);
+    const lastInfo = item.lastDate ? `Last: ${new Date(item.lastDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}${item.lastMiles ? ' · ' + item.lastMiles.toLocaleString() + ' mi' : ''}` : (item.lastMiles ? `Last: ${item.lastMiles.toLocaleString()} mi` : '');
+    const interval = [item.mileInterval ? `Every ${item.mileInterval.toLocaleString()} mi` : '', item.dayInterval ? `${item.dayInterval}d` : ''].filter(Boolean).join(' / ');
+    return `<div class="maint-row">
+      <div>
+        <div class="maint-name">${item.name}</div>
+        <div class="maint-meta">${interval}${lastInfo ? ' · ' + lastInfo : ''}</div>
+        <div class="maint-log-form" id="maint-form-${item.id}">
+          <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end">
+            <div class="fg" style="margin:0"><label style="font-size:10px">Service Date</label><input class="fi" id="maint-log-date-${item.id}" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+            <div class="fg" style="margin:0"><label style="font-size:10px">Odometer</label><input class="fi" id="maint-log-mi-${item.id}" type="number" placeholder="${odo||'miles'}" value="${odo||''}"></div>
+            <button class="btn btn-primary btn-sm" onclick="saveService(${item.id})">Save</button>
+          </div>
+          <div class="fg" style="margin:8px 0 0"><label style="font-size:10px">Notes (optional)</label><input class="fi" id="maint-log-notes-${item.id}" placeholder="Shop, parts used, etc."></div>
+        </div>
+      </div>
+      <span class="maint-badge ${st.cls}">${st.text}</span>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="toggleMaintForm(${item.id})">Log Service</button>
+        <button class="btn btn-ghost btn-sm" style="font-size:10px;color:var(--text3);padding:2px 6px" onclick="deleteMaintItem(${item.id})">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  renderMaintenanceAlert();
+}
+
+function toggleMaintForm(id) {
+  const f = document.getElementById('maint-form-' + id);
+  if (f) f.style.display = f.style.display === 'block' ? 'none' : 'block';
+}
+
+function saveService(id) {
+  const items = getMaintItems();
+  const item  = items.find(i => i.id === id);
+  if (!item) return;
+  const date  = document.getElementById('maint-log-date-' + id)?.value;
+  const miles = parseFloat(document.getElementById('maint-log-mi-' + id)?.value) || null;
+  const notes = document.getElementById('maint-log-notes-' + id)?.value || '';
+  if (date)  item.lastDate  = date;
+  if (miles) item.lastMiles = miles;
+  if (notes) item.notes     = notes;
+  saveMaintItems(items);
+  if (miles) saveMaintOdoValue(miles);
+  renderMaintenance();
+  showToast('✓ Service logged for ' + item.name);
+}
+
+function saveMaintOdo() {
+  const val = parseFloat(document.getElementById('maint-odo')?.value);
+  if (val) saveMaintOdoValue(val);
+}
+
+function saveMaintOdoValue(val) {
+  const s = CEDB.get('ce_settings') || {};
+  s.odometer = val;
+  APP.settings = Object.assign(APP.settings || {}, { odometer: val });
+  CEDB.set('ce_settings', s);
+}
+
+function addMaintItem() {
+  document.getElementById('maint-add-card').style.display = 'block';
+  document.getElementById('maint-new-name').focus();
+}
+
+function saveMaintNewItem() {
+  const name = document.getElementById('maint-new-name')?.value.trim();
+  if (!name) { showToast('Enter an item name'); return; }
+  const mi  = parseFloat(document.getElementById('maint-new-mi')?.value) || null;
+  const day = parseFloat(document.getElementById('maint-new-day')?.value) || null;
+  const items = getMaintItems();
+  const newId = Math.max(0, ...items.map(i => i.id)) + 1;
+  items.push({ id: newId, name, mileInterval: mi, dayInterval: day, lastMiles: null, lastDate: null, notes: '' });
+  saveMaintItems(items);
+  document.getElementById('maint-add-card').style.display = 'none';
+  document.getElementById('maint-new-name').value = '';
+  document.getElementById('maint-new-mi').value = '';
+  document.getElementById('maint-new-day').value = '';
+  renderMaintenance();
+  showToast('✓ ' + name + ' added');
+}
+
+function deleteMaintItem(id) {
+  const items = getMaintItems().filter(i => i.id !== id);
+  saveMaintItems(items);
+  renderMaintenance();
+}
+
+function renderMaintenanceAlert() {
+  const el  = document.getElementById('maint-dashboard-alert');
+  if (!el) return;
+  const odo   = parseFloat(APP.settings?.odometer) || 0;
+  const items = getMaintItems();
+  const due   = items.filter(i => getMaintStatus(i, odo).cls === 'due');
+  const soon  = items.filter(i => getMaintStatus(i, odo).cls === 'soon');
+  const badge = document.getElementById('maint-nav-badge');
+
+  if (!due.length && !soon.length) { el.innerHTML = ''; if(badge) badge.style.display='none'; return; }
+  if (badge) badge.style.display = 'inline';
+
+  const cls  = due.length ? 'red' : 'amber';
+  const icon = due.length ? '🔧' : '⚠️';
+  const count = due.length || soon.length;
+  const label = due.length
+    ? `${due.length} maintenance item${due.length>1?'s':''} overdue`
+    : `${soon.length} maintenance item${soon.length>1?'s':''} due soon`;
+  const names = (due.length ? due : soon).slice(0, 3).map(i => i.name).join(', ');
+
+  el.innerHTML = `<div class="ifta-alert ${cls}" style="margin-bottom:0">
+    <div class="ifta-alert-icon">${icon}</div>
+    <div class="ifta-alert-body">
+      <div class="ifta-alert-title">${label}</div>
+      <div class="ifta-alert-sub">${names}${count > 3 ? ' + more' : ''}</div>
+    </div>
+    <button class="ifta-alert-btn btn btn-ghost" onclick="showPage('maintenance',document.querySelector('[onclick*=maintenance]'))">Open Tracker →</button>
+  </div><div style="margin-bottom:16px"></div>`;
+}
+
+// ── BROKER SCORECARD ───────────────────────────────────
+function submitBrokerScore() {
+  const broker = document.getElementById('bs-broker')?.value.trim();
+  if (!broker) { showToast('Enter a broker name'); return; }
+  const entry = {
+    id:      Date.now(),
+    broker,
+    mc:      document.getElementById('bs-mc')?.value.trim()   || '',
+    date:    document.getElementById('bs-date')?.value         || new Date().toISOString().slice(0,10),
+    rate:    parseFloat(document.getElementById('bs-rate')?.value)  || 0,
+    payDays: parseInt(document.getElementById('bs-days')?.value)    || 0,
+    comm:    parseInt(document.getElementById('bs-comm')?.value)    || 3,
+    rel:     parseInt(document.getElementById('bs-rel')?.value)     || 3,
+    notes:   document.getElementById('bs-notes')?.value.trim() || '',
+  };
+  const scores = CEDB.get('ce_broker_scores') || [];
+  scores.unshift(entry);
+  CEDB.set('ce_broker_scores', scores);
+  ['bs-broker','bs-mc','bs-date','bs-rate','bs-days','bs-notes'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('bs-comm').value = '3';
+  document.getElementById('bs-rel').value  = '3';
+  renderBrokerScorecard();
+  showToast('✓ Rating saved for ' + broker);
+}
+
+function deleteBrokerScore(id) {
+  const scores = (CEDB.get('ce_broker_scores') || []).filter(s => s.id !== id);
+  CEDB.set('ce_broker_scores', scores);
+  renderBrokerScorecard();
+}
+
+function renderBrokerScorecard() {
+  const el = document.getElementById('bs-table');
+  if (!el) return;
+  const scores = CEDB.get('ce_broker_scores') || [];
+  if (!scores.length) {
+    el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">No ratings yet. Log your first broker after a load.</div>';
+    return;
+  }
+
+  // Build per-broker aggregate
+  const map = {};
+  scores.forEach(s => {
+    const key = s.broker.toLowerCase();
+    if (!map[key]) map[key] = { broker: s.broker, mc: s.mc, entries: [] };
+    map[key].entries.push(s);
+  });
+
+  const rows = Object.values(map).map(b => {
+    const n       = b.entries.length;
+    const avgPay  = Math.round(b.entries.reduce((a,e) => a + (e.payDays||0), 0) / n);
+    const avgComm = (b.entries.reduce((a,e) => a + e.comm, 0) / n).toFixed(1);
+    const avgRel  = (b.entries.reduce((a,e) => a + e.rel,  0) / n).toFixed(1);
+    const slow    = avgPay > 30;
+    const flagCls = slow ? 'slow' : 'ok';
+    const flagTxt = slow ? `Slow pay (${avgPay}d)` : `Fast pay (${avgPay}d)`;
+    return { broker: b.broker, mc: b.mc, n, avgPay, avgComm, avgRel, slow, flagCls, flagTxt, entries: b.entries };
+  }).sort((a,b) => b.n - a.n);
+
+  el.innerHTML = `<table class="bs-tbl">
+    <thead><tr>
+      <th>Broker</th><th>Loads</th><th>Avg Pay</th><th>Comm</th><th>Accuracy</th><th></th>
+    </tr></thead>
+    <tbody>
+    ${rows.map(r => `<tr>
+      <td><div style="font-weight:700">${r.broker}</div><div style="font-size:10px;color:var(--text3)">${r.mc || '—'}</div></td>
+      <td><span class="bs-score">${r.n}</span></td>
+      <td><span class="bs-flag ${r.flagCls}">${r.flagTxt}</span></td>
+      <td><span class="bs-score" style="color:${r.avgComm>=4?'var(--green)':r.avgComm>=3?'var(--amber)':'var(--red)'}">${r.avgComm}★</span></td>
+      <td><span class="bs-score" style="color:${r.avgRel>=4?'var(--green)':r.avgRel>=3?'var(--amber)':'var(--red)'}">${r.avgRel}★</span></td>
+      <td><button class="btn btn-ghost btn-sm" style="font-size:10px;padding:2px 7px;color:var(--text3)" onclick="deleteBrokerScore(${r.entries[0].id})">✕</button></td>
+    </tr>`).join('')}
+    </tbody>
+  </table>
+  <div style="margin-top:10px">
+    ${scores.slice(0,10).map(s => `<div style="font-size:11px;color:var(--text3);padding:5px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <span><strong style="color:var(--text)">${s.broker}</strong> · ${new Date(s.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})} · ${s.rate?'$'+s.rate.toLocaleString():''} · ${s.payDays?s.payDays+'d to pay':''} ${s.notes?'· '+s.notes:''}</span>
+      <button class="btn btn-ghost btn-sm" style="font-size:10px;padding:1px 6px;color:var(--text3);flex-shrink:0" onclick="deleteBrokerScore(${s.id})">✕</button>
+    </div>`).join('')}
+  </div>`;
 }
 
 // ── IFTA DEADLINE ALERT ────────────────────────────────
