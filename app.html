@@ -1245,6 +1245,35 @@ body { background:var(--layout-bg,var(--bg)); }
 .trl-exp-row { display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px; }
 .trl-exp-row:last-child { border-bottom:none; }
 .trailer-square { width:20px;height:20px;border-radius:3px;border:2px solid #080e1c;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:7px;font-weight:800;color:#fff;cursor:pointer; }
+
+/* ── Driver Management ── */
+.driver-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:16px; }
+.driver-card { background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;transition:border-color .15s; }
+.driver-card:hover { border-color:var(--border2); }
+.driver-name { font-size:14px;font-weight:800; }
+.driver-sub  { font-size:11px;color:var(--text3);margin-top:2px;line-height:1.5; }
+.driver-status-badge { font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap; }
+.driver-status-badge.active     { background:rgba(34,212,122,.1);color:var(--green);border:1px solid rgba(34,212,122,.25); }
+.driver-status-badge.inactive   { background:var(--bg3);color:var(--text3);border:1px solid var(--border); }
+.driver-status-badge.on_leave   { background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.25); }
+.driver-status-badge.terminated { background:rgba(240,84,84,.1);color:var(--red);border:1px solid rgba(240,84,84,.25); }
+.comp-health { display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;margin-top:7px; }
+.comp-health.green { background:rgba(34,212,122,.08);color:var(--green);border:1px solid rgba(34,212,122,.2); }
+.comp-health.amber { background:rgba(245,166,35,.08);color:var(--amber);border:1px solid rgba(245,166,35,.2); }
+.comp-health.red   { background:rgba(240,84,84,.08);color:var(--red);border:1px solid rgba(240,84,84,.25); }
+.comp-tbl { width:100%;border-collapse:collapse; }
+.comp-tbl th { font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap; }
+.comp-tbl td { font-size:12px;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle; }
+.comp-tbl tr:last-child td { border-bottom:none; }
+.comp-cell { font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap; }
+.comp-cell.ok   { background:rgba(34,212,122,.1);color:var(--green);border:1px solid rgba(34,212,122,.2); }
+.comp-cell.warn { background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.2); }
+.comp-cell.due  { background:rgba(240,84,84,.1);color:var(--red);border:1px solid rgba(240,84,84,.25); }
+.comp-cell.none { background:var(--bg3);color:var(--text3);border:1px solid var(--border); }
+.dqf-item { display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px; }
+.dqf-item:last-child { border-bottom:none; }
+.dqf-item input[type=checkbox] { width:15px;height:15px;accent-color:var(--green);flex-shrink:0;cursor:pointer; }
+.pay-deduct-row { display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;margin-bottom:6px; }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1345,6 +1374,11 @@ body { background:var(--layout-bg,var(--bg)); }
         <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="5" width="14" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M3 12v2M13 12v2M1 8h14" stroke="currentColor" stroke-width="1.3"/><circle cx="4" cy="13" r="1.2" fill="currentColor"/><circle cx="12" cy="13" r="1.2" fill="currentColor"/></svg>
         <span>Trailers</span>
         <span id="trailer-nav-badge" style="display:none" class="badge badge-red" style="font-size:9px;padding:1px 5px">!</span>
+      </button>
+      <button class="nav-btn" data-label="Drivers" onclick="showPage('drivers',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><circle cx="6" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M1 14c0-3.3 2.2-5 5-5s5 1.7 5 5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M11 2a2 2 0 010 4M15 14c0-2.5-1.5-4-4-4" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>
+        <span>Drivers</span>
+        <span id="driver-nav-badge" style="display:none" class="badge badge-red" style="font-size:9px;padding:1px 5px">!</span>
       </button>
       <button class="nav-btn" data-label="Finance Hub" onclick="showPage('financehub',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 4.75V9l2.5 1.5-.75 1.25-3-1.75V5.75h1.25z"/></svg>
@@ -1454,6 +1488,9 @@ body { background:var(--layout-bg,var(--bg)); }
 
       <!-- Trailer Maintenance Alert -->
       <div id="trailer-maint-alert"></div>
+
+      <!-- Driver Compliance Alert -->
+      <div id="driver-compliance-alert"></div>
 
       <!-- Quick Actions -->
       <div class="quick-actions">
@@ -3276,6 +3313,225 @@ body { background:var(--layout-bg,var(--bg)); }
   </div>
 </div>
 
+<!-- ── DRIVER MANAGEMENT PAGE ── -->
+<div id="page-drivers" class="page fade-in">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div class="page-title">Driver Management</div>
+        <div class="page-subtitle">Profiles · CDL & medical compliance · Pay calculator · Driver qualification files</div>
+      </div>
+      <button class="btn btn-primary" onclick="openDriverForm()">+ Add Driver</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px">
+    <div class="kpi"><div class="kpi-label">Total Drivers</div><div class="kpi-val" id="drv-kpi-total">0</div><div class="kpi-sub">on roster</div></div>
+    <div class="kpi"><div class="kpi-label">Active</div><div class="kpi-val" style="color:var(--green)" id="drv-kpi-active">0</div><div class="kpi-sub">driving</div></div>
+    <div class="kpi"><div class="kpi-label">Compliance Issues</div><div class="kpi-val" style="color:var(--red)" id="drv-kpi-issues">0</div><div class="kpi-sub">need attention</div></div>
+    <div class="kpi"><div class="kpi-label">DQF Complete</div><div class="kpi-val" style="color:var(--blue)" id="drv-kpi-dqf">0</div><div class="kpi-sub">of active drivers</div></div>
+  </div>
+
+  <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="btn btn-primary" id="dtab-roster"  onclick="switchDriverTab('roster')">Roster</button>
+    <button class="btn btn-ghost"   id="dtab-comp"    onclick="switchDriverTab('comp')">Compliance Center</button>
+    <button class="btn btn-ghost"   id="dtab-pay"     onclick="switchDriverTab('pay')">Pay Calculator</button>
+    <button class="btn btn-ghost"   id="dtab-log"     onclick="switchDriverTab('log')">Compliance Log</button>
+  </div>
+
+  <!-- Roster Tab -->
+  <div id="dts-roster">
+    <div class="driver-grid" id="driver-cards">
+      <div style="text-align:center;padding:30px;color:var(--text3);font-size:13px;grid-column:1/-1">No drivers yet. Click "+ Add Driver" to get started.</div>
+    </div>
+  </div>
+
+  <!-- Compliance Center Tab -->
+  <div id="dts-comp" style="display:none">
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header"><div class="card-title">Fleet Compliance Overview</div><span class="badge badge-blue">FMCSA 49 CFR 391</span></div>
+      <div style="overflow-x:auto"><table class="comp-tbl" id="comp-overview-table">
+        <thead><tr>
+          <th>Driver</th><th>CDL Expiry</th><th>Med Cert</th><th>MVR Pull</th><th>Drug Test</th><th>DQF</th><th></th>
+        </tr></thead>
+        <tbody id="comp-overview-body"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">No drivers on roster.</td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="card" id="dqf-card" style="display:none">
+      <div class="card-header">
+        <div class="card-title" id="dqf-title">Driver Qualification File</div>
+        <span class="badge badge-blue" id="dqf-progress">0/7</span>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.65">FMCSA requires a complete DQF for every driver. Check off each item when the document is on file.</div>
+      <div id="dqf-list"></div>
+    </div>
+  </div>
+
+  <!-- Pay Calculator Tab -->
+  <div id="dts-pay" style="display:none">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start" id="pay-calc-grid">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Pay Calculator</div></div>
+        <div class="fg"><label>Driver</label>
+          <select class="fi" id="pay-drv-sel" onchange="renderPayCalc()">
+            <option value="">-- select driver --</option>
+          </select>
+        </div>
+        <div id="pay-drv-meta" style="font-size:11px;color:var(--text3);margin:6px 0 12px;padding:8px;background:var(--bg3);border-radius:7px;display:none"></div>
+        <div class="form-grid" style="margin-top:10px">
+          <div class="fg"><label>Gross Miles</label><input class="fi" id="pay-miles" type="number" placeholder="920" oninput="calcDriverPay()"></div>
+          <div class="fg"><label>Load Rate ($) <span style="color:var(--text3);font-size:10px">for % pay</span></label><input class="fi" id="pay-rate" type="number" placeholder="2800" oninput="calcDriverPay()"></div>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+            Deductions
+            <button class="btn btn-ghost btn-sm" onclick="addPayDeductRow()">+ Add</button>
+          </div>
+          <div id="pay-deduct-list"></div>
+        </div>
+      </div>
+      <div class="card" id="pay-result-card">
+        <div class="card-header"><div class="card-title">Pay Breakdown</div></div>
+        <div id="pay-result"><div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Select a driver and enter miles to calculate.</div></div>
+        <button class="btn btn-primary" id="pay-log-btn" style="display:none;width:100%;margin-top:12px;justify-content:center" onclick="logDriverPay()">Log as Pay Record</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-header">
+        <div class="card-title">Pay History</div>
+        <select class="fi" id="pay-hist-sel" style="max-width:220px" onchange="renderPayHistory()">
+          <option value="">All drivers</option>
+        </select>
+      </div>
+      <div id="pay-history"></div>
+    </div>
+  </div>
+
+  <!-- Compliance Log Tab -->
+  <div id="dts-log" style="display:none">
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header"><div class="card-title">Log Compliance Event</div></div>
+      <div class="form-grid">
+        <div class="fg"><label>Driver</label>
+          <select class="fi" id="clog-drv-sel">
+            <option value="">-- select driver --</option>
+          </select>
+        </div>
+        <div class="fg"><label>Event Type</label>
+          <select class="fi" id="clog-type">
+            <option value="drug_test">Drug Test</option>
+            <option value="mvr">MVR Pull</option>
+            <option value="road_test">Road Test</option>
+            <option value="annual_review">Annual Review</option>
+            <option value="training">Training</option>
+            <option value="cert_violations">Cert of Violations</option>
+          </select>
+        </div>
+        <div class="fg"><label>Date</label><input class="fi" id="clog-date" type="date" value=""></div>
+        <div class="fg"><label>Result / Outcome</label>
+          <select class="fi" id="clog-result">
+            <option value="negative">Negative</option>
+            <option value="positive">Positive</option>
+            <option value="refusal">Refusal</option>
+            <option value="pass">Pass</option>
+            <option value="fail">Fail</option>
+            <option value="complete">Complete</option>
+            <option value="na">N/A</option>
+          </select>
+        </div>
+        <div class="fg" style="grid-column:1/-1"><label>Notes</label><input class="fi" id="clog-notes" placeholder="Lab, provider, violations noted, etc."></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:10px" onclick="saveComplianceEvent()">Save Event</button>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Compliance Event History</div>
+        <select class="fi" id="clog-filter-sel" style="max-width:220px" onchange="renderComplianceLog()">
+          <option value="">All drivers</option>
+        </select>
+      </div>
+      <div id="clog-list"><div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">No events logged yet.</div></div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Driver Form -->
+  <div class="card" id="drv-form-card" style="display:none;margin-top:16px">
+    <div class="card-header">
+      <div class="card-title" id="drv-form-title">Add Driver</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeDriverForm()">✕ Close</button>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Profile</div>
+    <div class="form-grid">
+      <div class="fg"><label>Full Name *</label><input class="fi" id="drv-f-name" placeholder="John Smith"></div>
+      <div class="fg"><label>Status</label>
+        <select class="fi" id="drv-f-status">
+          <option value="active">Active</option><option value="inactive">Inactive</option>
+          <option value="on_leave">On Leave</option><option value="terminated">Terminated</option>
+        </select>
+      </div>
+      <div class="fg"><label>Phone</label><input class="fi" id="drv-f-phone" type="tel" placeholder="555-123-4567"></div>
+      <div class="fg"><label>Email</label><input class="fi" id="drv-f-email" type="email" placeholder="john@example.com"></div>
+      <div class="fg"><label>Emergency Contact</label><input class="fi" id="drv-f-emg-name" placeholder="Jane Smith"></div>
+      <div class="fg"><label>Emergency Phone</label><input class="fi" id="drv-f-emg-phone" type="tel" placeholder="555-987-6543"></div>
+      <div class="fg"><label>Home State</label>
+        <select class="fi" id="drv-f-state"><option value="">—</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>FL</option><option>GA</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VA</option><option>WA</option><option>WI</option><option>WY</option></select>
+      </div>
+      <div class="fg"><label>Hire Date</label><input class="fi" id="drv-f-hire" type="date"></div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px">CDL &amp; Medical</div>
+    <div class="form-grid">
+      <div class="fg"><label>CDL Number</label><input class="fi" id="drv-f-cdl-num" placeholder="TX1234567"></div>
+      <div class="fg"><label>CDL Class</label>
+        <select class="fi" id="drv-f-cdl-class"><option value="A">Class A</option><option value="B">Class B</option><option value="C">Class C</option></select>
+      </div>
+      <div class="fg"><label>CDL State</label>
+        <select class="fi" id="drv-f-cdl-state"><option value="">—</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>FL</option><option>GA</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VA</option><option>WA</option><option>WI</option><option>WY</option></select>
+      </div>
+      <div class="fg"><label>CDL Expiry</label><input class="fi" id="drv-f-cdl-exp" type="date"></div>
+      <div class="fg"><label>Endorsements</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px" id="drv-f-endorse-wrap">
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" value="H" id="end-H" style="accent-color:var(--green)"> H — HazMat</label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" value="N" id="end-N" style="accent-color:var(--green)"> N — Tanker</label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" value="T" id="end-T" style="accent-color:var(--green)"> T — Doubles/Triples</label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" value="P" id="end-P" style="accent-color:var(--green)"> P — Passenger</label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" value="X" id="end-X" style="accent-color:var(--green)"> X — HazMat+Tanker</label>
+        </div>
+      </div>
+      <div class="fg"><label>Medical Cert Expiry</label><input class="fi" id="drv-f-med-exp" type="date"></div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px">Drug &amp; Alcohol / MVR</div>
+    <div class="form-grid">
+      <div class="fg"><label>Pre-Employment Drug Test Date</label><input class="fi" id="drv-f-pre-drug" type="date"></div>
+      <div class="fg"><label>Last Random Drug Test</label><input class="fi" id="drv-f-last-drug" type="date"></div>
+      <div class="fg"><label>Drug Consortium</label><input class="fi" id="drv-f-consortium" placeholder="e.g. C&amp;A Testing Inc"></div>
+      <div class="fg"><label>Last MVR Pull</label><input class="fi" id="drv-f-mvr" type="date"></div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px">Pay Structure</div>
+    <div class="form-grid">
+      <div class="fg"><label>Pay Type</label>
+        <select class="fi" id="drv-f-pay-type" onchange="updatePayRateLabel()">
+          <option value="cpm">Cents Per Mile (CPM)</option>
+          <option value="pct">% of Load Rate</option>
+          <option value="flat">Flat Per Load</option>
+          <option value="hr">Hourly</option>
+        </select>
+      </div>
+      <div class="fg"><label id="drv-pay-rate-label">Rate ($/mi)</label><input class="fi" id="drv-f-pay-rate" type="number" placeholder="0.55" step="0.01"></div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px">Assignment &amp; Notes</div>
+    <div class="form-grid">
+      <div class="fg"><label>Assigned Truck</label><input class="fi" id="drv-f-truck" placeholder="e.g. T-1"></div>
+      <div class="fg"><label>Assigned Trailer</label><input class="fi" id="drv-f-trailer" placeholder="e.g. TRL-101"></div>
+      <div class="fg" style="grid-column:1/-1"><label>Notes</label><input class="fi" id="drv-f-notes" placeholder="Optional"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="saveDriverForm()">Save Driver</button>
+      <button class="btn btn-ghost" onclick="closeDriverForm()">Cancel</button>
+      <button class="btn btn-ghost" id="drv-delete-btn" style="color:var(--red);margin-left:auto;display:none" onclick="deleteDriverConfirm()">Delete Driver</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── TRAILER FLEET PAGE ── -->
 <div id="page-trailers" class="page fade-in">
   <div class="page-header">
@@ -3702,6 +3958,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderIFTAAlert();
   renderMaintenanceAlert();
   renderTrailerMaintAlert();
+  renderDriverComplianceAlert();
   checkOnboarding();
   setInterval(fetchDieselPrice, 3600000);
 });
@@ -3958,7 +4215,7 @@ const pageTitles = {
   fuelroute:'Fuel Route Optimizer', ifta:'IFTA State Log', creditcheck:'Credit Check',
   compliance:'Compliance Hub', financehub:'Finance Hub', businesshub:'Business Hub',
   maintenance:'Maintenance Tracker', tracking:'Fleet Tracker', operations:'Load Operations',
-  workflow:'Edge Workflow', trailers:'Trailer Fleet',
+  workflow:'Edge Workflow', trailers:'Trailer Fleet', drivers:'Driver Management',
 };
 
 function showPageBase(id, btn){
@@ -5165,6 +5422,7 @@ function showPage(id, btn) {
   if (id === 'businesshub')  { renderBrokerScores(); renderCRM(); }
   if (id === 'maintenance')  { renderMaintenance(); }
   if (id === 'trailers')    { renderTrailers(); }
+  if (id === 'drivers')     { renderDrivers(); renderDeductRows(); const cd=document.getElementById('clog-date'); if(cd&&!cd.value) cd.value=new Date().toISOString().slice(0,10); }
   if (id === 'operations')  { const d=document.getElementById('ops-diesel'); if(d&&!d.value&&APP.dieselPrice) d.value=APP.dieselPrice.toFixed(3); }
   if (id === 'settings')    { refreshBackupCard(); }
   // Update layout chrome
@@ -9500,6 +9758,582 @@ function renderMaintenanceAlert() {
       <div class="ifta-alert-sub">${names}${count > 3 ? ' + more' : ''}</div>
     </div>
     <button class="ifta-alert-btn btn btn-ghost" onclick="showPage('maintenance',document.querySelector('[onclick*=maintenance]'))">Open Tracker →</button>
+  </div><div style="margin-bottom:16px"></div>`;
+}
+
+// ── DRIVER MANAGEMENT ──────────────────────────────────
+const DQF_ITEMS = [
+  { key:'application',    label:'Application for Employment' },
+  { key:'initialMvr',    label:'Initial MVR (Motor Vehicle Record)' },
+  { key:'roadTest',      label:'Road Test Certificate (or equivalent)' },
+  { key:'medCert',       label:'Medical Certificate (current on file)' },
+  { key:'preEmployDrug', label:'Pre-Employment Drug Test Result' },
+  { key:'annualReview',  label:'Annual Review of Driving Record' },
+  { key:'certViolations',label:'Annual Certificate of Violations' },
+];
+const DRV_STATUS_LBL = { active:'Active', inactive:'Inactive', on_leave:'On Leave', terminated:'Terminated' };
+const PAY_TYPE_LBL   = { cpm:'$/mi', pct:'% of load', flat:'$/load', hr:'$/hr' };
+const CLOG_TYPE_LBL  = { drug_test:'Drug Test', mvr:'MVR Pull', road_test:'Road Test', annual_review:'Annual Review', training:'Training', cert_violations:'Cert of Violations' };
+let _editDriverId = null;
+let _payDeductions = [];
+
+function getDrivers()             { return CEDB.get('ce_drivers') || []; }
+function saveDrivers(arr)         { CEDB.set('ce_drivers', arr); }
+function getDriverPayLog()        { return CEDB.get('ce_driver_pay') || []; }
+function saveDriverPayLog(arr)    { CEDB.set('ce_driver_pay', arr); }
+function getComplianceEvents()    { return CEDB.get('ce_compliance_events') || []; }
+function saveComplianceEvents(a)  { CEDB.set('ce_compliance_events', a); }
+function getDQF(driverId) {
+  const all = CEDB.get('ce_dqf') || {};
+  return all[driverId] || {};
+}
+function saveDQF(driverId, obj) {
+  const all = CEDB.get('ce_dqf') || {};
+  all[driverId] = obj;
+  CEDB.set('ce_dqf', all);
+}
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  return Math.floor((new Date(dateStr) - new Date()) / 86400000);
+}
+function daysSince(dateStr) {
+  if (!dateStr) return null;
+  return Math.floor((new Date() - new Date(dateStr)) / 86400000);
+}
+
+function getDriverComplianceStatus(d) {
+  const issues = [];
+  const check = (label, days, threshAmber, threshRed) => {
+    if (days === null) return;
+    if (days < 0)           issues.push({ level:'red',   msg: label + ' expired' });
+    else if (days <= threshRed)   issues.push({ level:'red',   msg: label + ' in ' + days + 'd' });
+    else if (days <= threshAmber) issues.push({ level:'amber', msg: label + ' in ' + days + 'd' });
+  };
+  check('CDL expires',      daysUntil(d.cdlExpiry),     90, 30);
+  check('Med cert expires', daysUntil(d.medCertExpiry), 90, 30);
+  const mvrAge = daysSince(d.lastMvrPull);
+  if (mvrAge === null) issues.push({ level:'amber', msg: 'MVR not on file' });
+  else if (mvrAge > 365) issues.push({ level:'red',   msg: 'MVR overdue (' + mvrAge + 'd)' });
+  else if (mvrAge > 300) issues.push({ level:'amber', msg: 'MVR due in ' + (365-mvrAge) + 'd' });
+  const curYear = new Date().getFullYear().toString();
+  const events  = getComplianceEvents().filter(e => e.driverId === d.id);
+  const hasRandThisYear = events.some(e => e.type === 'drug_test' && e.date?.startsWith(curYear) && e.result === 'negative');
+  if (!d.preEmployDrug) issues.push({ level:'amber', msg: 'Pre-employ drug not logged' });
+  const cls = issues.some(i => i.level === 'red') ? 'red' : issues.some(i => i.level === 'amber') ? 'amber' : 'green';
+  return { cls, issues };
+}
+
+function compCell(label, cls) {
+  return `<span class="comp-cell ${cls}">${label}</span>`;
+}
+function cdlCell(d) {
+  const days = daysUntil(d.cdlExpiry);
+  if (days === null) return compCell('Not set', 'none');
+  if (days < 0)       return compCell('Expired', 'due');
+  if (days <= 30)     return compCell(days + 'd', 'due');
+  if (days <= 90)     return compCell(days + 'd', 'warn');
+  return compCell('✓ ' + days + 'd', 'ok');
+}
+function medCell(d) {
+  const days = daysUntil(d.medCertExpiry);
+  if (days === null) return compCell('Not set', 'none');
+  if (days < 0)       return compCell('Expired', 'due');
+  if (days <= 30)     return compCell(days + 'd', 'due');
+  if (days <= 90)     return compCell(days + 'd', 'warn');
+  return compCell('✓ ' + days + 'd', 'ok');
+}
+function mvrCell(d) {
+  const age = daysSince(d.lastMvrPull);
+  if (age === null) return compCell('Not on file', 'none');
+  if (age > 365)    return compCell('Overdue', 'due');
+  if (age > 300)    return compCell((365-age) + 'd left', 'warn');
+  return compCell('✓ ' + age + 'd ago', 'ok');
+}
+function drugCell(d) {
+  if (!d.preEmployDrug) return compCell('Pre-employ missing', 'due');
+  const last = d.lastRandomDrug || d.preEmployDrug;
+  const age  = daysSince(last);
+  if (age === null) return compCell('Not logged', 'none');
+  return compCell('Last ' + age + 'd ago', age > 365 ? 'warn' : 'ok');
+}
+
+function renderDrivers() {
+  const drivers = getDrivers();
+  const kpi = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
+  const active = drivers.filter(d => d.status === 'active');
+  const issues = drivers.filter(d => { const s = getDriverComplianceStatus(d); return s.cls !== 'green'; }).length;
+  const dqfComplete = active.filter(d => {
+    const dqf = getDQF(d.id);
+    return DQF_ITEMS.every(i => dqf[i.key]);
+  }).length;
+  kpi('drv-kpi-total',  drivers.length);
+  kpi('drv-kpi-active', active.length);
+  kpi('drv-kpi-issues', issues);
+  kpi('drv-kpi-dqf', dqfComplete + '/' + active.length);
+
+  const driverOptions = '<option value="">-- select driver --</option>' +
+    drivers.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+  ['pay-drv-sel','pay-hist-sel','clog-drv-sel','clog-filter-sel'].forEach(sid => {
+    const s = document.getElementById(sid);
+    if (s) { const cur = s.value; s.innerHTML = driverOptions; s.value = cur; }
+  });
+  const ph = document.getElementById('pay-hist-sel');
+  if (ph) ph.innerHTML = '<option value="">All drivers</option>' + drivers.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+  const cf = document.getElementById('clog-filter-sel');
+  if (cf) cf.innerHTML = '<option value="">All drivers</option>' + drivers.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+
+  const el = document.getElementById('driver-cards');
+  if (!el) return;
+  if (!drivers.length) {
+    el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px;grid-column:1/-1">No drivers yet. Click "+ Add Driver" to get started.</div>';
+    renderDriverComplianceAlert();
+    return;
+  }
+
+  el.innerHTML = drivers.map(d => {
+    const st   = getDriverComplianceStatus(d);
+    const dqf  = getDQF(d.id);
+    const done = DQF_ITEMS.filter(i => dqf[i.key]).length;
+    const endorse = (d.cdlEndorsements || []).map(e => `<span style="font-size:9px;font-weight:700;background:var(--bg3);border:1px solid var(--border);padding:1px 5px;border-radius:3px">${e}</span>`).join(' ');
+    const issueText = st.issues.length ? st.issues.slice(0,2).map(i=>i.msg).join(' · ') : 'All compliance current';
+    return `<div class="driver-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div>
+          <div class="driver-name">${d.name}</div>
+          <div class="driver-sub">CDL-${d.cdlClass||'A'}${d.cdlState?' · '+d.cdlState:''} ${endorse}</div>
+        </div>
+        <span class="driver-status-badge ${d.status||'active'}">${DRV_STATUS_LBL[d.status]||'Active'}</span>
+      </div>
+      <div class="driver-sub">
+        ${d.assignedTruck?'🚛 '+d.assignedTruck+(d.assignedTrailer?' · '+d.assignedTrailer:'')+'<br>':''}
+        ${d.payType?'Pay: '+d.payRate+(d.payType==='cpm'?'¢':d.payType==='pct'?'%':d.payType==='flat'?'/load':'/hr')+' ('+PAY_TYPE_LBL[d.payType]+')':''}
+        ${d.hireDate?'<br>Hired '+new Date(d.hireDate+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):''}
+      </div>
+      <div class="comp-health ${st.cls}">${st.cls==='green'?'✓ Compliant':st.cls==='amber'?'⚠ '+issueText:'✗ '+issueText}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:5px">DQF: ${done}/7 complete</div>
+      <div class="trailer-actions" style="margin-top:10px">
+        <button class="btn btn-ghost btn-sm" onclick="openDriverForm(${d.id})">Edit</button>
+        <button class="btn btn-ghost btn-sm" onclick="switchDriverTab('comp');showDQF(${d.id})">DQF</button>
+        <button class="btn btn-ghost btn-sm" onclick="switchDriverTab('pay',${d.id})">Pay Calc</button>
+        <button class="btn btn-ghost btn-sm" onclick="switchDriverTab('log',${d.id})">Log Event</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  renderComplianceOverview();
+  renderDriverComplianceAlert();
+}
+
+function switchDriverTab(tab, driverId) {
+  ['roster','comp','pay','log'].forEach(k => {
+    const s = document.getElementById('dts-' + k);
+    const b = document.getElementById('dtab-' + k);
+    if (s) s.style.display = k === tab ? 'block' : 'none';
+    if (b) b.className = k === tab ? 'btn btn-primary' : 'btn btn-ghost';
+  });
+  if (driverId !== undefined) {
+    ['pay-drv-sel','clog-drv-sel'].forEach(sid => { const s = document.getElementById(sid); if(s) s.value = driverId; });
+  }
+  if (tab === 'comp') renderComplianceOverview();
+  if (tab === 'pay')  { renderPayCalc(); renderPayHistory(); }
+  if (tab === 'log')  { renderComplianceLog(); }
+}
+
+function renderComplianceOverview() {
+  const tbody = document.getElementById('comp-overview-body');
+  if (!tbody) return;
+  const drivers = getDrivers();
+  if (!drivers.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">No drivers on roster.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = drivers.map(d => {
+    const dqf = getDQF(d.id);
+    const done = DQF_ITEMS.filter(i => dqf[i.key]).length;
+    return `<tr>
+      <td><strong>${d.name}</strong><div style="font-size:10px;color:var(--text3)">CDL-${d.cdlClass||'A'}</div></td>
+      <td>${cdlCell(d)}</td>
+      <td>${medCell(d)}</td>
+      <td>${mvrCell(d)}</td>
+      <td>${drugCell(d)}</td>
+      <td><span class="comp-cell ${done===7?'ok':done>=5?'warn':'due'}">${done}/7</span></td>
+      <td><button class="btn btn-ghost btn-sm" style="font-size:10px;padding:2px 8px" onclick="showDQF(${d.id})">View DQF</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function showDQF(driverId) {
+  const d = getDrivers().find(dr => dr.id === driverId);
+  if (!d) return;
+  const card = document.getElementById('dqf-card');
+  const title = document.getElementById('dqf-title');
+  if (card) card.style.display = 'block';
+  if (title) title.textContent = 'DQF — ' + d.name;
+  const dqf = getDQF(driverId);
+  const done = DQF_ITEMS.filter(i => dqf[i.key]).length;
+  const prog = document.getElementById('dqf-progress');
+  if (prog) prog.textContent = done + '/7';
+  const list = document.getElementById('dqf-list');
+  if (!list) return;
+  list.innerHTML = DQF_ITEMS.map(item => `<div class="dqf-item">
+    <input type="checkbox" ${dqf[item.key]?'checked':''} onchange="toggleDQF(${driverId},'${item.key}',this.checked)">
+    <span style="${dqf[item.key]?'color:var(--text)':'color:var(--text2)'}">${item.label}</span>
+    ${dqf[item.key]?'<span style="margin-left:auto;font-size:10px;color:var(--green)">✓ On file</span>':''}
+  </div>`).join('');
+  card.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function toggleDQF(driverId, key, val) {
+  const dqf = getDQF(driverId);
+  dqf[key] = val;
+  saveDQF(driverId, dqf);
+  showDQF(driverId);
+  renderDrivers();
+}
+
+// ── DRIVER FORM ────────────────────────────────────────
+function updatePayRateLabel() {
+  const type = document.getElementById('drv-f-pay-type')?.value;
+  const labels = { cpm:'Rate ($/mi)', pct:'Rate (% of load)', flat:'Rate ($/load)', hr:'Rate ($/hr)' };
+  const lbl = document.getElementById('drv-pay-rate-label');
+  if (lbl) lbl.textContent = labels[type] || 'Rate';
+}
+
+function openDriverForm(id) {
+  _editDriverId = id || null;
+  const card   = document.getElementById('drv-form-card');
+  const title  = document.getElementById('drv-form-title');
+  const delBtn = document.getElementById('drv-delete-btn');
+  if (!card) return;
+  card.style.display = 'block';
+  card.scrollIntoView({ behavior:'smooth', block:'start' });
+  const textIds = ['drv-f-name','drv-f-phone','drv-f-email','drv-f-emg-name','drv-f-emg-phone',
+    'drv-f-cdl-num','drv-f-cdl-exp','drv-f-med-exp','drv-f-pre-drug','drv-f-last-drug',
+    'drv-f-consortium','drv-f-mvr','drv-f-pay-rate','drv-f-truck','drv-f-trailer','drv-f-notes','drv-f-hire'];
+  if (id) {
+    const d = getDrivers().find(dr => dr.id === id);
+    if (!d) return;
+    title.textContent = 'Edit Driver — ' + d.name;
+    if (delBtn) delBtn.style.display = 'inline-flex';
+    const f = (eid, val) => { const el = document.getElementById(eid); if(el && val != null) el.value = val; };
+    f('drv-f-name',d.name); f('drv-f-phone',d.phone); f('drv-f-email',d.email);
+    f('drv-f-emg-name',d.emgName); f('drv-f-emg-phone',d.emgPhone);
+    f('drv-f-state',d.homeState); f('drv-f-hire',d.hireDate); f('drv-f-status',d.status);
+    f('drv-f-cdl-num',d.cdlNumber); f('drv-f-cdl-class',d.cdlClass); f('drv-f-cdl-state',d.cdlState);
+    f('drv-f-cdl-exp',d.cdlExpiry); f('drv-f-med-exp',d.medCertExpiry);
+    f('drv-f-pre-drug',d.preEmployDrug); f('drv-f-last-drug',d.lastRandomDrug);
+    f('drv-f-consortium',d.consortium); f('drv-f-mvr',d.lastMvrPull);
+    f('drv-f-pay-type',d.payType); f('drv-f-pay-rate',d.payRate);
+    f('drv-f-truck',d.assignedTruck); f('drv-f-trailer',d.assignedTrailer); f('drv-f-notes',d.notes);
+    ['H','N','T','P','X'].forEach(e => { const cb = document.getElementById('end-'+e); if(cb) cb.checked = (d.cdlEndorsements||[]).includes(e); });
+    updatePayRateLabel();
+  } else {
+    title.textContent = 'Add Driver';
+    if (delBtn) delBtn.style.display = 'none';
+    textIds.forEach(eid => { const el = document.getElementById(eid); if(el) el.value=''; });
+    document.getElementById('drv-f-status').value   = 'active';
+    document.getElementById('drv-f-cdl-class').value= 'A';
+    document.getElementById('drv-f-pay-type').value = 'cpm';
+    ['H','N','T','P','X'].forEach(e => { const cb = document.getElementById('end-'+e); if(cb) cb.checked = false; });
+    updatePayRateLabel();
+  }
+}
+
+function closeDriverForm() {
+  _editDriverId = null;
+  const c = document.getElementById('drv-form-card');
+  if (c) c.style.display = 'none';
+}
+
+function saveDriverForm() {
+  const name = document.getElementById('drv-f-name')?.value.trim();
+  if (!name) { showToast('Driver name is required'); return; }
+  const drivers = getDrivers();
+  const isNew = !_editDriverId;
+  const id = _editDriverId || Date.now();
+  const endorse = ['H','N','T','P','X'].filter(e => document.getElementById('end-'+e)?.checked);
+  const driver = {
+    id, name,
+    phone:         document.getElementById('drv-f-phone')?.value.trim()     || '',
+    email:         document.getElementById('drv-f-email')?.value.trim()     || '',
+    emgName:       document.getElementById('drv-f-emg-name')?.value.trim()  || '',
+    emgPhone:      document.getElementById('drv-f-emg-phone')?.value.trim() || '',
+    homeState:     document.getElementById('drv-f-state')?.value            || '',
+    hireDate:      document.getElementById('drv-f-hire')?.value             || '',
+    status:        document.getElementById('drv-f-status')?.value           || 'active',
+    cdlNumber:     document.getElementById('drv-f-cdl-num')?.value.trim()   || '',
+    cdlClass:      document.getElementById('drv-f-cdl-class')?.value        || 'A',
+    cdlState:      document.getElementById('drv-f-cdl-state')?.value        || '',
+    cdlExpiry:     document.getElementById('drv-f-cdl-exp')?.value          || '',
+    cdlEndorsements: endorse,
+    medCertExpiry: document.getElementById('drv-f-med-exp')?.value          || '',
+    preEmployDrug: document.getElementById('drv-f-pre-drug')?.value         || '',
+    lastRandomDrug:document.getElementById('drv-f-last-drug')?.value        || '',
+    consortium:    document.getElementById('drv-f-consortium')?.value.trim()|| '',
+    lastMvrPull:   document.getElementById('drv-f-mvr')?.value              || '',
+    payType:       document.getElementById('drv-f-pay-type')?.value         || 'cpm',
+    payRate:       parseFloat(document.getElementById('drv-f-pay-rate')?.value) || 0,
+    assignedTruck: document.getElementById('drv-f-truck')?.value.trim()    || '',
+    assignedTrailer:document.getElementById('drv-f-trailer')?.value.trim() || '',
+    notes:         document.getElementById('drv-f-notes')?.value.trim()    || '',
+    updatedAt:     new Date().toISOString(),
+  };
+  if (isNew) {
+    drivers.push(driver);
+    saveDrivers(drivers);
+  } else {
+    const idx = drivers.findIndex(d => d.id === id);
+    if (idx > -1) drivers[idx] = driver; else drivers.push(driver);
+    saveDrivers(drivers);
+  }
+  closeDriverForm();
+  renderDrivers();
+  showToast('✓ Driver ' + name + ' saved');
+}
+
+function deleteDriverConfirm() {
+  if (!_editDriverId) return;
+  const d = getDrivers().find(dr => dr.id === _editDriverId);
+  if (!d || !confirm('Remove driver ' + d.name + '? This also deletes their pay records and compliance events.')) return;
+  saveDrivers(getDrivers().filter(dr => dr.id !== _editDriverId));
+  saveDriverPayLog(getDriverPayLog().filter(p => p.driverId !== _editDriverId));
+  saveComplianceEvents(getComplianceEvents().filter(e => e.driverId !== _editDriverId));
+  const dqfall = CEDB.get('ce_dqf') || {}; delete dqfall[_editDriverId]; CEDB.set('ce_dqf', dqfall);
+  closeDriverForm();
+  renderDrivers();
+  showToast('Driver removed');
+}
+
+// ── PAY CALCULATOR ─────────────────────────────────────
+function renderPayCalc() {
+  const sel = document.getElementById('pay-drv-sel');
+  const driverId = sel ? parseInt(sel.value) : 0;
+  const meta = document.getElementById('pay-drv-meta');
+  if (!driverId) { if(meta) meta.style.display='none'; calcDriverPay(); return; }
+  const d = getDrivers().find(dr => dr.id === driverId);
+  if (!d || !meta) { calcDriverPay(); return; }
+  meta.style.display = 'block';
+  meta.innerHTML = `Pay: <strong>${d.payRate} ${PAY_TYPE_LBL[d.payType]||''}</strong> &nbsp;·&nbsp; ${d.assignedTruck?'Truck: '+d.assignedTruck:'No truck assigned'}`;
+  calcDriverPay();
+}
+
+function addPayDeductRow(name, amount) {
+  _payDeductions.push({ name: name||'', amount: amount||0 });
+  renderDeductRows();
+}
+
+function removePayDeductRow(idx) {
+  _payDeductions.splice(idx, 1);
+  renderDeductRows();
+  calcDriverPay();
+}
+
+function renderDeductRows() {
+  const el = document.getElementById('pay-deduct-list');
+  if (!el) return;
+  if (!_payDeductions.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:4px 0">No deductions. Click + Add to add one.</div>';
+    calcDriverPay();
+    return;
+  }
+  el.innerHTML = _payDeductions.map((d,i) => `<div class="pay-deduct-row">
+    <input class="fi" style="font-size:12px;padding:6px 10px" placeholder="Description" value="${d.name}" oninput="_payDeductions[${i}].name=this.value">
+    <input class="fi" style="font-size:12px;padding:6px 10px;max-width:90px" type="number" placeholder="0.00" value="${d.amount||''}" oninput="_payDeductions[${i}].amount=parseFloat(this.value)||0;calcDriverPay()">
+    <button class="btn btn-ghost btn-sm" style="padding:4px 8px;color:var(--text3)" onclick="removePayDeductRow(${i})">✕</button>
+  </div>`).join('');
+  calcDriverPay();
+}
+
+function calcDriverPay() {
+  const sel = document.getElementById('pay-drv-sel');
+  const driverId = sel ? parseInt(sel.value) : 0;
+  const miles = parseFloat(document.getElementById('pay-miles')?.value) || 0;
+  const rate  = parseFloat(document.getElementById('pay-rate')?.value)  || 0;
+  const result = document.getElementById('pay-result');
+  const logBtn = document.getElementById('pay-log-btn');
+  if (!result) return;
+
+  if (!driverId) {
+    result.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Select a driver to calculate pay.</div>';
+    if (logBtn) logBtn.style.display = 'none';
+    return;
+  }
+  const d = getDrivers().find(dr => dr.id === driverId);
+  if (!d) return;
+
+  let gross = 0;
+  const pr = parseFloat(d.payRate) || 0;
+  if (d.payType === 'cpm')  gross = miles * pr;
+  else if (d.payType === 'pct')  gross = rate  * (pr / 100);
+  else if (d.payType === 'flat') gross = pr;
+  else if (d.payType === 'hr')   gross = miles * pr;
+
+  const totalDeduct = _payDeductions.reduce((a,dd) => a + (parseFloat(dd.amount)||0), 0);
+  const net = gross - totalDeduct;
+  const fmt = n => '$' + Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  result.innerHTML = `
+    <div style="padding:12px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
+      <span style="color:var(--text2);font-size:12px">Gross Pay <span style="color:var(--text3)">(${miles?miles.toLocaleString()+' mi':rate?'$'+rate.toLocaleString()+' load':'enter above'})</span></span>
+      <span style="font-family:var(--mono);font-weight:700;color:var(--green)">${fmt(gross)}</span>
+    </div>
+    ${_payDeductions.map(dd => `<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
+      <span style="color:var(--text2);font-size:12px">${dd.name||'Deduction'}</span>
+      <span style="font-family:var(--mono);font-size:12px;color:var(--red)">-${fmt(dd.amount)}</span>
+    </div>`).join('')}
+    <div style="padding:14px 0;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:14px;font-weight:800">Net Pay</span>
+      <span style="font-family:var(--mono);font-size:20px;font-weight:800;color:${net>=0?'var(--green)':'var(--red)'}">${net<0?'-':''}${fmt(net)}</span>
+    </div>
+  `;
+  if (logBtn) logBtn.style.display = gross > 0 ? 'flex' : 'none';
+}
+
+function logDriverPay() {
+  const sel = document.getElementById('pay-drv-sel');
+  const driverId = parseInt(sel?.value);
+  const d = getDrivers().find(dr => dr.id === driverId);
+  if (!d) return;
+  const miles = parseFloat(document.getElementById('pay-miles')?.value) || 0;
+  const rate  = parseFloat(document.getElementById('pay-rate')?.value)  || 0;
+  const pr    = parseFloat(d.payRate) || 0;
+  let gross = 0;
+  if (d.payType==='cpm') gross=miles*pr; else if(d.payType==='pct') gross=rate*(pr/100); else if(d.payType==='flat') gross=pr; else if(d.payType==='hr') gross=miles*pr;
+  const totalDeduct = _payDeductions.reduce((a,dd) => a+(parseFloat(dd.amount)||0), 0);
+  const record = {
+    id: Date.now(), driverId, date: new Date().toISOString().slice(0,10),
+    loadDesc: rate ? '$'+rate.toLocaleString()+' load' : (miles?miles.toLocaleString()+' mi':''),
+    grossMiles: miles, loadRate: rate, grossPay: gross,
+    deductions: _payDeductions.map(dd => Object.assign({},dd)),
+    netPay: gross - totalDeduct,
+  };
+  const log = getDriverPayLog();
+  log.unshift(record);
+  saveDriverPayLog(log);
+  _payDeductions = [];
+  renderDeductRows();
+  document.getElementById('pay-miles').value = '';
+  document.getElementById('pay-rate').value  = '';
+  renderPayHistory();
+  showToast('✓ Pay record logged for ' + d.name);
+}
+
+function renderPayHistory() {
+  const el = document.getElementById('pay-history');
+  if (!el) return;
+  const filterSel = document.getElementById('pay-hist-sel');
+  const filterId  = filterSel ? parseInt(filterSel.value) : 0;
+  const drivers   = getDrivers();
+  let records = getDriverPayLog();
+  if (filterId) records = records.filter(r => r.driverId === filterId);
+  if (!records.length) { el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">No pay records yet.</div>'; return; }
+  const fmt = n => '$'+Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  el.innerHTML = records.slice(0,20).map(r => {
+    const dname = drivers.find(d=>d.id===r.driverId)?.name || 'Unknown';
+    const totalD = (r.deductions||[]).reduce((a,d)=>a+(d.amount||0),0);
+    return `<div class="trl-exp-row">
+      <span><strong>${dname}</strong> · ${r.date} ${r.loadDesc?'· '+r.loadDesc:''}</span>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:11px;color:var(--text3)">Gross ${fmt(r.grossPay)}${totalD?' − '+fmt(totalD):''}</span>
+        <span style="font-family:var(--mono);font-weight:700;color:var(--green)">${fmt(r.netPay)}</span>
+        <button class="btn btn-ghost btn-sm" style="font-size:10px;padding:1px 6px;color:var(--text3)" onclick="deletePayRecord(${r.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deletePayRecord(id) {
+  saveDriverPayLog(getDriverPayLog().filter(r => r.id !== id));
+  renderPayHistory();
+}
+
+// ── COMPLIANCE LOG ─────────────────────────────────────
+function saveComplianceEvent() {
+  const sel = document.getElementById('clog-drv-sel');
+  const driverId = parseInt(sel?.value);
+  if (!driverId) { showToast('Select a driver'); return; }
+  const date = document.getElementById('clog-date')?.value;
+  if (!date) { showToast('Enter a date'); return; }
+  const d = getDrivers().find(dr => dr.id === driverId);
+  const type   = document.getElementById('clog-type')?.value   || 'drug_test';
+  const result = document.getElementById('clog-result')?.value || 'complete';
+  const notes  = document.getElementById('clog-notes')?.value.trim() || '';
+  const event  = { id:Date.now(), driverId, date, type, result, notes };
+  const events = getComplianceEvents();
+  events.unshift(event);
+  saveComplianceEvents(events);
+  // Auto-update driver record for MVR and drug tests
+  const drivers = getDrivers();
+  const driver  = drivers.find(dr => dr.id === driverId);
+  if (driver) {
+    if (type === 'mvr') { driver.lastMvrPull = date; saveDrivers(drivers); }
+    if (type === 'drug_test' && result === 'negative') { driver.lastRandomDrug = date; saveDrivers(drivers); }
+  }
+  document.getElementById('clog-notes').value = '';
+  renderComplianceLog();
+  renderDrivers();
+  showToast('✓ ' + (CLOG_TYPE_LBL[type]||type) + ' logged for ' + (d?.name||'driver'));
+}
+
+function renderComplianceLog() {
+  const el = document.getElementById('clog-list');
+  if (!el) return;
+  const filterSel = document.getElementById('clog-filter-sel');
+  const filterId  = filterSel ? parseInt(filterSel.value) : 0;
+  const drivers   = getDrivers();
+  let events = getComplianceEvents();
+  if (filterId) events = events.filter(e => e.driverId === filterId);
+  if (!events.length) { el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">No events logged yet.</div>'; return; }
+  const resultColor = { negative:'var(--green)', positive:'var(--red)', refusal:'var(--red)', pass:'var(--green)', fail:'var(--red)', complete:'var(--blue)', na:'var(--text3)' };
+  el.innerHTML = events.slice(0,30).map(e => {
+    const dname = drivers.find(d=>d.id===e.driverId)?.name || 'Unknown';
+    const col   = resultColor[e.result] || 'var(--text2)';
+    return `<div class="trl-exp-row">
+      <span><strong>${dname}</strong> · <span style="color:var(--text2)">${CLOG_TYPE_LBL[e.type]||e.type}</span> · ${e.date}${e.notes?' · '+e.notes:''}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;font-weight:700;color:${col}">${e.result||''}</span>
+        <button class="btn btn-ghost btn-sm" style="font-size:10px;padding:1px 6px;color:var(--text3)" onclick="deleteComplianceEvent(${e.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteComplianceEvent(id) {
+  saveComplianceEvents(getComplianceEvents().filter(e => e.id !== id));
+  renderComplianceLog();
+}
+
+// ── DRIVER COMPLIANCE ALERT ────────────────────────────
+function renderDriverComplianceAlert() {
+  const el    = document.getElementById('driver-compliance-alert');
+  const badge = document.getElementById('driver-nav-badge');
+  if (!el) return;
+  const drivers = getDrivers().filter(d => d.status === 'active');
+  const red = [], amber = [];
+  drivers.forEach(d => {
+    const st = getDriverComplianceStatus(d);
+    st.issues.forEach(i => {
+      if (i.level === 'red')   red.push({ name:d.name, msg:i.msg });
+      if (i.level === 'amber') amber.push({ name:d.name, msg:i.msg });
+    });
+  });
+  if (badge) badge.style.display = (red.length||amber.length) ? 'inline' : 'none';
+  if (!red.length && !amber.length) { el.innerHTML = ''; return; }
+  const arr   = red.length ? red : amber;
+  const cls   = red.length ? 'red' : 'amber';
+  const icon  = '📋';
+  const label = red.length
+    ? `${red.length} driver compliance item${red.length>1?'s':''} require immediate attention`
+    : `${amber.length} driver compliance item${amber.length>1?'s':''} expiring soon`;
+  const names = arr.slice(0,3).map(x => x.name+': '+x.msg).join(' · ');
+  el.innerHTML = `<div class="ifta-alert ${cls}" style="margin-bottom:0">
+    <div class="ifta-alert-icon">${icon}</div>
+    <div class="ifta-alert-body">
+      <div class="ifta-alert-title">${label}</div>
+      <div class="ifta-alert-sub">${names}${arr.length>3?' + more':''}</div>
+    </div>
+    <button class="ifta-alert-btn btn btn-ghost" onclick="showPage('drivers',document.querySelector('[onclick*=drivers]'));switchDriverTab('comp')">Open Compliance →</button>
   </div><div style="margin-bottom:16px"></div>`;
 }
 
