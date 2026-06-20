@@ -1226,6 +1226,25 @@ body { background:var(--layout-bg,var(--bg)); }
 .bs-flag  { font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px; }
 .bs-flag.slow { background:rgba(240,84,84,.1);color:var(--red);border:1px solid rgba(240,84,84,.25); }
 .bs-flag.ok   { background:rgba(34,212,122,.1);color:var(--green);border:1px solid rgba(34,212,122,.25); }
+
+/* ── Trailer Fleet ── */
+.trailer-card { background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;transition:border-color .15s; }
+.trailer-card:hover { border-color:var(--border2); }
+.trailer-unit { font-size:15px;font-weight:800;font-family:var(--mono); }
+.trailer-type-badge { font-size:10px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);padding:2px 7px;border-radius:20px;margin-left:6px; }
+.trailer-status-badge { font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap; }
+.trailer-status-badge.available   { background:rgba(34,212,122,.1);color:var(--green);border:1px solid rgba(34,212,122,.25); }
+.trailer-status-badge.in_transit  { background:rgba(74,143,255,.1);color:var(--blue);border:1px solid rgba(74,143,255,.25); }
+.trailer-status-badge.at_customer { background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.25); }
+.trailer-status-badge.in_shop     { background:rgba(240,84,84,.1);color:var(--red);border:1px solid rgba(240,84,84,.25); }
+.trailer-status-badge.booked      { background:rgba(159,125,255,.1);color:#9f7dff;border:1px solid rgba(159,125,255,.25); }
+.trailer-grid    { display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:16px; }
+.trailer-meta    { font-size:11px;color:var(--text2);margin-top:6px;line-height:1.6; }
+.trailer-actions { display:flex;flex-wrap:wrap;gap:6px;margin-top:12px; }
+.trailer-mi-form { background:var(--bg3);border-radius:8px;padding:12px;margin-top:10px;display:none;border:1px solid var(--border); }
+.trl-exp-row { display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px; }
+.trl-exp-row:last-child { border-bottom:none; }
+.trailer-square { width:20px;height:20px;border-radius:3px;border:2px solid #080e1c;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:7px;font-weight:800;color:#fff;cursor:pointer; }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1321,6 +1340,11 @@ body { background:var(--layout-bg,var(--bg)); }
         <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M13.7 2.3a.5.5 0 00-.7 0l-2 2-.8-.8 2-2a3 3 0 00-3.8 3.6L4.5 9a1.5 1.5 0 002 2l3.9-3.9a3 3 0 003.6-3.8l-1.7 1.7-1.4-1.4 1.7-1.7-.9-.6z"/></svg>
         <span>Maintenance</span>
         <span id="maint-nav-badge" style="display:none" class="badge badge-red" style="font-size:9px;padding:1px 5px">!</span>
+      </button>
+      <button class="nav-btn" data-label="Trailers" onclick="showPage('trailers',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="5" width="14" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M3 12v2M13 12v2M1 8h14" stroke="currentColor" stroke-width="1.3"/><circle cx="4" cy="13" r="1.2" fill="currentColor"/><circle cx="12" cy="13" r="1.2" fill="currentColor"/></svg>
+        <span>Trailers</span>
+        <span id="trailer-nav-badge" style="display:none" class="badge badge-red" style="font-size:9px;padding:1px 5px">!</span>
       </button>
       <button class="nav-btn" data-label="Finance Hub" onclick="showPage('financehub',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 4.75V9l2.5 1.5-.75 1.25-3-1.75V5.75h1.25z"/></svg>
@@ -1427,6 +1451,9 @@ body { background:var(--layout-bg,var(--bg)); }
 
       <!-- Maintenance Alert -->
       <div id="maint-dashboard-alert"></div>
+
+      <!-- Trailer Maintenance Alert -->
+      <div id="trailer-maint-alert"></div>
 
       <!-- Quick Actions -->
       <div class="quick-actions">
@@ -3249,6 +3276,114 @@ body { background:var(--layout-bg,var(--bg)); }
   </div>
 </div>
 
+<!-- ── TRAILER FLEET PAGE ── -->
+<div id="page-trailers" class="page fade-in">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div class="page-title">Trailer Fleet</div>
+        <div class="page-subtitle">Location · Miles tracking · Per-trailer maintenance · Cost per mile</div>
+      </div>
+      <button class="btn btn-primary" onclick="openTrailerForm()">+ Add Trailer</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px">
+    <div class="kpi"><div class="kpi-label">Total Trailers</div><div class="kpi-val" id="trl-kpi-total">0</div><div class="kpi-sub">in fleet</div></div>
+    <div class="kpi"><div class="kpi-label">In Transit</div><div class="kpi-val" style="color:var(--blue)" id="trl-kpi-transit">0</div><div class="kpi-sub">hauling freight</div></div>
+    <div class="kpi"><div class="kpi-label">Available</div><div class="kpi-val" style="color:var(--green)" id="trl-kpi-avail">0</div><div class="kpi-sub">at yard</div></div>
+    <div class="kpi"><div class="kpi-label">In Shop</div><div class="kpi-val" style="color:var(--red)" id="trl-kpi-shop">0</div><div class="kpi-sub">maintenance</div></div>
+  </div>
+
+  <div style="display:flex;gap:6px;margin-bottom:16px">
+    <button class="btn btn-primary" id="tt-fleet" onclick="switchTrailerTab('fleet')">Fleet View</button>
+    <button class="btn btn-ghost"   id="tt-maint" onclick="switchTrailerTab('maint')">Maintenance</button>
+    <button class="btn btn-ghost"   id="tt-cost"  onclick="switchTrailerTab('cost')">Cost Tracker</button>
+  </div>
+
+  <!-- Fleet View -->
+  <div id="ts-fleet">
+    <div class="trailer-grid" id="trailer-cards">
+      <div style="text-align:center;padding:30px;color:var(--text3);font-size:13px;grid-column:1/-1">No trailers yet. Click "+ Add Trailer" to get started.</div>
+    </div>
+  </div>
+
+  <!-- Maintenance Tab -->
+  <div id="ts-maint" style="display:none">
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header"><div class="card-title">Select Trailer</div></div>
+      <select class="fi" id="trl-maint-sel" onchange="renderTrailerMaint()" style="max-width:280px">
+        <option value="">-- select a trailer --</option>
+      </select>
+    </div>
+    <div id="trl-maint-content"><div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Select a trailer above.</div></div>
+    <div class="card" id="trl-maint-add-card" style="display:none;margin-top:16px">
+      <div class="card-header"><div class="card-title">Add Custom Item</div></div>
+      <div class="form-grid">
+        <div class="fg"><label>Item Name</label><input class="fi" id="trl-new-maint-name" placeholder="e.g. Lift Gate Service"></div>
+        <div class="fg"><label>Mile Interval</label><input class="fi" id="trl-new-maint-mi" type="number" placeholder="e.g. 50000"></div>
+        <div class="fg"><label>Day Interval</label><input class="fi" id="trl-new-maint-day" type="number" placeholder="e.g. 90"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-primary" onclick="saveTrlMaintItem()">Add Item</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('trl-maint-add-card').style.display='none'">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cost Tracker Tab -->
+  <div id="ts-cost" style="display:none">
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header"><div class="card-title">Select Trailer</div></div>
+      <select class="fi" id="trl-cost-sel" onchange="renderTrailerCost()" style="max-width:280px">
+        <option value="">-- select a trailer --</option>
+      </select>
+    </div>
+    <div id="trl-cost-content"><div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Select a trailer above.</div></div>
+  </div>
+
+  <!-- Add / Edit Form -->
+  <div class="card" id="trl-form-card" style="display:none;margin-top:16px">
+    <div class="card-header">
+      <div class="card-title" id="trl-form-title">Add Trailer</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeTrailerForm()">✕ Close</button>
+    </div>
+    <div class="form-grid">
+      <div class="fg"><label>Unit # *</label><input class="fi" id="trl-f-unit" placeholder="e.g. TRL-101"></div>
+      <div class="fg"><label>Type *</label>
+        <select class="fi" id="trl-f-type">
+          <option>Dry Van</option><option>Reefer</option><option>Flatbed</option>
+          <option>Step Deck</option><option>Chassis</option><option>Tank</option><option>Other</option>
+        </select>
+      </div>
+      <div class="fg"><label>Year</label><input class="fi" id="trl-f-year" type="number" placeholder="2019" min="1980" max="2030"></div>
+      <div class="fg"><label>Make / Model</label><input class="fi" id="trl-f-make" placeholder="Wabash 53ft"></div>
+      <div class="fg"><label>VIN</label><input class="fi" id="trl-f-vin" placeholder="Optional"></div>
+      <div class="fg"><label>Plate #</label><input class="fi" id="trl-f-plate" placeholder="ABC1234"></div>
+      <div class="fg"><label>Plate State</label>
+        <select class="fi" id="trl-f-state"><option value="">—</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>FL</option><option>GA</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VA</option><option>WA</option><option>WI</option><option>WY</option></select>
+      </div>
+      <div class="fg"><label>Status</label>
+        <select class="fi" id="trl-f-status">
+          <option value="available">Available</option><option value="in_transit">In Transit</option>
+          <option value="at_customer">At Customer</option><option value="in_shop">In Shop</option>
+          <option value="booked">Booked</option>
+        </select>
+      </div>
+      <div class="fg"><label>Current Location (City, ST)</label><input class="fi" id="trl-f-city" placeholder="e.g. Dallas, TX"></div>
+      <div class="fg"><label>Assigned Truck</label><input class="fi" id="trl-f-truck" placeholder="e.g. T-1 (optional)"></div>
+      <div class="fg"><label>Total Miles (odometer)</label><input class="fi" id="trl-f-miles" type="number" placeholder="e.g. 487200"></div>
+      <div class="fg"><label>Monthly Payment ($)</label><input class="fi" id="trl-f-payment" type="number" placeholder="1200"></div>
+      <div class="fg"><label>Monthly Insurance ($)</label><input class="fi" id="trl-f-insurance" type="number" placeholder="280"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="saveTrailerForm()">Save Trailer</button>
+      <button class="btn btn-ghost" onclick="closeTrailerForm()">Cancel</button>
+      <button class="btn btn-ghost" id="trl-delete-btn" style="color:var(--red);margin-left:auto;display:none" onclick="deleteTrailerConfirm()">Delete Trailer</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── MAINTENANCE TRACKER PAGE ── -->
 <div id="page-maintenance" class="page fade-in">
   <div class="page-header">
@@ -3566,6 +3701,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   refreshLicenseUI();
   renderIFTAAlert();
   renderMaintenanceAlert();
+  renderTrailerMaintAlert();
   checkOnboarding();
   setInterval(fetchDieselPrice, 3600000);
 });
@@ -3822,7 +3958,7 @@ const pageTitles = {
   fuelroute:'Fuel Route Optimizer', ifta:'IFTA State Log', creditcheck:'Credit Check',
   compliance:'Compliance Hub', financehub:'Finance Hub', businesshub:'Business Hub',
   maintenance:'Maintenance Tracker', tracking:'Fleet Tracker', operations:'Load Operations',
-  workflow:'Edge Workflow',
+  workflow:'Edge Workflow', trailers:'Trailer Fleet',
 };
 
 function showPageBase(id, btn){
@@ -5028,6 +5164,7 @@ function showPage(id, btn) {
   if (id === 'creditcheck')  { renderWatchlist(); renderBrokerScorecard(); }
   if (id === 'businesshub')  { renderBrokerScores(); renderCRM(); }
   if (id === 'maintenance')  { renderMaintenance(); }
+  if (id === 'trailers')    { renderTrailers(); }
   if (id === 'operations')  { const d=document.getElementById('ops-diesel'); if(d&&!d.value&&APP.dieselPrice) d.value=APP.dieselPrice.toFixed(3); }
   if (id === 'settings')    { refreshBackupCard(); }
   // Update layout chrome
@@ -5070,7 +5207,7 @@ function saveTruck(){
 function deleteTruck(id){if(!confirm('Remove truck?'))return;FLEET=FLEET.filter(t=>t.id!==id);saveFleet();renderFleet();}
 const ST_LBL={'en_route':'En Route','stopped':'Stopped','loading':'Loading','hos_break':'HOS Break','off_duty':'Off Duty'};
 const ST_COL={'en_route':'var(--green)','stopped':'var(--amber)','loading':'var(--blue)','hos_break':'#f59e0b','off_duty':'var(--text3)'};
-function renderFleet(){renderFleetMap();renderFleetSidebar();renderFleetTable();updateFleetStats();const c=document.getElementById('map-truck-count');if(c)c.textContent=FLEET.length+' truck'+(FLEET.length!==1?'s':'');}
+function renderFleet(){renderFleetMap();renderTrailerMapPins();renderFleetSidebar();renderFleetTable();updateFleetStats();const c=document.getElementById('map-truck-count');if(c)c.textContent=FLEET.length+' truck'+(FLEET.length!==1?'s':'');}
 function renderFleetMap(){
   if(typeof L==='undefined'){return;}
   if(!_fleetMap) initFleetMap();
@@ -9363,6 +9500,443 @@ function renderMaintenanceAlert() {
       <div class="ifta-alert-sub">${names}${count > 3 ? ' + more' : ''}</div>
     </div>
     <button class="ifta-alert-btn btn btn-ghost" onclick="showPage('maintenance',document.querySelector('[onclick*=maintenance]'))">Open Tracker →</button>
+  </div><div style="margin-bottom:16px"></div>`;
+}
+
+// ── TRAILER FLEET ──────────────────────────────────────
+const TRAILER_MAINT_DEFAULTS = [
+  { id:1, name:'Tire Replacement',          mileInterval:80000, dayInterval:null, lastMiles:null, lastDate:null, notes:'' },
+  { id:2, name:'Brake Adjustment',          mileInterval:25000, dayInterval:90,   lastMiles:null, lastDate:null, notes:'' },
+  { id:3, name:'DOT Annual Inspection',     mileInterval:null,  dayInterval:365,  lastMiles:null, lastDate:null, notes:'' },
+  { id:4, name:'Lights & Electrical Check', mileInterval:10000, dayInterval:90,   lastMiles:null, lastDate:null, notes:'' },
+  { id:5, name:'Landing Gear Lubrication',  mileInterval:null,  dayInterval:30,   lastMiles:null, lastDate:null, notes:'' },
+  { id:6, name:'Kingpin Inspection',        mileInterval:50000, dayInterval:null, lastMiles:null, lastDate:null, notes:'' },
+  { id:7, name:'Glad Hand Seals',           mileInterval:null,  dayInterval:90,   lastMiles:null, lastDate:null, notes:'' },
+];
+const TRL_STATUS_LBL = { available:'Available', in_transit:'In Transit', at_customer:'At Customer', in_shop:'In Shop', booked:'Booked' };
+let _editTrailerId = null;
+
+function getTrailers()          { return CEDB.get('ce_trailers') || []; }
+function saveTrailers(arr)      { CEDB.set('ce_trailers', arr); }
+function getTrailerExpenses()   { return CEDB.get('ce_trailer_expenses') || []; }
+function saveTrailerExpenses(a) { CEDB.set('ce_trailer_expenses', a); }
+function getTrailerMaint(tid) {
+  const all = CEDB.get('ce_trailer_maint') || {};
+  if (!all[tid]) {
+    all[tid] = TRAILER_MAINT_DEFAULTS.map(i => Object.assign({}, i));
+    CEDB.set('ce_trailer_maint', all);
+  }
+  return all[tid];
+}
+function saveTrailerMaint(tid, items) {
+  const all = CEDB.get('ce_trailer_maint') || {};
+  all[tid] = items;
+  CEDB.set('ce_trailer_maint', all);
+}
+
+function renderTrailers() {
+  const trailers = getTrailers();
+  const kpi = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
+  kpi('trl-kpi-total',   trailers.length);
+  kpi('trl-kpi-transit', trailers.filter(t => t.status === 'in_transit').length);
+  kpi('trl-kpi-avail',   trailers.filter(t => t.status === 'available').length);
+  kpi('trl-kpi-shop',    trailers.filter(t => t.status === 'in_shop').length);
+
+  ['trl-maint-sel','trl-cost-sel'].forEach(selId => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">-- select a trailer --</option>' +
+      trailers.map(t => `<option value="${t.id}"${t.id==cur?' selected':''}>${t.unit} — ${t.type}</option>`).join('');
+  });
+
+  const el = document.getElementById('trailer-cards');
+  if (!el) return;
+  if (!trailers.length) {
+    el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px;grid-column:1/-1">No trailers yet. Click "+ Add Trailer" to get started.</div>';
+    return;
+  }
+
+  el.innerHTML = trailers.map(t => {
+    const stCls = t.status || 'available';
+    const items = getTrailerMaint(t.id);
+    const odo   = parseFloat(t.totalMiles) || 0;
+    const due   = items.filter(i => getMaintStatus(i, odo).cls === 'due').length;
+    const soon  = items.filter(i => getMaintStatus(i, odo).cls === 'soon').length;
+    const maintLine = due
+      ? `<span style="color:var(--red);font-weight:700">${due} overdue</span>${soon ? ', ' + soon + ' due soon' : ''}`
+      : soon ? `<span style="color:var(--amber)">${soon} due soon</span>` : '<span style="color:var(--green)">All up to date</span>';
+    const expenses  = getTrailerExpenses().filter(e => e.trailerId === t.id);
+    const fixedMo   = (parseFloat(t.payment)||0) + (parseFloat(t.insurance)||0);
+    const varTotal  = expenses.reduce((a,e) => a+e.amount, 0);
+    const cpm = odo && fixedMo ? (fixedMo / odo * 12).toFixed(4) : null;
+    return `<div class="trailer-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div><span class="trailer-unit">${t.unit}</span><span class="trailer-type-badge">${t.type}</span></div>
+        <span class="trailer-status-badge ${stCls}">${TRL_STATUS_LBL[stCls]||stCls}</span>
+      </div>
+      <div class="trailer-meta">
+        ${t.city?'📍 '+t.city+' &nbsp;':''}${t.assignedTruck?'🚛 '+t.assignedTruck+' &nbsp;':''}
+        ${t.year||t.make?'<br>'+[t.year,t.make].filter(Boolean).join(' '):''}
+        <br><span style="font-family:var(--mono)">${odo?odo.toLocaleString()+' mi':'Miles not set'}</span>
+        ${fixedMo?' · $'+fixedMo.toLocaleString()+'/mo fixed':''}
+        ${varTotal?' · $'+Math.round(varTotal).toLocaleString()+' var. spend':''}
+      </div>
+      <div style="font-size:11px;margin-top:6px">Maintenance: ${maintLine}</div>
+      <div class="trailer-actions">
+        <button class="btn btn-ghost btn-sm" onclick="toggleTrlMiForm(${t.id})">Log Miles</button>
+        <button class="btn btn-ghost btn-sm" onclick="switchTrailerTab('maint',${t.id})">Maintenance</button>
+        <button class="btn btn-ghost btn-sm" onclick="switchTrailerTab('cost',${t.id})">Costs</button>
+        <button class="btn btn-ghost btn-sm" onclick="openTrailerForm(${t.id})">Edit</button>
+      </div>
+      <div class="trailer-mi-form" id="trl-mi-form-${t.id}">
+        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end">
+          <div class="fg" style="margin:0"><label style="font-size:10px">Miles This Trip</label><input class="fi" id="trl-mi-val-${t.id}" type="number" placeholder="e.g. 850"></div>
+          <div class="fg" style="margin:0"><label style="font-size:10px">Date</label><input class="fi" id="trl-mi-date-${t.id}" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+          <button class="btn btn-primary btn-sm" onclick="saveTrlMiles(${t.id})">Save</button>
+        </div>
+        <div class="fg" style="margin:8px 0 0"><label style="font-size:10px">Notes (broker, route — optional)</label><input class="fi" id="trl-mi-notes-${t.id}" placeholder="e.g. CHI→DAL via Echo Global"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  renderTrailerMaintAlert();
+  renderTrailerMapPins();
+}
+
+function toggleTrlMiForm(id) {
+  const f = document.getElementById('trl-mi-form-' + id);
+  if (f) f.style.display = f.style.display === 'block' ? 'none' : 'block';
+}
+
+function saveTrlMiles(id) {
+  const add = parseFloat(document.getElementById('trl-mi-val-' + id)?.value) || 0;
+  if (!add) { showToast('Enter miles driven'); return; }
+  const trailers = getTrailers();
+  const t = trailers.find(tr => tr.id === id);
+  if (!t) return;
+  t.totalMiles = (parseFloat(t.totalMiles) || 0) + add;
+  saveTrailers(trailers);
+  renderTrailers();
+  showToast('✓ ' + add.toLocaleString() + ' mi added — ' + t.unit + ' total: ' + t.totalMiles.toLocaleString() + ' mi');
+}
+
+function switchTrailerTab(tab, trailerId) {
+  ['fleet','maint','cost'].forEach(k => {
+    const s = document.getElementById('ts-' + k);
+    const b = document.getElementById('tt-' + k);
+    if (s) s.style.display = k === tab ? 'block' : 'none';
+    if (b) b.className = k === tab ? 'btn btn-primary' : 'btn btn-ghost';
+  });
+  if (trailerId !== undefined) {
+    ['trl-maint-sel','trl-cost-sel'].forEach(sid => { const s = document.getElementById(sid); if(s) s.value = trailerId; });
+  }
+  if (tab === 'maint') renderTrailerMaint();
+  if (tab === 'cost')  renderTrailerCost();
+}
+
+function openTrailerForm(id) {
+  _editTrailerId = id || null;
+  const card   = document.getElementById('trl-form-card');
+  const title  = document.getElementById('trl-form-title');
+  const delBtn = document.getElementById('trl-delete-btn');
+  if (!card) return;
+  card.style.display = 'block';
+  card.scrollIntoView({ behavior:'smooth', block:'start' });
+  if (id) {
+    const t = getTrailers().find(tr => tr.id === id);
+    if (!t) return;
+    title.textContent = 'Edit Trailer — ' + t.unit;
+    if (delBtn) delBtn.style.display = 'inline-flex';
+    const f = (eid, val) => { const el = document.getElementById(eid); if(el && val != null) el.value = val; };
+    f('trl-f-unit',t.unit); f('trl-f-type',t.type); f('trl-f-year',t.year);
+    f('trl-f-make',t.make); f('trl-f-vin',t.vin); f('trl-f-plate',t.plate);
+    f('trl-f-state',t.plateState); f('trl-f-status',t.status);
+    f('trl-f-city',t.city); f('trl-f-truck',t.assignedTruck);
+    f('trl-f-miles',t.totalMiles); f('trl-f-payment',t.payment); f('trl-f-insurance',t.insurance);
+  } else {
+    title.textContent = 'Add Trailer';
+    if (delBtn) delBtn.style.display = 'none';
+    ['trl-f-unit','trl-f-year','trl-f-make','trl-f-vin','trl-f-plate','trl-f-city','trl-f-truck','trl-f-miles','trl-f-payment','trl-f-insurance'].forEach(eid => { const el = document.getElementById(eid); if(el) el.value=''; });
+    const ts = document.getElementById('trl-f-status'); if(ts) ts.value = 'available';
+    const tp = document.getElementById('trl-f-type');   if(tp) tp.value = 'Dry Van';
+    const tst = document.getElementById('trl-f-state'); if(tst) tst.value = '';
+  }
+}
+
+function closeTrailerForm() {
+  _editTrailerId = null;
+  const c = document.getElementById('trl-form-card');
+  if (c) c.style.display = 'none';
+}
+
+function saveTrailerForm() {
+  const unit = document.getElementById('trl-f-unit')?.value.trim();
+  if (!unit) { showToast('Unit # is required'); return; }
+  const trailers = getTrailers();
+  const isNew = !_editTrailerId;
+  const id = _editTrailerId || Date.now();
+  const trailer = {
+    id,
+    unit,
+    type:          document.getElementById('trl-f-type')?.value         || 'Dry Van',
+    year:          document.getElementById('trl-f-year')?.value         || '',
+    make:          document.getElementById('trl-f-make')?.value.trim()  || '',
+    vin:           document.getElementById('trl-f-vin')?.value.trim()   || '',
+    plate:         document.getElementById('trl-f-plate')?.value.trim() || '',
+    plateState:    document.getElementById('trl-f-state')?.value        || '',
+    status:        document.getElementById('trl-f-status')?.value       || 'available',
+    city:          document.getElementById('trl-f-city')?.value.trim()  || '',
+    assignedTruck: document.getElementById('trl-f-truck')?.value.trim() || '',
+    totalMiles:    parseFloat(document.getElementById('trl-f-miles')?.value)    || 0,
+    payment:       parseFloat(document.getElementById('trl-f-payment')?.value)  || 0,
+    insurance:     parseFloat(document.getElementById('trl-f-insurance')?.value)|| 0,
+    updatedAt:     new Date().toISOString(),
+  };
+  if (isNew) {
+    trailers.push(trailer);
+  } else {
+    const idx = trailers.findIndex(t => t.id === id);
+    if (idx > -1) trailers[idx] = trailer; else trailers.push(trailer);
+  }
+  saveTrailers(trailers);
+  closeTrailerForm();
+  renderTrailers();
+  showToast('✓ Trailer ' + unit + ' saved');
+}
+
+function deleteTrailerConfirm() {
+  if (!_editTrailerId) return;
+  const t = getTrailers().find(tr => tr.id === _editTrailerId);
+  if (!t || !confirm('Remove trailer ' + t.unit + '? This deletes its maintenance history and expenses.')) return;
+  saveTrailers(getTrailers().filter(tr => tr.id !== _editTrailerId));
+  const maint = CEDB.get('ce_trailer_maint') || {};
+  delete maint[_editTrailerId];
+  CEDB.set('ce_trailer_maint', maint);
+  saveTrailerExpenses(getTrailerExpenses().filter(e => e.trailerId !== _editTrailerId));
+  closeTrailerForm();
+  renderTrailers();
+  showToast('Trailer removed');
+}
+
+// ── TRAILER MAINTENANCE ────────────────────────────────
+function renderTrailerMaint() {
+  const sel = document.getElementById('trl-maint-sel');
+  const tid = sel ? parseInt(sel.value) : 0;
+  const content = document.getElementById('trl-maint-content');
+  if (!content) return;
+  if (!tid) { content.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Select a trailer above.</div>'; return; }
+  const t = getTrailers().find(tr => tr.id === tid);
+  if (!t) return;
+  const items = getTrailerMaint(tid);
+  const odo   = parseFloat(t.totalMiles) || 0;
+
+  content.innerHTML = `<div class="card">
+    <div class="card-header">
+      <div class="card-title">${t.unit} — ${t.type}${odo ? ' · ' + odo.toLocaleString() + ' total mi' : ''}</div>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('trl-maint-add-card').style.display='block'">+ Add Item</button>
+    </div>
+    ${items.map(item => {
+      const st = getMaintStatus(item, odo);
+      const lastInfo = item.lastDate
+        ? 'Last: ' + new Date(item.lastDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + (item.lastMiles ? ' · ' + item.lastMiles.toLocaleString() + ' mi' : '')
+        : (item.lastMiles ? 'Last: ' + item.lastMiles.toLocaleString() + ' mi' : '');
+      const intv = [item.mileInterval?'Every '+item.mileInterval.toLocaleString()+' mi':'', item.dayInterval?item.dayInterval+'d':''].filter(Boolean).join(' / ');
+      return `<div class="maint-row">
+        <div>
+          <div class="maint-name">${item.name}</div>
+          <div class="maint-meta">${intv}${lastInfo?' · '+lastInfo:''}</div>
+          <div class="maint-log-form" id="tmf-${tid}-${item.id}">
+            <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end">
+              <div class="fg" style="margin:0"><label style="font-size:10px">Service Date</label><input class="fi" id="tmf-d-${tid}-${item.id}" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+              <div class="fg" style="margin:0"><label style="font-size:10px">Odometer (mi)</label><input class="fi" id="tmf-m-${tid}-${item.id}" type="number" placeholder="${odo||'miles'}" value="${odo||''}"></div>
+              <button class="btn btn-primary btn-sm" onclick="saveTrlService(${tid},${item.id})">Save</button>
+            </div>
+            <div class="fg" style="margin:8px 0 0"><label style="font-size:10px">Notes</label><input class="fi" id="tmf-n-${tid}-${item.id}" placeholder="Shop, parts, cost"></div>
+          </div>
+        </div>
+        <span class="maint-badge ${st.cls}">${st.text}</span>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <button class="btn btn-ghost btn-sm" onclick="var f=document.getElementById('tmf-${tid}-${item.id}');f.style.display=f.style.display==='block'?'none':'block'">Log Service</button>
+          <button class="btn btn-ghost btn-sm" style="font-size:10px;color:var(--text3);padding:2px 6px" onclick="deleteTrlMaintItem(${tid},${item.id})">Remove</button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function saveTrlService(tid, mid) {
+  const items = getTrailerMaint(tid);
+  const item  = items.find(i => i.id === mid);
+  if (!item) return;
+  const date  = document.getElementById(`tmf-d-${tid}-${mid}`)?.value;
+  const miles = parseFloat(document.getElementById(`tmf-m-${tid}-${mid}`)?.value) || null;
+  const notes = document.getElementById(`tmf-n-${tid}-${mid}`)?.value || '';
+  if (date)  item.lastDate  = date;
+  if (miles) item.lastMiles = miles;
+  if (notes) item.notes     = notes;
+  saveTrailerMaint(tid, items);
+  if (miles) {
+    const trailers = getTrailers();
+    const t = trailers.find(tr => tr.id === tid);
+    if (t && miles > (parseFloat(t.totalMiles)||0)) { t.totalMiles = miles; saveTrailers(trailers); }
+  }
+  renderTrailerMaint();
+  showToast('✓ Service logged for ' + item.name);
+}
+
+function saveTrlMaintItem() {
+  const tid  = parseInt(document.getElementById('trl-maint-sel')?.value);
+  if (!tid) return;
+  const name = document.getElementById('trl-new-maint-name')?.value.trim();
+  if (!name) { showToast('Enter an item name'); return; }
+  const mi  = parseFloat(document.getElementById('trl-new-maint-mi')?.value)  || null;
+  const day = parseFloat(document.getElementById('trl-new-maint-day')?.value) || null;
+  const items = getTrailerMaint(tid);
+  items.push({ id: Math.max(0,...items.map(i=>i.id))+1, name, mileInterval:mi, dayInterval:day, lastMiles:null, lastDate:null, notes:'' });
+  saveTrailerMaint(tid, items);
+  document.getElementById('trl-maint-add-card').style.display = 'none';
+  ['trl-new-maint-name','trl-new-maint-mi','trl-new-maint-day'].forEach(eid => { const el=document.getElementById(eid);if(el)el.value=''; });
+  renderTrailerMaint();
+  showToast('✓ ' + name + ' added');
+}
+
+function deleteTrlMaintItem(tid, mid) {
+  saveTrailerMaint(tid, getTrailerMaint(tid).filter(i => i.id !== mid));
+  renderTrailerMaint();
+}
+
+// ── TRAILER COST TRACKER ───────────────────────────────
+function renderTrailerCost() {
+  const sel = document.getElementById('trl-cost-sel');
+  const tid = sel ? parseInt(sel.value) : 0;
+  const content = document.getElementById('trl-cost-content');
+  if (!content) return;
+  if (!tid) { content.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Select a trailer above.</div>'; return; }
+  const t = getTrailers().find(tr => tr.id === tid);
+  if (!t) return;
+  const expenses  = getTrailerExpenses().filter(e => e.trailerId === tid);
+  const fixedMo   = (parseFloat(t.payment)||0) + (parseFloat(t.insurance)||0);
+  const varTotal  = expenses.reduce((a,e) => a+e.amount, 0);
+  const odo       = parseFloat(t.totalMiles) || 0;
+  const now       = new Date().toISOString().slice(0,7);
+  const thisMonthVar = expenses.filter(e => e.date?.slice(0,7)===now).reduce((a,e)=>a+e.amount,0);
+  const totalCost = fixedMo + varTotal;
+  const cpm       = odo && totalCost ? (totalCost / odo).toFixed(4) : null;
+  const fmt       = n => '$' + n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  content.innerHTML = `
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:16px">
+    <div class="lpc-stat"><div class="lpc-stat-label">Monthly Fixed</div><div class="lpc-stat-val" style="color:var(--amber)">${fmt(fixedMo)}</div></div>
+    <div class="lpc-stat"><div class="lpc-stat-label">Variable (all-time)</div><div class="lpc-stat-val" style="color:var(--red)">${fmt(varTotal)}</div></div>
+    <div class="lpc-stat"><div class="lpc-stat-label">This Month Variable</div><div class="lpc-stat-val" style="color:var(--text2)">${fmt(thisMonthVar)}</div></div>
+    ${cpm?`<div class="lpc-stat"><div class="lpc-stat-label">Cost Per Mile</div><div class="lpc-stat-val" style="color:var(--blue)">$${cpm}</div></div>`:''}
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-header"><div class="card-title">Log Expense</div></div>
+    <div class="form-grid">
+      <div class="fg"><label>Date</label><input class="fi" id="trl-exp-date" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="fg"><label>Type</label>
+        <select class="fi" id="trl-exp-type">
+          <option>Tires</option><option>Brakes</option><option>Repair</option>
+          <option>DOT Inspection</option><option>Permit</option><option>Wash</option><option>Other</option>
+        </select>
+      </div>
+      <div class="fg"><label>Amount ($)</label><input class="fi" id="trl-exp-amount" type="number" placeholder="0.00" step="0.01"></div>
+      <div class="fg"><label>Notes</label><input class="fi" id="trl-exp-notes" placeholder="Optional"></div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:10px" onclick="saveTrlExpense(${tid})">Add Expense</button>
+  </div>
+  ${expenses.length ? `<div class="card">
+    <div class="card-header"><div class="card-title">Expense History</div><span class="badge">${expenses.length} entries</span></div>
+    ${expenses.slice().reverse().map(e=>`<div class="trl-exp-row">
+      <span><strong>${e.type}</strong> · ${e.date?new Date(e.date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—'}${e.notes?' · '+e.notes:''}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-family:var(--mono);color:var(--red);font-weight:700">-${fmt(e.amount)}</span>
+        <button class="btn btn-ghost btn-sm" style="font-size:10px;padding:1px 6px;color:var(--text3)" onclick="deleteTrlExpense(${e.id},${tid})">✕</button>
+      </div>
+    </div>`).join('')}
+  </div>` : '<div style="text-align:center;padding:16px;color:var(--text3);font-size:12px">No expenses logged yet.</div>'}`;
+}
+
+function saveTrlExpense(tid) {
+  const amount = parseFloat(document.getElementById('trl-exp-amount')?.value);
+  if (!amount) { showToast('Enter an amount'); return; }
+  const expenses = getTrailerExpenses();
+  expenses.push({
+    id:        Date.now(),
+    trailerId: tid,
+    date:      document.getElementById('trl-exp-date')?.value  || new Date().toISOString().slice(0,10),
+    type:      document.getElementById('trl-exp-type')?.value  || 'Other',
+    amount,
+    notes:     document.getElementById('trl-exp-notes')?.value.trim() || '',
+  });
+  saveTrailerExpenses(expenses);
+  document.getElementById('trl-exp-amount').value = '';
+  document.getElementById('trl-exp-notes').value  = '';
+  renderTrailerCost();
+  showToast('✓ Expense logged');
+}
+
+function deleteTrlExpense(id, tid) {
+  saveTrailerExpenses(getTrailerExpenses().filter(e => e.id !== id));
+  renderTrailerCost();
+}
+
+// ── TRAILER MAP PINS ───────────────────────────────────
+let _trailerMarkers = {};
+function renderTrailerMapPins() {
+  if (typeof L === 'undefined' || !_fleetMap) return;
+  Object.values(_trailerMarkers).forEach(m => _fleetMap.removeLayer(m));
+  _trailerMarkers = {};
+  getTrailers().forEach(t => {
+    const ll  = (t.lat && t.lng) ? [t.lat, t.lng] : (typeof resolveLL !== 'undefined' ? resolveLL(t.city || '') : [39.5,-98.35]);
+    const lbl = t.unit.replace(/[^A-Za-z0-9]/g,'').slice(0,3).toUpperCase();
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="trailer-square" style="background:#9f7dff">${lbl}</div>`,
+      iconSize:[20,20], iconAnchor:[10,10], tooltipAnchor:[0,-12],
+    });
+    const tip = `<strong>${t.unit}</strong> — ${t.type}<br>${TRL_STATUS_LBL[t.status]||t.status||''}${t.city?' · '+t.city:''}${t.assignedTruck?'<br>Truck: '+t.assignedTruck:''}`;
+    const marker = L.marker(ll, {icon})
+      .addTo(_fleetMap)
+      .bindTooltip(tip, {permanent:false, direction:'top', className:'fleet-tip', opacity:1})
+      .on('click', () => showPage('trailers', document.querySelector('[onclick*=trailers]')));
+    _trailerMarkers[t.id] = marker;
+  });
+}
+
+// ── TRAILER MAINTENANCE ALERT ──────────────────────────
+function renderTrailerMaintAlert() {
+  const el    = document.getElementById('trailer-maint-alert');
+  const badge = document.getElementById('trailer-nav-badge');
+  if (!el) return;
+  const trailers = getTrailers();
+  const allDue = [], allSoon = [];
+  trailers.forEach(t => {
+    const odo = parseFloat(t.totalMiles) || 0;
+    getTrailerMaint(t.id).forEach(i => {
+      const st = getMaintStatus(i, odo);
+      if (st.cls === 'due')  allDue.push({ trailer:t.unit, item:i.name });
+      if (st.cls === 'soon') allSoon.push({ trailer:t.unit, item:i.name });
+    });
+  });
+  if (badge) badge.style.display = (allDue.length||allSoon.length) ? 'inline' : 'none';
+  if (!allDue.length && !allSoon.length) { el.innerHTML = ''; return; }
+  const arr   = allDue.length ? allDue : allSoon;
+  const cls   = allDue.length ? 'red' : 'amber';
+  const icon  = allDue.length ? '🚛' : '⚠️';
+  const label = allDue.length
+    ? `${allDue.length} trailer maintenance item${allDue.length>1?'s':''} overdue`
+    : `${allSoon.length} trailer maintenance item${allSoon.length>1?'s':''} due soon`;
+  const names = arr.slice(0,3).map(x => x.trailer+': '+x.item).join(' · ');
+  el.innerHTML = `<div class="ifta-alert ${cls}" style="margin-bottom:0">
+    <div class="ifta-alert-icon">${icon}</div>
+    <div class="ifta-alert-body">
+      <div class="ifta-alert-title">${label}</div>
+      <div class="ifta-alert-sub">${names}${arr.length>3?' + more':''}</div>
+    </div>
+    <button class="ifta-alert-btn btn btn-ghost" onclick="showPage('trailers',document.querySelector('[onclick*=trailers]'));switchTrailerTab('maint')">Open Trailers →</button>
   </div><div style="margin-bottom:16px"></div>`;
 }
 
