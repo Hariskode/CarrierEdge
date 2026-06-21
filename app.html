@@ -2540,7 +2540,7 @@ body { background:var(--layout-bg,var(--bg)); }
           <div id="api-status-row" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding:10px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)">
             <span style="font-size:10px;color:var(--text3);font-weight:700;align-self:center;margin-right:4px">STATUS:</span>
             <span id="st-anthropic" class="badge badge-amber">✦ AI — no key</span>
-            <span id="st-fmcsa"     class="badge badge-amber">FMCSA — demo key</span>
+            <span id="st-fmcsa"     class="badge badge-green">FMCSA — proxied</span>
             <span id="st-eia"       class="badge badge-amber">EIA — demo key</span>
             <span id="st-dat"       class="badge" style="background:rgba(122,138,176,.1);color:var(--text3);border:1px solid var(--border)">DAT — not set</span>
           </div>
@@ -2559,11 +2559,6 @@ body { background:var(--layout-bg,var(--bg)); }
             <div class="fg">
               <label>DAT API Key (Live Lane Rates)</label>
               <input class="fi" id="s-dat-key" type="password" placeholder="Paid DAT subscription required" oninput="saveSettings()">
-            </div>
-            <div class="fg">
-              <label>FMCSA Web Services Key (Credit Check)</label>
-              <input class="fi" id="s-fmcsa-key" type="password" placeholder="Free — register at ai.fmcsa.dot.gov/api" oninput="saveSettings()">
-              <div style="font-size:11px;color:var(--text3);margin-top:3px">Free registration at <a href="https://ai.fmcsa.dot.gov/api" target="_blank">ai.fmcsa.dot.gov/api</a> — enables live broker authority lookup</div>
             </div>
           </div>
           <div style="margin-top:16px;padding:12px 14px;background:var(--bg3);border-radius:10px;border:1px solid var(--border)">
@@ -4243,7 +4238,6 @@ function loadSettings(){
     if(s.anthropicKey){ document.getElementById('s-anthropic-key').value = s.anthropicKey; }
     if(s.eiaKey){ document.getElementById('s-eia-key').value = s.eiaKey; }
     if(s.datKey){ document.getElementById('s-dat-key').value = s.datKey; }
-    if(s.fmcsaKey){ document.getElementById('s-fmcsa-key').value = s.fmcsaKey; }
     if(s.ansoniaKey){ document.getElementById('s-ansonia-key').value = s.ansoniaKey; }
     if(s.dnbKey){ document.getElementById('s-dnb-key').value = s.dnbKey; }
     if(s.experianKey){ document.getElementById('s-experian-key').value = s.experianKey; }
@@ -4259,7 +4253,7 @@ function loadSettings(){
       el.textContent = ok ? okLabel : warnLabel;
     }
     setBadge('st-anthropic', !!s.anthropicKey, '✦ AI — active',     '✦ AI — no key');
-    setBadge('st-fmcsa',     !!s.fmcsaKey,     'FMCSA — live key',  'FMCSA — demo key');
+    setBadge('st-fmcsa',     true,              'FMCSA — proxied',   'FMCSA — proxied');
     setBadge('st-eia',       !!s.eiaKey,        'EIA — live key',    'EIA — demo key');
     var stDat = document.getElementById('st-dat'); if(stDat){
       stDat.className = 'badge ' + (s.datKey ? 'badge-green' : '');
@@ -4280,7 +4274,6 @@ function saveSettings(){
     anthropicKey: document.getElementById('s-anthropic-key').value,
     eiaKey: document.getElementById('s-eia-key').value,
     datKey: document.getElementById('s-dat-key').value,
-    fmcsaKey:    document.getElementById('s-fmcsa-key')?.value    || '',
     ansoniaKey:  document.getElementById('s-ansonia-key')?.value  || '',
     dnbKey:      document.getElementById('s-dnb-key')?.value      || '',
     experianKey: document.getElementById('s-experian-key')?.value || '',
@@ -4299,7 +4292,7 @@ function saveSettings(){
     el.className = 'badge ' + (ok ? (okCls||'badge-green') : (warnCls||'badge-amber'));
   }
   updBadge('st-anthropic', !!s.anthropicKey, '✦ AI — active',    '✦ AI — no key');
-  updBadge('st-fmcsa',     !!s.fmcsaKey,     'FMCSA — live key', 'FMCSA — demo key');
+  updBadge('st-fmcsa',     true,              'FMCSA — proxied',  'FMCSA — proxied', 'badge-green', 'badge-green');
   updBadge('st-eia',       !!s.eiaKey,        'EIA — live key',   'EIA — demo key');
   updBadge('st-dat',       !!s.datKey,        'DAT — connected',  'DAT — not set', 'badge-green', '');
 }
@@ -4322,7 +4315,7 @@ const CE_BACKUP_KEYS = [
   'ce_factor_pipeline','ce_layout','ce_theme'
 ];
 const CE_API_KEY_FIELDS = [
-  'anthropicKey','eiaKey','datKey','fmcsaKey',
+  'anthropicKey','eiaKey','datKey',
   'ansoniaKey','dnbKey','experianKey','carrier411Key'
 ];
 
@@ -4794,19 +4787,10 @@ async function loadFMCSAForDot(dot){
   document.getElementById('fmcsa-error').style.display='none';
 
   try {
-    // FMCSA SAFER API — public, no key needed
-    // Using the FMCSA REST API endpoint (requires free registration for best access)
-    // Public CORS-accessible endpoint:
-    const fmcsaKey = (APP.settings && APP.settings.fmcsaKey) ? APP.settings.fmcsaKey : 'demo';
-    const url = `https://mobile.fmcsa.dot.gov/qc/services/carriers/${dot}?webKey=${fmcsaKey}`;
-    // Register free at https://ai.fmcsa.dot.gov/api — enter key in Settings to avoid rate limits
-
-    // We'll try the SAFER web query as a backup approach
-    // Since CORS blocks direct browser requests to FMCSA for most endpoints,
-    // we parse what we can and show guidance for the rest
-    const res = await fetchWithTimeout(url, 8000);
-    if(!res.ok) throw new Error('FMCSA API returned ' + res.status);
+    const res = await fetchWithTimeout(`/api/fmcsa?dot=${dot}`, 10000);
+    if(!res.ok) throw new Error('FMCSA proxy returned ' + res.status);
     const json = await res.json();
+    if(json.error) throw new Error(json.error);
     const c = json.content;
     if(!c) throw new Error('No carrier data found for DOT #'+dot);
     renderFMCSAData(c, dot);
@@ -8343,38 +8327,22 @@ function calcBrokerDSO(brokerName) {
 
 // ── FMCSA — live fetch with full address + alternative matches ──
 async function fetchFMCSABroker(mcRaw, companyName) {
-  const webKey = APP.settings.fmcsaKey || 'demo';
   let primary = null;
   let alternatives = [];
 
-  // Try MC/docket lookup first
-  const mc = mcRaw ? mcRaw.replace(/[^0-9]/g,'') : '';
-  if (mc) {
-    try {
-      const res = await fetchWithTimeout(
-        `https://mobile.fmcsa.dot.gov/qc/services/carriers/docket-number/${mc}?webKey=${webKey}`, 8000);
-      if (res.ok) {
-        const json = await res.json();
-        const c = json?.content?.carrier || json?.content;
-        if (c) primary = parseFMCSACarrier(c);
-      }
-    } catch(e) { console.warn('FMCSA MC lookup:', e.message); }
-  }
-
-  // Name search for alternatives (and primary if no MC)
-  if (companyName) {
-    try {
-      const res = await fetchWithTimeout(
-        `https://mobile.fmcsa.dot.gov/qc/services/carriers?name=${encodeURIComponent(companyName)}&start=0&size=6&webKey=${webKey}`, 8000);
-      if (res.ok) {
-        const json = await res.json();
-        const list = json?.content?.Carrier || json?.content || [];
-        const arr = Array.isArray(list) ? list : [list];
-        alternatives = arr.map(c => parseFMCSACarrier(c)).filter(Boolean);
-        if (!primary && alternatives.length) primary = alternatives[0];
-      }
-    } catch(e) { console.warn('FMCSA name search:', e.message); }
-  }
+  try {
+    const mc = mcRaw ? mcRaw.replace(/[^0-9]/g,'') : '';
+    const params = new URLSearchParams();
+    if (mc)          params.set('mc',   mc);
+    if (companyName) params.set('name', companyName);
+    const res = await fetchWithTimeout('/api/fmcsa?' + params.toString(), 10000);
+    if (res.ok) {
+      const json = await res.json();
+      primary      = json.primary      ? parseFMCSACarrier(json.primary)               : null;
+      alternatives = (json.alternatives||[]).map(c => parseFMCSACarrier(c)).filter(Boolean);
+      if (!primary && alternatives.length) primary = alternatives[0];
+    }
+  } catch(e) { console.warn('FMCSA proxy error:', e.message); }
 
   if (!primary && !alternatives.length) return null;
   return { primary, alternatives, live: true };
@@ -8624,7 +8592,7 @@ function buildCreditProfile(name, mc, type, fmcsaResult, ansonia, dnb, experian,
   var seed  = name + mc;
   var h     = hashStr(seed);
 
-  var yearsOld = (dnb && dnb.yearsInBiz) || (known ? (2026 - known.founded) : (8 + (h % 12)));
+  var yearsOld = (dnb && dnb.yearsInBiz) || (known ? (2026 - known.founded) : null);
 
   var fmcsaPrimary = (fmcsaResult && fmcsaResult.primary) || null;
   var fmcsaAlts    = (fmcsaResult && fmcsaResult.alternatives) || [];
@@ -8655,12 +8623,10 @@ function buildCreditProfile(name, mc, type, fmcsaResult, ansonia, dnb, experian,
     alternatives:    fmcsaAlts.slice(1),
     live: true,
   } : {
-    authorityActive: known ? true : (h % 10 !== 0),
-    bondOnFile:      known ? (known.bond >= 75000) : true,
-    insuranceOnFile: true,
-    legalName:       known
-      ? name.split(' ').map(function(w){return w.charAt(0).toUpperCase()+w.slice(1);}).join(' ')
-      : name,
+    authorityActive: known ? true : null,
+    bondOnFile:      known ? (known.bond >= 75000) : null,
+    insuranceOnFile: null,
+    legalName:       name,
     dbaName:         '',
     address:         (known && known.hq) ? known.hq : '',
     mailAddress:     null,
@@ -8670,7 +8636,7 @@ function buildCreditProfile(name, mc, type, fmcsaResult, ansonia, dnb, experian,
     zip:             '',
     dotNumber:       '',
     mcNumber:        cleanMCnum,
-    entityType:      type === 'broker' ? 'BROKER' : type === '3pl' ? 'FREIGHT FORWARDER' : 'SHIPPER',
+    entityType:      '',
     safetyRating:    '',
     powerUnits:      0,
     drivers:         0,
@@ -8689,7 +8655,7 @@ function buildCreditProfile(name, mc, type, fmcsaResult, ansonia, dnb, experian,
   src.dnb      = dnb      ? { paydex: dnb.paydex || 70, duns: dnb.duns || '', live: true }
                           : { paydex: genScore(baseQ+1, seed+'dnb', 20), live: false };
   src.experian = experian ? { score: experian.intelliScore || experian.fsrScore || 70, paymentIndex: experian.paymentIndex || 0, bankruptcy: !!experian.bankruptcy, liens: !!experian.liens, live: true }
-                          : { score: genScore(baseQ-1, seed+'exp', 22), bankruptcy: (baseQ < 65 && h % 7 === 0), liens: (baseQ < 68 && h % 5 === 0), live: false };
+                          : { score: null, bankruptcy: false, liens: false, live: false };
   src.equifax  = { score: genScore(baseQ, seed+'eqfx', 18), live: false };
   src.c411     = c411     ? { grade: c411.grade || 'B', alerts: c411.alerts || [], live: true }
                           : { grade: ['A+','A','A','A-','B+','B'][Math.min(5, Math.floor((100-baseQ)/8))], alerts: [], live: false };
@@ -8880,7 +8846,7 @@ function renderCreditResult(p, el) {
     if (src.tia.member) html += '<span class="badge badge-green">TIA Member</span>';
     html += '<span class="badge ' + (p.liveCount > 0 ? 'badge-green' : 'badge-blue') + '" style="font-size:10px">' + (p.liveCount > 0 ? p.liveCount + ' live source' + (p.liveCount > 1 ? 's' : '') : 'Estimated') + '</span>';
     html += '</div>';
-    html += '<div style="font-size:11px;color:var(--text2)">' + p.yearsOld + ' yrs in business</div>';
+    if (p.yearsOld !== null) html += '<div style="font-size:11px;color:var(--text2)">' + p.yearsOld + ' yrs in business</div>';
     html += '</div></div>'; // end company info + left col
 
     // Quick KPIs right side
@@ -8914,14 +8880,18 @@ function renderCreditResult(p, el) {
         + '</div>';
     }
 
-    html += profileRow('Legal Name', src.fmcsa.legalName || p.name, '', src.fmcsa.live ? '' : '(est.)');
+    html += profileRow('Legal Name', src.fmcsa.legalName || p.name, '', src.fmcsa.live ? '' : '');
     html += profileRow('MC / DOT', (cleanMC ? 'MC-' + cleanMC : '') + (src.fmcsa.dotNumber ? (cleanMC ? ' · ' : '') + 'DOT-' + src.fmcsa.dotNumber : '') || 'Enter MC # above', '');
-    html += profileRow('Registered Address', src.fmcsa.address || (p.known && p.known.hq ? p.known.hq + ' (city est.)' : 'Not on file'), '', src.fmcsa.live ? '' : '');
-    html += profileRow('Entity Type', src.fmcsa.entityType || (p.type === 'broker' ? 'BROKER' : 'SHIPPER'), '');
-    html += profileRow('Years in Business', p.yearsOld + ' years', '', p.known ? '' : '(est.)');
-    html += profileRow('Authority', src.fmcsa.authorityActive ? 'Active' : 'Inactive', src.fmcsa.authorityActive ? 'var(--green)' : 'var(--red)', src.fmcsa.live ? '' : '(est.)');
-    html += profileRow('Surety Bond ($75k min)', src.fmcsa.bondOnFile ? 'On File' : 'Not Found', src.fmcsa.bondOnFile ? 'var(--green)' : 'var(--red)', src.fmcsa.live ? '' : '(est.)');
-    html += profileRow('TIA Member', src.tia.member ? 'Yes' : 'No', src.tia.member ? 'var(--green)' : 'var(--text2)', '');
+    html += profileRow('Registered Address', src.fmcsa.address || (src.fmcsa.live ? 'Not on file' : '—'), '');
+    html += profileRow('Entity Type', src.fmcsa.entityType || (src.fmcsa.live ? (p.type === 'broker' ? 'BROKER' : 'SHIPPER') : '—'), '');
+    html += profileRow('Years in Business', p.yearsOld !== null ? p.yearsOld + ' yrs' : '—', '', p.known && !src.fmcsa.live ? '(KNOWN_BROKERS)' : '');
+    var authVal   = src.fmcsa.authorityActive === null ? '—' : src.fmcsa.authorityActive ? 'Active' : 'Inactive';
+    var authColor = src.fmcsa.authorityActive === null ? '' : src.fmcsa.authorityActive ? 'var(--green)' : 'var(--red)';
+    html += profileRow('Authority', authVal, authColor, src.fmcsa.live ? '' : '');
+    var bondVal   = src.fmcsa.bondOnFile === null ? '—' : src.fmcsa.bondOnFile ? 'On File' : 'Not Found';
+    var bondColor = src.fmcsa.bondOnFile === null ? '' : src.fmcsa.bondOnFile ? 'var(--green)' : 'var(--red)';
+    html += profileRow('Surety Bond ($75k min)', bondVal, bondColor, src.fmcsa.live ? '' : '');
+    html += profileRow('TIA Member', p.known ? (src.tia.member ? 'Yes' : 'No') : '—', p.known && src.tia.member ? 'var(--green)' : '', '');
     if (src.fmcsa.phone) html += profileRow('Phone', src.fmcsa.phone, '', '');
     if (src.fmcsa.powerUnits) html += profileRow('Power Units / Drivers', src.fmcsa.powerUnits + ' / ' + src.fmcsa.drivers, '', '');
     if (src.fmcsa.mcs150Date) html += profileRow('MCS-150 Filed', src.fmcsa.mcs150Date, '', '');
