@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CarrierEdge Factoring Tools — Free for Owner-Operators</title>
-<meta name="description" content="Free freight factoring calculators: All-In Cost Engine, Should I Factor? break-even analysis, rate benchmarks, and negotiation scripts. No signup required.">
+<meta name="description" content="Search 300 freight factors with transparency grades. Compare true all-in factoring cost by your volume—not star ratings or paid listings. Free All-In Cost Engine.">
 <meta name="theme-color" content="#4a8fff">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -278,6 +278,27 @@ tr:hover td { background:rgba(74,143,255,.03); }
   line-height:1.7;
   margin-top:40px;
 }
+
+/* Factor directory */
+.fd-search-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.fd-search{flex:1;min-width:220px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:11px 14px;font-size:14px;color:var(--text);font-family:inherit;outline:none}
+.fd-search:focus{border-color:var(--green)}
+.fd-filter{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-size:12px;color:var(--text);font-family:inherit}
+.fd-meta{font-size:11px;color:var(--text3);margin-bottom:12px}
+.fd-list{display:flex;flex-direction:column;gap:8px}
+.fd-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.fd-card-top{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;justify-content:space-between}
+.fd-name{font-size:14px;font-weight:700;color:var(--text)}
+.fd-hq{font-size:11px;color:var(--text3);margin-top:2px}
+.fd-badges{display:flex;flex-wrap:wrap;gap:6px}
+.fd-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;letter-spacing:.02em}
+.fd-badge-inc{background:rgba(245,166,35,.12);color:var(--amber);border:1px solid rgba(245,166,35,.28)}
+.fd-badge-pass{background:rgba(34,212,122,.12);color:var(--green);border:1px solid rgba(34,212,122,.28)}
+.fd-badge-partner{background:rgba(45,212,191,.12);color:var(--teal);border:1px solid rgba(45,212,191,.28)}
+.fd-link{font-size:12px;color:var(--blue);text-decoration:none}
+.fd-link:hover{text-decoration:underline}
+.fd-v1{font-size:11px;color:var(--text2);margin-top:8px;line-height:1.55}
+.fd-empty{text-align:center;padding:28px;color:var(--text3);font-size:13px}
 </style>
 </head>
 <body>
@@ -300,6 +321,7 @@ tr:hover td { background:rgba(74,143,255,.03); }
 <!-- TAB NAV -->
 <nav class="tab-nav">
   <button class="tab-btn active" onclick="switchTab('rate-table')">Rate Benchmarks</button>
+  <button class="tab-btn" onclick="switchTab('directory')">Factor Directory</button>
   <button class="tab-btn" onclick="switchTab('allin')">All-In Cost Engine</button>
   <button class="tab-btn" onclick="switchTab('sif')">Should I Factor?</button>
   <button class="tab-btn" onclick="switchTab('negotiate')">Negotiation Script</button>
@@ -315,6 +337,7 @@ tr:hover td { background:rgba(74,143,255,.03); }
     <div class="hero-sub">Free calculators to cut through the noise. See real all-in costs, decide if factoring makes sense for your cash flow, and get the exact words to negotiate your rate down.</div>
     <div class="hero-tools">
       <span class="hero-tool">Rate Benchmarks</span>
+      <span class="hero-tool">Factor Directory</span>
       <span class="hero-tool">All-In Cost Engine</span>
       <span class="hero-tool">Should I Factor?</span>
       <span class="hero-tool">Negotiation Scripts</span>
@@ -502,6 +525,37 @@ tr:hover td { background:rgba(74,143,255,.03); }
       </div>
       <a href="/pricing" class="btn-upgrade">Try CarrierEdge Free →</a>
     </div>
+  </div>
+
+
+  <!-- ── TAB: FACTOR DIRECTORY ── -->
+  <div id="tab-directory" class="tab-section">
+    <div class="section-head">
+      <div class="section-title">Factor Directory — Search &amp; Transparency Grades</div>
+      <div class="section-sub">Background on 300 freight / invoice factors that serve trucking carriers. Search by name. Grades use a transparency gate — Incomplete factors stay visible for research but cannot win All-In / “best.”</div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;border-color:rgba(34,212,122,.2)">
+      <div style="font-size:12px;color:var(--text2);line-height:1.65">
+        <strong style="color:var(--text)">Rankings are never for sale.</strong>
+        CE Verified Partners may pay a referral (CPA) or listing fee for a sponsored card or badge.
+        <strong style="color:var(--text)">Partner payments do not change directory order or All-In Cost Engine rank.</strong>
+        Sort and “best” use fee data only — never CPA, listing fee, affiliate payout, or star ratings.
+      </div>
+    </div>
+
+    <div class="fd-search-row">
+      <input class="fd-search" id="fd-q" type="search" placeholder="Search factors by name…" oninput="renderFactorDirectory()" autocomplete="off">
+      <select class="fd-filter" id="fd-status" onchange="renderFactorDirectory()">
+        <option value="all">All grades</option>
+        <option value="Incomplete">Incomplete</option>
+        <option value="Transparency-pass">Transparency-pass</option>
+        <option value="partner">CE Verified Partners</option>
+      </select>
+    </div>
+    <div class="fd-meta" id="fd-meta">Loading factor census…</div>
+    <div class="fd-list" id="fd-list"></div>
+    <p class="disc" style="margin-top:16px">Fee schedules are not invented. Prefer <strong>Incomplete</strong> over a guessed rate. Always request a full Schedule A before signing. Graded as of <span id="fd-asof">—</span>.</p>
   </div>
 
   <!-- ── TAB: ALL-IN COST ENGINE ── -->
@@ -1088,10 +1142,111 @@ function switchTab(id) {
   document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
-  event.currentTarget.classList.add('active');
+  if (typeof event !== 'undefined' && event && event.currentTarget && event.currentTarget.classList) {
+    event.currentTarget.classList.add('active');
+  } else {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      if ((b.getAttribute('onclick') || '').includes("'" + id + "'")) b.classList.add('active');
+    });
+  }
   if (id === 'allin') runAllIn();
   if (id === 'sif')   runSIF();
   if (id === 'negotiate') runNI();
+  if (id === 'directory') ensureFactorDirectory();
+}
+
+// ============================================================
+// FACTOR DIRECTORY (census grades — no invented fees)
+// ============================================================
+let FD_DATA = null;
+
+async function ensureFactorDirectory() {
+  if (!FD_DATA) {
+    try {
+      const res = await fetch('/data/factors.json', { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      FD_DATA = await res.json();
+    } catch (e) {
+      const meta = document.getElementById('fd-meta');
+      const list = document.getElementById('fd-list');
+      if (meta) meta.textContent = 'Could not load factor census.';
+      if (list) list.innerHTML = '<div class="fd-empty">Factor directory unavailable. Try refresh.</div>';
+      return;
+    }
+  }
+  const asof = document.getElementById('fd-asof');
+  if (asof && FD_DATA.gradedAsOf) asof.textContent = FD_DATA.gradedAsOf;
+  renderFactorDirectory();
+}
+
+function renderFactorDirectory() {
+  if (!FD_DATA || !Array.isArray(FD_DATA.factors)) return;
+  const q = (document.getElementById('fd-q')?.value || '').trim().toLowerCase();
+  const filter = document.getElementById('fd-status')?.value || 'all';
+  let rows = FD_DATA.factors.slice();
+
+  if (q) {
+    rows = rows.filter(f =>
+      (f.name || '').toLowerCase().includes(q) ||
+      (f.id || '').toLowerCase().includes(q) ||
+      (f.notes || '').toLowerCase().includes(q)
+    );
+  }
+  if (filter === 'Incomplete' || filter === 'Transparency-pass') {
+    rows = rows.filter(f => f.gradeStatus === filter);
+  } else if (filter === 'partner') {
+    rows = rows.filter(f => f.cePartner);
+  }
+
+  // Transparency-pass first, then partners, then A–Z Incomplete
+  rows.sort((a, b) => {
+    const rank = s => s === 'Transparency-pass' ? 0 : 1;
+    const d = rank(a.gradeStatus) - rank(b.gradeStatus);
+    if (d) return d;
+    if (a.cePartner !== b.cePartner) return a.cePartner ? -1 : 1;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  const meta = document.getElementById('fd-meta');
+  if (meta) {
+    const pass = FD_DATA.factors.filter(f => f.gradeStatus === 'Transparency-pass').length;
+    const inc = FD_DATA.factors.length - pass;
+    meta.textContent = `Showing ${rows.length} of ${FD_DATA.factors.length} · ${pass} Transparency-pass · ${inc} Incomplete · partners labeled only (never buy rank)`;
+  }
+
+  const list = document.getElementById('fd-list');
+  if (!list) return;
+  if (!rows.length) {
+    list.innerHTML = '<div class="fd-empty">No factors match that search.</div>';
+    return;
+  }
+
+  list.innerHTML = rows.map(f => {
+    const statusBadge = f.gradeStatus === 'Transparency-pass'
+      ? '<span class="fd-badge fd-badge-pass">Transparency-pass</span>'
+      : '<span class="fd-badge fd-badge-inc">Incomplete</span>';
+    const partnerBadge = f.cePartner ? '<span class="fd-badge fd-badge-partner">✓ CE Verified Partner</span>' : '';
+    const site = f.website
+      ? `<a class="fd-link" href="${f.website.replace(/"/g,'')}" target="_blank" rel="noopener noreferrer">Website ↗</a>`
+      : '<span style="font-size:11px;color:var(--text3)">No website on file</span>';
+    const hq = f.hq ? `<div class="fd-hq">${escapeHtml(f.hq)}</div>` : '';
+    const v1 = f.gradeV1 ? `<div class="fd-v1">${escapeHtml(f.gradeV1)}</div>` : '';
+    return `<div class="fd-card">
+      <div class="fd-card-top">
+        <div>
+          <div class="fd-name">${escapeHtml(f.name || f.id)}</div>
+          ${hq}
+        </div>
+        <div class="fd-badges">${statusBadge}${partnerBadge}</div>
+      </div>
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:12px;align-items:center">${site}</div>
+      ${v1}
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 // ============================================================
