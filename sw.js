@@ -1,7 +1,7 @@
 // CarrierEdge Service Worker
 // Cache-first for the app shell; network-first for external resources.
 // Version bump here forces old caches to evict on next visit.
-const CACHE = 'carrieredge-v2';
+const CACHE = 'carrieredge-v10';
 
 const SHELL = [
   './index.html',
@@ -28,6 +28,9 @@ self.addEventListener('fetch', e => {
 
   // Only handle same-origin GETs (don't intercept Anthropic/EIA/FMCSA calls).
   if (e.request.method !== 'GET' || url.origin !== self.location.origin) return;
+
+  // Never cache API routes — always hit the Worker directly.
+  if (url.pathname.startsWith('/api/')) return;
 
   // Cache-first for the shell; stale-while-revalidate keeps it fresh.
   e.respondWith(

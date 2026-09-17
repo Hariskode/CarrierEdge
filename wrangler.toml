@@ -6,3 +6,8 @@ main = "worker.js"
 directory = "."
 html_handling = "none"
 binding = "ASSETS"
+run_worker_first = true
+
+[[kv_namespaces]]
+binding = "CE_AUTH"
+id = "010fd72b1441465e88d5cafbd04ada3b"
